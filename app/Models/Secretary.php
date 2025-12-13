@@ -11,8 +11,14 @@ class Secretary extends Model
 
     protected $fillable = [
         'user_id',
-        'medical_center_id',
         'clinic_id',
+        'medical_center_id',
+        'doctor_id',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'string',
     ];
 
     // Relations
@@ -21,13 +27,18 @@ class Secretary extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function clinic()
+    {
+        return $this->belongsTo(Clinic::class);
+    }
+
     public function medicalCenter()
     {
         return $this->belongsTo(MedicalCenter::class);
     }
 
-    public function clinic()
+    public function doctor()
     {
-        return $this->belongsTo(Clinic::class);
+        return $this->belongsTo(Doctor::class);
     }
 }

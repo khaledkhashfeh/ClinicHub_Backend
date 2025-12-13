@@ -16,18 +16,29 @@ return new class extends Migration
     
             $table->foreignId('user_id')
                   ->unique()
-                  ->nullable()
                   ->constrained()
                   ->cascadeOnDelete();
+
+            $table->foreignId('medical_center_id')->nullable()
+            ->constrained('medical_centers')
+            ->nullOnDelete();      
     
-            $table->foreignId('medical_center_id')
-                  ->nullable()
-                  ->constrained('medical_centers')
-                  ->nullOnDelete();
+            $table->foreignId('governorate_id')
+                  ->constrained('governorates')
+                  ->cascadeOnDelete();
+    
+            $table->foreignId('city_id')
+                  ->constrained('cities')
+                  ->cascadeOnDelete();
     
             $table->string('name');
+            $table->string('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
             $table->string('floor')->nullable();
             $table->string('room_number')->nullable();
+    
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
     
             $table->timestamps();
         });

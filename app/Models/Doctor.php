@@ -63,4 +63,9 @@ class Doctor extends Model
     {
         return $this->hasMany(Review::class);
     }
+
+    public function secretaries()
+    {
+        return $this->hasMany(Secretary::class);
+    }
 }

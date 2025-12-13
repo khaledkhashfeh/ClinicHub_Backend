@@ -19,15 +19,16 @@ return new class extends Migration
                   ->constrained()
                   ->cascadeOnDelete();
     
-            $table->foreignId('medical_center_id')
+            $table->foreignId('clinic_id')
+                  ->constrained('clinics')
+                  ->cascadeOnDelete();
+    
+            $table->foreignId('doctor_id')
                   ->nullable()
-                  ->constrained('medical_centers')
+                  ->constrained('doctors')
                   ->nullOnDelete();
     
-            $table->foreignId('clinic_id')
-                  ->nullable()
-                  ->constrained('clinics')
-                  ->nullOnDelete();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
     
             $table->timestamps();
         });

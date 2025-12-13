@@ -13,25 +13,28 @@ return new class extends Migration
     {
         Schema::create('medical_centers', function (Blueprint $table) {
             $table->id();
-    
+        
             $table->foreignId('user_id')
                   ->unique()
                   ->nullable()
                   ->constrained()
                   ->cascadeOnDelete();
-    
+        
             $table->string('name');
-            $table->string('city');
-            $table->string('area')->nullable();
+        
+            $table->foreignId('governorate_id')->nullable()->constrained('governorates')->nullOnDelete();
+            $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
+        
             $table->string('address_details')->nullable();
             $table->string('location_coords')->nullable();
             $table->text('description')->nullable();
             $table->string('logo_url')->nullable();
-    
+        
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-    
+        
             $table->timestamps();
         });
+        
     }
     
 

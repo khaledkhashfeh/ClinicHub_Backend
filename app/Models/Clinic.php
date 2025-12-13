@@ -12,15 +12,35 @@ class Clinic extends Model
     protected $fillable = [
         'user_id',
         'medical_center_id',
+        'governorate_id',
+        'city_id',
         'name',
+        'address',
+        'phone',
+        'email',
         'floor',
         'room_number',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'string',
     ];
 
     // Relations
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function medicalCenter()

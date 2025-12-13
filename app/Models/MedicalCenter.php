@@ -11,8 +11,12 @@ class MedicalCenter extends Model
 
     protected $fillable = [
         'user_id',
+        'governorate_id',
+        'city_id',
         'name',
-        'city',
+        'address',
+        'phone',
+        'email',
         'area',
         'address_details',
         'location_coords',
@@ -25,6 +29,16 @@ class MedicalCenter extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function clinics()

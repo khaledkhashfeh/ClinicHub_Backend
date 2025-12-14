@@ -12,7 +12,6 @@ class Secretary extends Model
     protected $fillable = [
         'user_id',
         'clinic_id',
-        'medical_center_id',
         'doctor_id',
         'status',
     ];
@@ -30,11 +29,6 @@ class Secretary extends Model
     public function clinic()
     {
         return $this->belongsTo(Clinic::class);
-    }
-
-    public function medicalCenter()
-    {
-        return $this->belongsTo(MedicalCenter::class);
     }
 
     public function doctor()

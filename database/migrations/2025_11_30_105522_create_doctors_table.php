@@ -22,7 +22,16 @@ return new class extends Migration
             $table->string('specialty');
             $table->decimal('consultation_price', 10, 2);
     
-            $table->string('city')->nullable();
+            $table->foreignId('governorate_id')
+                  ->nullable()
+                  ->constrained('governorates')
+                  ->nullOnDelete();
+            
+            $table->foreignId('city_id')
+                  ->nullable()
+                  ->constrained('cities')
+                  ->nullOnDelete();
+            
             $table->string('area')->nullable();
             $table->string('address_details')->nullable();
     

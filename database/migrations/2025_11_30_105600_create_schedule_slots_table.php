@@ -18,10 +18,12 @@ return new class extends Migration
                   ->constrained('doctors')
                   ->cascadeOnDelete();
     
-            $table->string('day_of_week'); 
+            $table->tinyInteger('day_of_week'); 
             $table->time('start_time');
             $table->time('end_time');
             $table->boolean('is_available')->default(true);
+            $table->enum('slot_type', ['open', 'request']);
+
     
             $table->timestamps();
         });

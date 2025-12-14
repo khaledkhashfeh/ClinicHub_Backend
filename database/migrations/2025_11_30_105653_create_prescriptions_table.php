@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('medication_name');
             $table->string('dosage')->nullable();
             $table->string('instructions')->nullable();
+            $table->timestamp('issued_at')->nullable();
+
     
             $table->timestamps();
         });

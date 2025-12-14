@@ -18,13 +18,12 @@ return new class extends Migration
                   ->constrained('medical_files')
                   ->cascadeOnDelete();
     
-            $table->foreignId('doctor_id')
-                  ->constrained('doctors')
-                  ->cascadeOnDelete();
-    
-            $table->foreignId('clinic_id')
-                  ->constrained('clinics')
-                  ->cascadeOnDelete();
+                  
+            $table->foreignId('appointment_id')
+                  ->nullable()
+                  ->constrained('appointments')
+                  ->nullOnDelete();
+
     
             $table->date('visit_date');
             $table->text('diagnosis');

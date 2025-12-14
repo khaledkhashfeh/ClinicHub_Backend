@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.dev
+.phpunit.result.cache
+.dockerignore
+.gitattributes
+.editorconfig
+composer.lock
+.DS_Store
+Thumbs.db
+*.all.php

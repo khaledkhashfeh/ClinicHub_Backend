@@ -14,7 +14,7 @@ class GenerateAllMigrationsFile extends Command
     public function handle()
     {
         $migrationPath = database_path('migrations');
-        $outputPath = base_path('AllMigrations.php');
+        $outputPath = base_path('Migrations.all.php');
 
         $files = File::allFiles($migrationPath);
 

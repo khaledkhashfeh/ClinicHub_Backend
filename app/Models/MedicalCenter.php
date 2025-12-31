@@ -48,6 +48,6 @@ class MedicalCenter extends Model
 
     public function secretaries()
     {
-        return $this->hasMany(Secretary::class);
+        return $this->morphMany(Secretary::class, 'entity');
     }
 }

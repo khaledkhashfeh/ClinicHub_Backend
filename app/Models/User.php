@@ -11,17 +11,24 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles, JWTSubject;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'first_name',
+        'mid_name',
         'last_name',
+        'phone_verified_at',
         'phone',
         'email',
+        'username',
         'password',
         'gender',
         'birth_date',
         'profile_photo_url',
+        'otp_code',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_last_sent_at',
         'status',
     ];
 

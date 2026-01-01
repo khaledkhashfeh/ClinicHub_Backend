@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Certification;
 use App\Services\OtpService;
+use App\Services\EvolutionApiService;
+use Carbon\Traits\ToStringFormat;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -20,10 +22,12 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class DoctorController extends Controller
 {
     private $otpService;
+    private $evolutionApiService;
 
-    public function __construct(OtpService $otpService)
+    public function __construct(OtpService $otpService, EvolutionApiService $evolutionApiService)
     {
         $this->otpService = $otpService;
+        $this->evolutionApiService = $evolutionApiService;
     }
 
     public function login(DoctorLoginRequest $request): JsonResponse
@@ -112,7 +116,8 @@ class DoctorController extends Controller
             'distinguished_specialties' => $request->distinguished_specialties,
             'facebook_link' => $request->facebook_link,
             'instagram_link' => $request->instagram_link,
-            'status' => 'pending', // New registrations start as pending
+            'status' => 'approved', // New registrations start as pending
+            'phone_verified' => true
         ]);
 
         // Attach specializations
@@ -133,11 +138,11 @@ class DoctorController extends Controller
         }
 
         // Send OTP to doctor's phone number for verification
-        $otpResponse = $this->otpService->sendOtp($request->phone);
-        if (!$otpResponse['success']) {
-            // If OTP sending fails, log the error but still return success for registration
-            \Log::error('Failed to send OTP to doctor: ' . $request->phone . ', Error: ' . $otpResponse['message']);
-        }
+        // $otpResponse = $this->otpService->sendOtp($request->phone);
+        // if (!$otpResponse['success']) {
+        //     // If OTP sending fails, log the error but still return success for registration
+        //     \Log::error('Failed to send OTP to doctor: ' . $request->phone . ', Error: ' . $otpResponse['message']);
+        // }
 
         // Return accepted response (registration request submitted for review)
         $response = [
@@ -146,9 +151,9 @@ class DoctorController extends Controller
         ];
 
         // If OTP was sent successfully, include a success message about verification
-        if ($otpResponse['success']) {
-            $response['message'] = 'تم استلام طلب إنشاء الحساب بنجاح. تم إرسال رمز تحقق إلى هاتفك. سيتم مراجعة الطلب والموافقة عليه من قبل الإدارة.';
-        }
+        // if ($otpResponse['success']) {
+        //     $response['message'] = 'تم استلام طلب إنشاء الحساب بنجاح. تم إرسال رمز تحقق إلى هاتفك. سيتم مراجعة الطلب والموافقة عليه من قبل الإدارة.';
+        // }
 
         return response()->json($response, 202);
     }
@@ -296,6 +301,22 @@ class DoctorController extends Controller
         if ($request->hasFile('certifications')) {
             $this->handleCertificationsUpload($request->file('certifications'), $doctor->id);
         }
+
+        // Format updated data for sending via message
+        // $updatedFields = [];
+        // foreach ($request->only([
+        //     'first_name', 'last_name', 'phone', 'email',
+        //     'practicing_profession_date', 'governorate_id', 'district_id',
+        //     'bio', 'distinguished_specialties', 'facebook_link',
+        //     'instagram_link', 'consultation_price', 'image'
+        // ]) as $field => $value) {
+        //     if (!empty($value)) {
+        //         $updatedFields[] = "*{$field}*: " . (is_array($value) ? implode(', ', $value) : $value);
+        //     }
+        // }
+
+        // $updated_data_string = "تم تحديث بيانات الطبيب:\n" . implode("\n", $updatedFields);
+        // $this->evolutionApiService->sendMessage($doctor->user->phone, $updated_data_string);
 
         return response()->json([
             'success' => true,

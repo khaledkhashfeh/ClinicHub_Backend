@@ -1,0 +1,2259 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "ClinicHub API",
+        "description": "API documentation for ClinicHub application",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development server"
+        }
+    ],
+    "paths": {
+        "/api/clinic/login": {
+            "post": {
+                "tags": [
+                    "Clinic Authentication"
+                ],
+                "summary": "Clinic login",
+                "description": "Authenticates a clinic and returns a JWT token",
+                "operationId": "de1e5ec4fb7b235c255bb9256f4002ef",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifyer",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "identifyer": {
+                                        "description": "Email, username, or phone number",
+                                        "type": "string",
+                                        "example": "clinic@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الدخول بنجاح."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Clinic"
+                                        },
+                                        "clinic": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account not approved"
+                    }
+                }
+            }
+        },
+        "/api/clinic/logout": {
+            "post": {
+                "tags": [
+                    "Clinic Authentication"
+                ],
+                "summary": "Clinic logout",
+                "description": "Logs out the authenticated clinic",
+                "operationId": "b266b570639dea645607e2670f3d73b3",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الخروج بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "No token provided"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinic/send-otp": {
+            "post": {
+                "tags": [
+                    "Clinic Authentication"
+                ],
+                "summary": "Send OTP to clinic phone",
+                "description": "Sends an OTP code to the clinic's phone number",
+                "operationId": "0795d3d642572d3da6f78bc6b3df8c43",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully to your phone number."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Phone number already exists"
+                    },
+                    "500": {
+                        "description": "Failed to send OTP"
+                    }
+                }
+            }
+        },
+        "/api/clinic/verify-otp": {
+            "post": {
+                "tags": [
+                    "Clinic Authentication"
+                ],
+                "summary": "Verify clinic's phone number",
+                "description": "Verifies a clinic's phone number using OTP",
+                "operationId": "b5baf003d0aed085ee508d7e1fca8018",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP verified successfully."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    }
+                }
+            }
+        },
+        "/api/clinics": {
+            "post": {
+                "tags": [
+                    "Clinic Authentication"
+                ],
+                "summary": "Register a new clinic",
+                "description": "Registers a new clinic account",
+                "operationId": "4396fe9e4264d49f9a7746fcd4d325c0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "clinic_name",
+                                    "phone",
+                                    "password",
+                                    "password_confirmation",
+                                    "specialization_id",
+                                    "governorate_id",
+                                    "city_id",
+                                    "district_id",
+                                    "detailed_address",
+                                    "consultation_fee",
+                                    "description",
+                                    "username"
+                                ],
+                                "properties": {
+                                    "clinic_name": {
+                                        "description": "اسم العيادة",
+                                        "type": "string",
+                                        "example": "عيادة الدكتور علي لطب الأسنان"
+                                    },
+                                    "phone": {
+                                        "description": "رقم الهاتف",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "email": {
+                                        "description": "البريد الإلكتروني للعيادة (اختياري)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "clinic@example.com"
+                                    },
+                                    "password": {
+                                        "description": "كلمة المرور",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "ClinicSecurePassword"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "تأكيد كلمة المرور",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "ClinicSecurePassword"
+                                    },
+                                    "specialization_id": {
+                                        "description": "معرّف التخصص (ID يتم جلبه من API التخصصات)",
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "governorate_id": {
+                                        "description": "معرّف المحافظة (ID يتم جلبه من API المحافظات)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "city_id": {
+                                        "description": "معرّف المدينة (ID يتم جلبه من API المدن)",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "district_id": {
+                                        "description": "معرّف المنطقة (ID يتم جلبه من API المناطق)",
+                                        "type": "integer",
+                                        "example": 205
+                                    },
+                                    "address": {
+                                        "description": "العنوان (اختياري)",
+                                        "type": "string",
+                                        "example": "شارع بغداد، مقابل مدرسة اليرموك"
+                                    },
+                                    "detailed_address": {
+                                        "description": "العنوان التفصيلي",
+                                        "type": "string",
+                                        "example": "حلب - شارع الكواكبي - الطابق الأول"
+                                    },
+                                    "floor": {
+                                        "description": "الدور (اختياري)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "room_number": {
+                                        "description": "رقم الغرفة (اختياري)",
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "consultation_fee": {
+                                        "description": "رسوم الاستشارة",
+                                        "type": "number",
+                                        "example": 15000
+                                    },
+                                    "description": {
+                                        "description": "وصف العيادة",
+                                        "type": "string",
+                                        "example": "عيادة متخصصة في تجميل وزراعة الأسنان."
+                                    },
+                                    "username": {
+                                        "description": "اسم المستخدم",
+                                        "type": "string",
+                                        "example": "ali_dental_clinic"
+                                    },
+                                    "main_image": {
+                                        "description": "صورة العيادة الرئيسية (يتم إرسال ملف الصورة)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "working_hours": {
+                                        "description": "ساعات العمل بصيغة JSON",
+                                        "type": "string",
+                                        "example": "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}"
+                                    },
+                                    "latitude": {
+                                        "description": "خط العرض (اختياري)",
+                                        "type": "number",
+                                        "example": 33.5138
+                                    },
+                                    "longitude": {
+                                        "description": "خط الطول (اختياري)",
+                                        "type": "number",
+                                        "example": 36.2765
+                                    },
+                                    "services[0][name]": {
+                                        "description": "اسم الخدمة الأولى - استخدم services[0][name], services[0][price], services[1][name], services[1][price], إلخ",
+                                        "type": "string",
+                                        "example": "تنظيف الأسنان"
+                                    },
+                                    "services[0][price]": {
+                                        "description": "سعر الخدمة الأولى",
+                                        "type": "number",
+                                        "example": 25000
+                                    },
+                                    "gallery_images[0]": {
+                                        "description": "صورة المعرض الأولى (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images[1]": {
+                                        "description": "صورة المعرض الثانية (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images[2]": {
+                                        "description": "صورة المعرض الثالثة (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Registration request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "phone": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The phone has already been taken."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/clinics/profile": {
+            "get": {
+                "tags": [
+                    "Clinic Profile"
+                ],
+                "summary": "Get clinic profile",
+                "description": "Returns the authenticated clinic's profile information",
+                "operationId": "8b88bd6f4772a4926113c66d21064869",
+                "responses": {
+                    "200": {
+                        "description": "Clinic profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "specialization_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "governorate_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "city_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "district_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "detailed_address": {
+                                                    "type": "string",
+                                                    "example": "123 Main Street, Baghdad"
+                                                },
+                                                "consultation_fee": {
+                                                    "type": "number",
+                                                    "example": 25
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A modern clinic providing quality healthcare services"
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "alrashid_clinic"
+                                                },
+                                                "main_image": {
+                                                    "type": "string",
+                                                    "example": "images/clinics/main_image.jpg"
+                                                },
+                                                "working_hours": {
+                                                    "type": "object",
+                                                    "example": "{\"saturday\": {\"open\": \"09:00\", \"close\": \"18:00\"}}"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                },
+                                                "phone_verified_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "specialization": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Cardiology"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "governorate": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name_ar": {
+                                                            "type": "string",
+                                                            "example": "بغداد"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "district": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name_ar": {
+                                                            "type": "string",
+                                                            "example": "الكرخ"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "General Consultation"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 25
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "galleryImages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "image_path": {
+                                                                "type": "string",
+                                                                "example": "images/clinics/gallery/image.jpg"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Clinic Profile"
+                ],
+                "summary": "Update clinic profile",
+                "description": "Updates the authenticated clinic's profile information",
+                "operationId": "551ba71ac0964ae50253e8600371b5ea",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "clinic_name": {
+                                        "description": "اسم العيادة",
+                                        "type": "string",
+                                        "example": "Updated Clinic Name"
+                                    },
+                                    "phone": {
+                                        "description": "رقم الهاتف",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "email": {
+                                        "description": "البريد الإلكتروني للعيادة (اختياري)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "clinic@example.com"
+                                    },
+                                    "specialization_id": {
+                                        "description": "معرّف التخصص (ID يتم جلبه من API التخصصات)",
+                                        "type": "integer",
+                                        "example": 4
+                                    },
+                                    "governorate_id": {
+                                        "description": "معرّف المحافظة (ID يتم جلبه من API المحافظات)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "city_id": {
+                                        "description": "معرّف المدينة (ID يتم جلبه من API المدن)",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "district_id": {
+                                        "description": "معرّف المنطقة (ID يتم جلبه من API المناطق)",
+                                        "type": "integer",
+                                        "example": 205
+                                    },
+                                    "address": {
+                                        "description": "العنوان (اختياري)",
+                                        "type": "string",
+                                        "example": "شارع بغداد، مقابل مدرسة اليرموك"
+                                    },
+                                    "detailed_address": {
+                                        "description": "العنوان التفصيلي",
+                                        "type": "string",
+                                        "example": "حلب - شارع الكواكبي - الطابق الأول"
+                                    },
+                                    "floor": {
+                                        "description": "الدور (اختياري)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "room_number": {
+                                        "description": "رقم الغرفة (اختياري)",
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "consultation_fee": {
+                                        "description": "رسوم الاستشارة",
+                                        "type": "number",
+                                        "example": 15000
+                                    },
+                                    "description": {
+                                        "description": "وصف العيادة",
+                                        "type": "string",
+                                        "example": "عيادة متخصصة في تجميل وزراعة الأسنان."
+                                    },
+                                    "username": {
+                                        "description": "اسم المستخدم",
+                                        "type": "string",
+                                        "example": "ali_dental_clinic"
+                                    },
+                                    "main_image": {
+                                        "description": "صورة العيادة الرئيسية (يتم إرسال ملف الصورة)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "working_hours": {
+                                        "description": "ساعات العمل بصيغة JSON",
+                                        "type": "string",
+                                        "example": "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}"
+                                    },
+                                    "latitude": {
+                                        "description": "خط العرض (اختياري)",
+                                        "type": "number",
+                                        "example": 33.5138
+                                    },
+                                    "longitude": {
+                                        "description": "خط الطول (اختياري)",
+                                        "type": "number",
+                                        "example": 36.2765
+                                    },
+                                    "services[0][name]": {
+                                        "description": "اسم الخدمة الأولى - استخدم services[0][name], services[0][price], services[1][name], services[1][price], إلخ",
+                                        "type": "string",
+                                        "example": "تنظيف الأسنان"
+                                    },
+                                    "services[0][price]": {
+                                        "description": "سعر الخدمة الأولى",
+                                        "type": "number",
+                                        "example": 25000
+                                    },
+                                    "gallery_images[0]": {
+                                        "description": "صورة المعرض الأولى (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images[1]": {
+                                        "description": "صورة المعرض الثانية (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images[2]": {
+                                        "description": "صورة المعرض الثالثة (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Clinic profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث بيانات العيادة بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Updated Clinic Name"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "consultation_fee": {
+                                                    "type": "number",
+                                                    "example": 30
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Clinic Profile"
+                ],
+                "summary": "Delete clinic profile",
+                "description": "Deletes the authenticated clinic's profile",
+                "operationId": "2445651b019e9483e88727a1e394e466",
+                "responses": {
+                    "200": {
+                        "description": "Clinic profile deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم حذف العيادة بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/doctor/login": {
+            "post": {
+                "tags": [
+                    "Doctor Authentication"
+                ],
+                "summary": "Doctor login",
+                "description": "Authenticates a doctor and returns a JWT token",
+                "operationId": "bea8c5a5312b4f54d434be1ca64757d5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email or phone number",
+                                        "type": "string",
+                                        "example": "doctor@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الدخول بنجاح."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        },
+                                        "doctor": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe"
+                                                },
+                                                "is_approved": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account not approved or phone not verified"
+                    },
+                    "404": {
+                        "description": "No doctor account associated with user"
+                    }
+                }
+            }
+        },
+        "/api/doctor/register-request": {
+            "post": {
+                "tags": [
+                    "Doctor Authentication"
+                ],
+                "summary": "Doctor registration request",
+                "description": "Submits a request to register a new doctor account",
+                "operationId": "21e95ad8b510bfa382ddc7eaa8abc2cc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "last_name",
+                                    "phone",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "date_of_birth",
+                                    "gender",
+                                    "governorate_id",
+                                    "specializations_ids[0]",
+                                    "practicing_profession_date",
+                                    "bio"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "description": "الاسم الأول",
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "description": "الاسم الأخير",
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "phone": {
+                                        "description": "رقم الهاتف",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "email": {
+                                        "description": "البريد الإلكتروني",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "description": "كلمة المرور",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "تأكيد كلمة المرور",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "تاريخ الميلاد بصيغة YYYY-MM-DD",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1985-01-01"
+                                    },
+                                    "gender": {
+                                        "description": "الجنس (male أو female)",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "governorate_id": {
+                                        "description": "معرّف المحافظة (ID يتم جلبه من API المحافظات)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "specializations_ids[0]": {
+                                        "description": "معرّف التخصص الأول - يمكن إضافة المزيد باستخدام specializations_ids[1], specializations_ids[2], إلخ",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "specializations_ids[1]": {
+                                        "description": "معرّف التخصص الثاني (اختياري)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "practicing_profession_date": {
+                                        "description": "عدد سنوات الخبرة العملية (قيمة عددية صحيحة للسنة التي بدأ فيها الطبيب بمزاولة المهنة)",
+                                        "type": "integer",
+                                        "example": 2010
+                                    },
+                                    "bio": {
+                                        "description": "نبذة تعريفية عن الطبيب",
+                                        "type": "string",
+                                        "example": "Experienced cardiologist with 10 years of practice"
+                                    },
+                                    "image": {
+                                        "description": "الصورة الشخصية (يتم إرسال ملف الصورة)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "distinguished_specialties": {
+                                        "description": "التخصصات الفرعية أو المميزة (نص String)",
+                                        "type": "string",
+                                        "example": "Heart Surgery"
+                                    },
+                                    "certifications[0][name]": {
+                                        "description": "اسم الشهادة الأولى - استخدم certifications[0][name], certifications[0][image], certifications[1][name], certifications[1][image], إلخ",
+                                        "type": "string",
+                                        "example": "MD Degree"
+                                    },
+                                    "certifications[0][image]": {
+                                        "description": "صورة الشهادة الأولى",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "certifications[1][name]": {
+                                        "description": "اسم الشهادة الثانية (اختياري)",
+                                        "type": "string",
+                                        "example": "Board Certification"
+                                    },
+                                    "certifications[1][image]": {
+                                        "description": "صورة الشهادة الثانية (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "facebook_link": {
+                                        "description": "رابط صفحة فيسبوك",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://facebook.com/doctor"
+                                    },
+                                    "instagram_link": {
+                                        "description": "رابط حساب إنستقرام",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://instagram.com/doctor"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Registration request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The email has already been taken."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/doctor/verify-phone": {
+            "post": {
+                "tags": [
+                    "Doctor Authentication"
+                ],
+                "summary": "Verify doctor's phone number",
+                "description": "Verifies a doctor's phone number using OTP",
+                "operationId": "e402df2501f39172503b89efcf9be71c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Phone verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم التحقق من رقم الهاتف بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid OTP"
+                    }
+                }
+            }
+        },
+        "/api/doctor/resend-otp": {
+            "post": {
+                "tags": [
+                    "Doctor Authentication"
+                ],
+                "summary": "Resend OTP to doctor's phone",
+                "description": "Sends a new OTP code to the doctor's phone number",
+                "operationId": "30cccb6c21fa983f351ed5caf7401e85",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP resent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إرسال رمز التحقق الجديد إلى هاتفك."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to send OTP"
+                    }
+                }
+            }
+        },
+        "/api/doctor/logout": {
+            "post": {
+                "tags": [
+                    "Doctor Authentication"
+                ],
+                "summary": "Doctor logout",
+                "description": "Logs out the authenticated doctor",
+                "operationId": "782cf77748f78e6544bbfbca3e97f895",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الخروج بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/doctors": {
+            "put": {
+                "tags": [
+                    "Doctor Profile"
+                ],
+                "summary": "Update doctor profile",
+                "description": "Updates the authenticated doctor's profile information. Only send the fields you want to update - leave other fields empty. This endpoint uses POST with _method=PUT for multipart/form-data support.",
+                "operationId": "58f9afd132f83f28eabd0d45bfcf2bab",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "_method"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "description": "الاسم الأول (اختياري)",
+                                        "type": "string",
+                                        "example": "John"
+                                    },
+                                    "last_name": {
+                                        "description": "الاسم الأخير (اختياري)",
+                                        "type": "string",
+                                        "example": "Doe"
+                                    },
+                                    "phone": {
+                                        "description": "رقم الهاتف (اختياري)",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "email": {
+                                        "description": "البريد الإلكتروني (اختياري)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "description": "كلمة المرور الجديدة (اختياري)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "تأكيد كلمة المرور (مطلوب فقط عند تغيير كلمة المرور)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "تاريخ الميلاد بصيغة YYYY-MM-DD (اختياري)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1985-01-01"
+                                    },
+                                    "gender": {
+                                        "description": "الجنس (اختياري)",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "governorate_id": {
+                                        "description": "معرّف المحافظة (اختياري)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "specializations_ids[0]": {
+                                        "description": "معرّف التخصص الأول (اختياري) - يمكن إضافة المزيد",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "specializations_ids[1]": {
+                                        "description": "معرّف التخصص الثاني (اختياري)",
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "practicing_profession_date": {
+                                        "description": "سنة بداية ممارسة المهنة (اختياري)",
+                                        "type": "integer",
+                                        "example": 2010
+                                    },
+                                    "bio": {
+                                        "description": "نبذة تعريفية (اختياري)",
+                                        "type": "string",
+                                        "example": "Experienced cardiologist with 10 years of practice"
+                                    },
+                                    "image": {
+                                        "description": "الصورة الشخصية (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "distinguished_specialties": {
+                                        "description": "التخصصات المميزة (اختياري)",
+                                        "type": "string",
+                                        "example": "Heart Surgery"
+                                    },
+                                    "certifications[0][name]": {
+                                        "description": "اسم الشهادة الأولى (اختياري)",
+                                        "type": "string",
+                                        "example": "MD Degree"
+                                    },
+                                    "certifications[0][image]": {
+                                        "description": "صورة الشهادة الأولى (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "certifications[1][name]": {
+                                        "description": "اسم الشهادة الثانية (اختياري)",
+                                        "type": "string",
+                                        "example": "Board Certification"
+                                    },
+                                    "certifications[1][image]": {
+                                        "description": "صورة الشهادة الثانية (اختياري)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "facebook_link": {
+                                        "description": "رابط فيسبوك (اختياري)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://facebook.com/doctor"
+                                    },
+                                    "instagram_link": {
+                                        "description": "رابط إنستقرام (اختياري)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://instagram.com/doctor"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث بيانات الطبيب بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe"
+                                                },
+                                                "bio": {
+                                                    "type": "string",
+                                                    "example": "Experienced cardiologist"
+                                                },
+                                                "practicing_profession_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2020-01-01"
+                                                },
+                                                "instagram_link": {
+                                                    "type": "string",
+                                                    "example": "https://instagram.com/doctor"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The email has already been taken."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/doctors/profile": {
+            "get": {
+                "tags": [
+                    "Doctor Profile"
+                ],
+                "summary": "Get doctor profile",
+                "description": "Returns the authenticated doctor's profile information",
+                "operationId": "0dae93654d8eabd86794c837743153e6",
+                "responses": {
+                    "200": {
+                        "description": "Doctor profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe"
+                                                },
+                                                "bio": {
+                                                    "type": "string",
+                                                    "example": "Experienced cardiologist"
+                                                },
+                                                "practicing_profession_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2020-01-01"
+                                                },
+                                                "facebook_link": {
+                                                    "type": "string",
+                                                    "example": "https://facebook.com/doctor"
+                                                },
+                                                "instagram_link": {
+                                                    "type": "string",
+                                                    "example": "https://instagram.com/doctor"
+                                                },
+                                                "consultation_price": {
+                                                    "type": "number",
+                                                    "example": 50
+                                                },
+                                                "image": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/storage/images/doctors/image.jpg"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                },
+                                                "phone_verified": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "John"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "Doe"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "07771234567"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "john.doe@example.com"
+                                                        },
+                                                        "phone_verified_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "specializations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Cardiology"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "No doctor account associated with user"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/governorates": {
+            "get": {
+                "tags": [
+                    "Governorates"
+                ],
+                "summary": "Get all governorates",
+                "description": "Returns a list of all governorates",
+                "operationId": "07cbc81975d93e620059b5693a52d1bd",
+                "responses": {
+                    "200": {
+                        "description": "List of governorates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Baghdad"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/governorates/{governorate}/districts": {
+            "get": {
+                "tags": [
+                    "Governorates"
+                ],
+                "summary": "Get districts by governorate",
+                "description": "Returns a list of districts (cities) for a specific governorate",
+                "operationId": "7c72754a95576015d1ea5475c3539b1e",
+                "parameters": [
+                    {
+                        "name": "governorate",
+                        "in": "path",
+                        "description": "Governorate ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of districts",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "governorate_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Al-Karkh"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Governorate not found"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Governorates"
+                ],
+                "summary": "Add a new district to a governorate",
+                "description": "Adds a new district (city) to a specific governorate",
+                "operationId": "a1b9b98981faa3dbb5b7411a53df194e",
+                "parameters": [
+                    {
+                        "name": "governorate",
+                        "in": "path",
+                        "description": "Governorate ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "New District Name"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "District created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إضافة المنطقة بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "governorate_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "New District Name"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "فشل التحقق من البيانات."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/medical-specializations": {
+            "get": {
+                "tags": [
+                    "Medical Specializations"
+                ],
+                "summary": "Get all medical specializations",
+                "description": "Returns a list of all medical specializations",
+                "operationId": "310572021a1cd79157452d54e23e8bf7",
+                "responses": {
+                    "200": {
+                        "description": "List of medical specializations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Cardiology"
+                                            },
+                                            "image_url": {
+                                                "type": "string",
+                                                "example": "http://example.com/images/cardiology.jpg"
+                                            },
+                                            "is_active": {
+                                                "type": "boolean",
+                                                "example": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Medical Specializations"
+                ],
+                "summary": "Create a new medical specialization",
+                "description": "Creates a new medical specialization",
+                "operationId": "636df1f9398b65e2c1f5d90ea16103bb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Dermatology"
+                                    },
+                                    "image": {
+                                        "description": "Specialization image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_active": {
+                                        "description": "Set to '1' for active, '0' for inactive",
+                                        "type": "string",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Medical specialization created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إضافة التخصص الطبي بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Dermatology"
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/storage/medical_specializations/image.jpg"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/medical-specializations/{medicalSpecialization}": {
+            "put": {
+                "tags": [
+                    "Medical Specializations"
+                ],
+                "summary": "Update an existing medical specialization",
+                "description": "Updates an existing medical specialization",
+                "operationId": "b376c6954b56f1eeb8ed4966bbbcd3e7",
+                "parameters": [
+                    {
+                        "name": "medicalSpecialization",
+                        "in": "path",
+                        "description": "Medical Specialization ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Dermatology"
+                                    },
+                                    "image": {
+                                        "description": "Specialization image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "is_active": {
+                                        "description": "Set to '1' for active, '0' for inactive",
+                                        "type": "string",
+                                        "example": "0"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Medical specialization updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث التخصص بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Updated Dermatology"
+                                                },
+                                                "image_url": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/storage/medical_specializations/updated_image.jpg"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Medical specialization not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Medical Specializations"
+                ],
+                "summary": "Delete a medical specialization",
+                "description": "Deletes a medical specialization",
+                "operationId": "167af0033457cc3c01037703f9ee696b",
+                "parameters": [
+                    {
+                        "name": "medicalSpecialization",
+                        "in": "path",
+                        "description": "Medical Specialization ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medical specialization deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم حذف تخصص Cardiology بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Medical specialization not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Clinic Authentication",
+            "description": "Clinic Authentication"
+        },
+        {
+            "name": "Clinic Profile",
+            "description": "Clinic Profile"
+        },
+        {
+            "name": "Doctor Authentication",
+            "description": "Doctor Authentication"
+        },
+        {
+            "name": "Doctor Profile",
+            "description": "Doctor Profile"
+        },
+        {
+            "name": "Governorates",
+            "description": "Governorates"
+        },
+        {
+            "name": "Medical Specializations",
+            "description": "Medical Specializations"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            },
+            "jwt": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT Authorization header using the Bearer scheme."
+            }
+        }
+    },
+    "security": [
+        {
+            "jwt": []
+        }
+    ]
+}

@@ -15,6 +15,6 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "@qwen-code/qwen-code": "^0.5.1"
+        "@qwen-code/qwen-code": "^0.6.0"
     }
 }

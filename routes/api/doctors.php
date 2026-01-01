@@ -13,7 +13,9 @@ Route::prefix('doctor')->group(function () {
 });
 
 // Doctor Protected Routes
-Route::prefix('doctors')->middleware('auth:api')->group(function () {
+Route::prefix('doctors')
+->middleware('auth:api')
+->group(function () {
     Route::put('/', [DoctorController::class, 'update']);
     Route::get('profile', [DoctorController::class, 'profile']);
 });

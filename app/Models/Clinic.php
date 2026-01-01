@@ -3,21 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Clinic extends Model implements JWTSubject
+class Clinic extends Model implements JWTSubject, AuthenticatableContract
 {
+    use Authenticatable;
     protected $fillable = [
-        'user_id',
         'clinic_name',
         'phone',
+        'email',
         'specialization_id',
         'governorate_id',
         'city_id',
         'district_id',
+        'address',
         'detailed_address',
+        'floor',
+        'room_number',
         'consultation_fee',
         'description',
         'username',
@@ -27,6 +33,9 @@ class Clinic extends Model implements JWTSubject
         'latitude',
         'longitude',
         'status',
+        'otp_code',
+        'otp_expires_at',
+        'phone_verified_at',
     ];
 
     protected $casts = [
@@ -42,11 +51,6 @@ class Clinic extends Model implements JWTSubject
     ];
 
     // Relations
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function specialization(): BelongsTo
     {
         return $this->belongsTo(Specialization::class);

@@ -3,80 +3,91 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Clinic extends Model
+class Clinic extends Model implements JWTSubject
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
-        'medical_center_id',
+        'clinic_name',
+        'phone',
+        'specialization_id',
         'governorate_id',
         'city_id',
-        'name',
-        'address',
-        'phone',
-        'email',
-        'floor',
-        'room_number',
+        'district_id',
+        'detailed_address',
+        'consultation_fee',
+        'description',
+        'username',
+        'password',
+        'main_image',
+        'working_hours',
+        'latitude',
+        'longitude',
         'status',
     ];
 
     protected $casts = [
-        'status' => 'string',
+        'consultation_fee' => 'decimal:2',
+        'working_hours' => 'array',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     // Relations
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function governorate()
+    public function specialization(): BelongsTo
+    {
+        return $this->belongsTo(Specialization::class);
+    }
+
+    public function governorate(): BelongsTo
     {
         return $this->belongsTo(Governorate::class);
     }
 
-    public function city()
+    public function district(): BelongsTo
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(District::class);
     }
 
-    public function medicalCenter()
+    public function services(): HasMany
     {
-        return $this->belongsTo(MedicalCenter::class);
+        return $this->hasMany(ClinicService::class);
     }
 
-    public function doctors()
+    public function galleryImages(): HasMany
     {
-        return $this->belongsToMany(Doctor::class)
-                    ->withTimestamps()
-                    ->withPivot('is_primary');
+        return $this->hasMany(ClinicGalleryImage::class);
     }
 
-    public function appointments()
+    // Mutator for password hashing
+    public function setPasswordAttribute($value)
     {
-        return $this->hasMany(Appointment::class);
+        if ($value) {
+            $this->attributes['password'] = bcrypt($value);
+        }
     }
 
-    public function visitRecords()
+    // JWT Methods
+    public function getJWTIdentifier()
     {
-        return $this->hasMany(VisitRecord::class);
+        return $this->getKey();
     }
 
-    public function secretaries()
+    public function getJWTCustomClaims()
     {
-        return $this->hasMany(Secretary::class);
-    }
-
-    public function offers()
-    {
-        return $this->hasMany(Offer::class);
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
+        return [];
     }
 }

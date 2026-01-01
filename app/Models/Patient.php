@@ -11,6 +11,9 @@ class Patient extends Model
 
     protected $fillable = [
         'user_id',
+        'governorate_id',
+        'city_id',
+        'occupation',
         'city',
         'area',
         'loyalty_points_balance',
@@ -20,6 +23,16 @@ class Patient extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function governorate()
+    {
+        return $this->belongsTo(Governorate::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function medicalFile()

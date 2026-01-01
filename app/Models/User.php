@@ -11,7 +11,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles, JWTSubject;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'first_name',
@@ -23,6 +23,10 @@ class User extends Authenticatable implements JWTSubject
         'birth_date',
         'profile_photo_url',
         'status',
+        'otp_code',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_last_sent_at',
     ];
 
     protected $hidden = [
@@ -32,6 +36,8 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'birth_date' => 'date',
+        'otp_expires_at' => 'datetime',
+        'otp_last_sent_at' => 'datetime',
     ];
 
     protected $appends = ['full_name'];

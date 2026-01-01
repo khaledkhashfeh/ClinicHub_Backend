@@ -36,6 +36,8 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'birth_date' => 'date',
+        'otp_expires_at' => 'datetime',
+        'otp_last_sent_at' => 'datetime',
     ];
 
     protected $appends = ['full_name'];

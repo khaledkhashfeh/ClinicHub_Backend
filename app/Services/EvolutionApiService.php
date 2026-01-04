@@ -28,10 +28,21 @@ class EvolutionApiService
     public function sendMessage($phone, $message)
     {
         if (!$this->baseUrl || !$this->apiKey || !$this->instance) {
-            Log::error("Evolution API configuration is missing");
+            $missing = [];
+            if (!$this->baseUrl) $missing[] = 'EVOLUTION_API_URL';
+            if (!$this->apiKey) $missing[] = 'EVOLUTION_API_KEY';
+            if (!$this->instance) $missing[] = 'EVOLUTION_INSTANCE';
+            
+            Log::error("Evolution API configuration is missing", [
+                'missing_variables' => $missing,
+                'baseUrl' => $this->baseUrl ? 'set' : 'missing',
+                'apiKey' => $this->apiKey ? 'set' : 'missing',
+                'instance' => $this->instance ? 'set' : 'missing'
+            ]);
+            
             return [
                 "success" => false,
-                "message" => "Evolution API configuration is missing"
+                "message" => "إعدادات Evolution API غير موجودة. يرجى إضافة المتغيرات التالية في ملف .env: " . implode(', ', $missing)
             ];
         }
 

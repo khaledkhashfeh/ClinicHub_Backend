@@ -25,23 +25,54 @@ class OtpService
     }
 
     /**
+     * Format phone number for Evolution API (add country code if needed)
+     *
+     * @param string $phone Phone number
+     * @return string Formatted phone number
+     */
+    private function formatPhoneNumber($phone)
+    {
+        // Remove any non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+        
+        // If phone starts with 0, remove it
+        if (strpos($phone, '0') === 0) {
+            $phone = substr($phone, 1);
+        }
+        
+        // If phone doesn't start with country code (963 for Syria), add it
+        if (strlen($phone) === 9 && !str_starts_with($phone, '963')) {
+            $phone = '963' . $phone;
+        }
+        
+        return $phone;
+    }
+
+    /**
      * Send OTP to phone number via Evolution API
      *
      * @param string $phone Phone number to send OTP to
+     * @param string|null $otp Optional OTP code. If not provided, a new one will be generated
      * @return array
      */
-    public function sendOtp($phone)
+    public function sendOtp($phone, $otp = null)
     {
-        $otp = $this->generateOtp();
+        if ($otp === null) {
+            $otp = $this->generateOtp();
+        }
+        
         $cacheKey = "otp_{$phone}";
         
         // Store OTP in cache for 5 minutes (300 seconds)
         Cache::put($cacheKey, $otp, now()->addMinutes(5));
         
-        // Send OTP via Evolution API
-        $message = "Your verification code is: {$otp}. This code will expire in 5 minutes.";
+        // Format phone number for Evolution API
+        $formattedPhone = $this->formatPhoneNumber($phone);
         
-        return $this->evolutionApiService->sendMessage($phone, $message);
+        // Send OTP via Evolution API
+        $message = "رمز التحقق الخاص بك هو: {$otp}. هذا الرمز سينتهي خلال 5 دقائق.";
+        
+        return $this->evolutionApiService->sendMessage($formattedPhone, $message);
     }
 
     /**

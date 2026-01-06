@@ -2207,6 +2207,731 @@
                     }
                 ]
             }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Patient Authentication"
+                ],
+                "summary": "Patient login",
+                "description": "Authenticates a patient and returns a JWT token",
+                "operationId": "40f89e808e659f5e3a16287a7e404ea1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Phone number",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الدخول بنجاح."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Patient"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "patient_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmad Ali"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account pending approval"
+                    },
+                    "404": {
+                        "description": "Account not found or registration incomplete"
+                    }
+                }
+            }
+        },
+        "/api/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Patient Authentication"
+                ],
+                "summary": "Send OTP to patient phone",
+                "description": "Sends an OTP code to the patient's phone number for verification",
+                "operationId": "be82ec2bee66efe961f8654f6d5ccdce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Phone number to send OTP to",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إرسال رمز التحقق بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "429": {
+                        "description": "Too many attempts"
+                    },
+                    "500": {
+                        "description": "Failed to send OTP"
+                    }
+                }
+            }
+        },
+        "/api/auth/verify-otp": {
+            "post": {
+                "tags": [
+                    "Patient Authentication"
+                ],
+                "summary": "Verify patient phone with OTP",
+                "description": "Verifies a patient's phone number using the OTP code received",
+                "operationId": "f19f7a5f044cb0efdc04344a078ca6b8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Phone number",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "otp": {
+                                        "description": "6-digit OTP code",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP verified successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "is_registered": {
+                                            "description": "Whether the patient is already registered",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم التحقق بنجاح. يرجى إكمال بيانات التسجيل."
+                                        },
+                                        "token": {
+                                            "description": "JWT token if already registered",
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "patient_id": {
+                                            "description": "Patient ID if already registered",
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data or OTP"
+                    }
+                }
+            }
+        },
+        "/api/auth/resend-otp": {
+            "post": {
+                "tags": [
+                    "Patient Authentication"
+                ],
+                "summary": "Resend OTP to patient phone",
+                "description": "Resends an OTP code to the patient's phone number",
+                "operationId": "a60b03724a881b37707fc36710b165ce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "description": "Phone number to resend OTP to",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP resent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إرسال رمز التحقق الجديد بنجاح."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "404": {
+                        "description": "Phone number not found"
+                    },
+                    "429": {
+                        "description": "Too many attempts"
+                    },
+                    "500": {
+                        "description": "Failed to resend OTP"
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "Patient Authentication"
+                ],
+                "summary": "Register a new patient",
+                "description": "Registers a new patient account after OTP verification",
+                "operationId": "e5b8631e8d33a487332f51b65f36c65f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "full_name",
+                                    "phone",
+                                    "governorate",
+                                    "district",
+                                    "gender",
+                                    "date_of_birth",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "full_name": {
+                                        "description": "Full name",
+                                        "type": "string",
+                                        "example": "Ahmad Ali"
+                                    },
+                                    "phone": {
+                                        "description": "Phone number (must be verified with OTP)",
+                                        "type": "string",
+                                        "example": "07771234567"
+                                    },
+                                    "governorate": {
+                                        "description": "Governorate ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "district": {
+                                        "description": "District ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "gender": {
+                                        "description": "Gender",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "Date of birth",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "email": {
+                                        "description": "Email (optional)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "patient@example.com"
+                                    },
+                                    "image": {
+                                        "description": "Profile image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "occupation": {
+                                        "description": "Occupation (optional)",
+                                        "type": "string",
+                                        "example": "Engineer"
+                                    },
+                                    "blood_type": {
+                                        "description": "Blood type (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "A+",
+                                            "A-",
+                                            "B+",
+                                            "B-",
+                                            "AB+",
+                                            "AB-",
+                                            "O+",
+                                            "O-"
+                                        ],
+                                        "example": "A+"
+                                    },
+                                    "has_chronic_diseases": {
+                                        "description": "Whether patient has chronic diseases (optional)",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "chronic_diseases_details": {
+                                        "description": "Details of chronic diseases (required if has_chronic_diseases is true)",
+                                        "type": "string",
+                                        "example": "Diabetes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Registration successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إنشاء الحساب بنجاح وتسجيل الدخول."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Patient"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "patient_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmad Ali"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data or phone not verified"
+                    },
+                    "409": {
+                        "description": "Account already exists"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "البيانات غير صحيحة."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patients/{id}": {
+            "put": {
+                "tags": [
+                    "Patient Profile"
+                ],
+                "summary": "Update patient profile",
+                "description": "Updates the profile information of the authenticated patient",
+                "operationId": "fe8d6e3b4a2f49d564eebf9640fa5d1f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Patient ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "full_name": {
+                                        "description": "Full name (optional)",
+                                        "type": "string",
+                                        "example": "Ahmad Ali"
+                                    },
+                                    "email": {
+                                        "description": "Email (optional)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "patient@example.com"
+                                    },
+                                    "governorate": {
+                                        "description": "Governorate ID (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "district": {
+                                        "description": "District ID (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "gender": {
+                                        "description": "Gender (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "Date of birth (optional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "image": {
+                                        "description": "Profile image (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "occupation": {
+                                        "description": "Occupation (optional)",
+                                        "type": "string",
+                                        "example": "Engineer"
+                                    },
+                                    "blood_type": {
+                                        "description": "Blood type (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "A+",
+                                            "A-",
+                                            "B+",
+                                            "B-",
+                                            "AB+",
+                                            "AB-",
+                                            "O+",
+                                            "O-"
+                                        ],
+                                        "example": "A+"
+                                    },
+                                    "has_chronic_diseases": {
+                                        "description": "Whether patient has chronic diseases (optional)",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "chronic_diseases_details": {
+                                        "description": "Details of chronic diseases (optional)",
+                                        "type": "string",
+                                        "example": "Diabetes"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث بيانات المريض بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmad Ali"
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "Ahmad"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Ali"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "patient@example.com"
+                                                },
+                                                "gender": {
+                                                    "type": "string",
+                                                    "example": "male"
+                                                },
+                                                "date_of_birth": {
+                                                    "type": "string",
+                                                    "example": "1990-01-01"
+                                                },
+                                                "profile_photo_url": {
+                                                    "type": "string",
+                                                    "example": "http://localhost:8000/storage/profiles/patients/image.jpg"
+                                                },
+                                                "governorate_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "city_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "occupation": {
+                                                    "type": "string",
+                                                    "example": "Engineer"
+                                                },
+                                                "blood_type": {
+                                                    "type": "string",
+                                                    "example": "A+"
+                                                },
+                                                "has_chronic_diseases": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "chronic_diseases_details": {
+                                                    "type": "string",
+                                                    "example": "Diabetes"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "403": {
+                        "description": "Not authorized to update this profile"
+                    },
+                    "404": {
+                        "description": "Patient not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "البيانات غير صحيحة."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error during update"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
@@ -2233,6 +2958,14 @@
         {
             "name": "Medical Specializations",
             "description": "Medical Specializations"
+        },
+        {
+            "name": "Patient Authentication",
+            "description": "Patient Authentication"
+        },
+        {
+            "name": "Patient Profile",
+            "description": "Patient Profile"
         }
     ],
     "components": {

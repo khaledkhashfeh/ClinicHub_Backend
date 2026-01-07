@@ -79,9 +79,28 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
     // Mutator for password hashing
     public function setPasswordAttribute($value)
     {
-        if ($value) {
+            if ($value) {
             $this->attributes['password'] = bcrypt($value);
         }
+    }
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function visitRecords()
+    {
+        return $this->hasMany(VisitRecord::class);
+    }
+
+    public function secretaries()
+    {
+        return $this->morphMany(Secretary::class, 'entity');
+    }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
     }
 
     // JWT Methods
@@ -93,5 +112,9 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
     public function getJWTCustomClaims()
     {
         return [];
+    }
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
     }
 }

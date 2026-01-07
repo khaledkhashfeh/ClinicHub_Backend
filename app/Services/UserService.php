@@ -20,17 +20,6 @@ class UserService
 
     // this function used as general account sign up.
     public function SignUp(array $data): User {
-        $fullname = trim(preg_replace('/\s+/', ' ', $data['full_name']));
-        $parts = explode(' ', $fullname);
-
-        if (count($parts) != 3) {
-            throw new \InvalidArgumentException(
-                'Full name must contain first, mid and last name'
-            );
-        }
-
-        [$first, $mid, $last] = $parts;
-
         $user = User::where('phone', $data['phone_number'])->exists();
     
         if ($user) {
@@ -40,9 +29,8 @@ class UserService
         }
 
         return User::create([
-            'first_name' => $first,
-            'mid_name' => $mid,
-            'last_name' => $last,
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
             'phone' => $data['phone_number'],
             'email' => $data['email'],
             'username' => $data['username'],

@@ -15,14 +15,12 @@ return new class extends Migration
             $table->id();
         
             $table->string('first_name');
-            $table->string('mid_name');
             $table->string('last_name');
             $table->string('phone')->unique();
-            $table->timestamp('phone_verified_at')->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('username')->unique();
             $table->string('password');
-            $table->enum('gender', ['male', 'female'])->nullable();
+            $table->enum('gender', ['male', 'female']);
             $table->date('birth_date')->nullable();
             $table->string('profile_photo_url')->nullable();
 

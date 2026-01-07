@@ -15,8 +15,9 @@ class SecretaryController extends Controller
     // this function for creating secretary account
     public function createSecretary(Request $request, UserService $userService) {
         $validatedData = $request->validate([
-            'full_name'     => ['required', 'string', 'max:255'],
-            'phone_number'  => ['required', 'regex:/^(0|\+963)\d{8}$/'],
+            'first_name'     => ['required', 'string', 'max:255'],
+            'last_name'     => ['required', 'string', 'max:255'],
+            'phone_number'  => ['required', 'regex:/^(0|\+963)\d{9}$/'],
             'email'         => ['nullable', 'email'],
             'username'      => ['required', 'string', 'max:255'],
             'password'      => ['required', 'string', 'min:8', 'max:18', 'confirmed'],

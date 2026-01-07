@@ -18,7 +18,6 @@ class User extends Authenticatable implements JWTSubject
         'last_name',
         'phone',
         'email',
-        'username',
         'password',
         'gender',
         'birth_date',
@@ -91,5 +90,5 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    
+
 }

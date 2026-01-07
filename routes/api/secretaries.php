@@ -6,3 +6,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/secretaries', [SecretaryController::class, 'createSecretary']);
 Route::post('/secretaries/login', [UserController::class, 'Login']);
+Route::post('/secretaries/updateAccounte', [SecretaryController::class, 'editSecretary']);

@@ -15,6 +15,8 @@ class DoctorRegisterRequest extends FormRequest
     {
         return [
             // Required fields
+            'username' => 'required|string|max:255|unique:doctors,username',
+            'license_number' => 'required|string|max:255|unique:doctors,license_number',
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|unique:users,phone',
@@ -42,6 +44,10 @@ class DoctorRegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'username.required' => 'اسم المستخدم مطلوب',
+            'username.unique' => 'اسم المستخدم مستخدم من قبل',
+            'license_number.required' => 'رقم الترخيص مطلوب',
+            'license_number.unique' => 'رقم الترخيص مستخدم من قبل',
             'first_name.required' => 'الاسم الأول مطلوب',
             'last_name.required' => 'اسم العائلة مطلوب',
             'phone.required' => 'رقم الهاتف مطلوب',

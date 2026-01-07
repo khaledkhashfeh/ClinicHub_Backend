@@ -21,6 +21,8 @@ class UpdateDoctorProfileRequest extends FormRequest
         $userId = $this->user()->doctor->user_id;
 
         return [
+            'username' => "sometimes|string|max:255|unique:doctors,username,{$this->user()->doctor->id},id",
+            'license_number' => "sometimes|string|max:255|unique:doctors,license_number,{$this->user()->doctor->id},id",
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'phone' => "sometimes|string|unique:users,phone,{$userId},id",

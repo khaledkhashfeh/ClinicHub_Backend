@@ -60,6 +60,8 @@ class DoctorSeeder extends Seeder
                     'status' => 'approved',
                 ],
                 'doctor' => [
+                    'username' => 'dr_ahmad_hassan',
+                    'license_number' => 'MED001',
                     'practicing_profession_date' => 2010,
                     'governorate_id' => 1, // Assuming Damascus has ID 1
 
@@ -83,6 +85,8 @@ class DoctorSeeder extends Seeder
                     'status' => 'approved',
                 ],
                 'doctor' => [
+                    'username' => 'dr_lina_rashid',
+                    'license_number' => 'PED002',
                     'practicing_profession_date' => 2012,
                     'governorate_id' => 1,
 
@@ -106,6 +110,8 @@ class DoctorSeeder extends Seeder
                     'status' => 'approved',
                 ],
                 'doctor' => [
+                    'username' => 'dr_omar_masri',
+                    'license_number' => 'CARD003',
                     'practicing_profession_date' => 2008,
                     'governorate_id' => 1,
 
@@ -129,6 +135,8 @@ class DoctorSeeder extends Seeder
                     'status' => 'approved',
                 ],
                 'doctor' => [
+                    'username' => 'dr_fatima_zahra',
+                    'license_number' => 'DENT004',
                     'practicing_profession_date' => 2015,
                     'governorate_id' => 1,
                     'bio' => 'Dental surgeon with expertise in cosmetic dentistry and oral surgery.',
@@ -151,6 +159,8 @@ class DoctorSeeder extends Seeder
                     'status' => 'pending',
                 ],
                 'doctor' => [
+                    'username' => 'dr_khaled_omari',
+                    'license_number' => 'SURG005',
                     'practicing_profession_date' => 2018,
                     'governorate_id' => 1,
                     'bio' => 'General surgeon with experience in various surgical procedures.',
@@ -186,6 +196,8 @@ class DoctorSeeder extends Seeder
             if (!$doctor) {
                 $doctor = Doctor::create([
                     'user_id' => $user->id,
+                    'username' => $doctorData['doctor']['username'],
+                    'license_number' => $doctorData['doctor']['license_number'],
                     'practicing_profession_date' => $doctorData['doctor']['practicing_profession_date'],
                     'governorate_id' => $doctorData['doctor']['governorate_id'],
                     'bio' => $doctorData['doctor']['bio'],
@@ -213,6 +225,8 @@ class DoctorSeeder extends Seeder
                 'status' => 'approved',
             ],
             'doctor' => [
+                'username' => 'dr_mohammad_turk',
+                'license_number' => 'INT006',
                 'practicing_profession_date' => 2009,
                 'governorate_id' => 1,
                 'bio' => 'Internal medicine specialist with expertise in multiple areas.',
@@ -244,6 +258,8 @@ class DoctorSeeder extends Seeder
         if (!$doctor) {
             $doctor = Doctor::create([
                 'user_id' => $user->id,
+                'username' => $multiSpecDoctor['doctor']['username'],
+                'license_number' => $multiSpecDoctor['doctor']['license_number'],
                 'practicing_profession_date' => $multiSpecDoctor['doctor']['practicing_profession_date'],
                 'governorate_id' => $multiSpecDoctor['doctor']['governorate_id'],
                 'bio' => $multiSpecDoctor['doctor']['bio'],

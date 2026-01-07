@@ -110,6 +110,8 @@ class DoctorController extends Controller
         // Create doctor profile with pending status
         $doctor = Doctor::create([
             'user_id' => $user->id,
+            'username' => $request->username,
+            'license_number' => $request->license_number,
             'practicing_profession_date' => $request->practicing_profession_date,
             'governorate_id' => $request->governorate_id,
             'bio' => $request->bio,
@@ -273,6 +275,8 @@ class DoctorController extends Controller
 
         // Update doctor profile
         $doctorUpdateData = $request->only([
+            'username',
+            'license_number',
             'practicing_profession_date',
             'governorate_id',
             'district_id',

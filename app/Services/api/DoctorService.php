@@ -72,6 +72,8 @@ class DoctorAuthService
             // إنشاء ملف الطبيب
             $doctor = Doctor::create([
                 'user_id' => $user->id,
+                'username' => $data['username'],
+                'license_number' => $data['license_number'],
                 'governorate_id' => $data['governorate_id'],
                 'district_id' => $data['district_id'],
                 'practicing_profession_date' => $data['practicing_profession_date'],
@@ -148,6 +150,8 @@ class DoctorProfileService
             // تحديث بيانات الطبيب
             $doctorData = [];
             $allowedFields = [
+                'username',
+                'license_number',
                 'governorate_id',
                 'district_id',
                 'practicing_profession_date',

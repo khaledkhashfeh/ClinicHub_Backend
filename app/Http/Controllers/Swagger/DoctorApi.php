@@ -75,6 +75,8 @@ class DoctorApi
                 mediaType: "multipart/form-data",
                 schema: new OA\Schema(
                     properties: [
+                        new OA\Property(property: "username", type: "string", example: "dr_john_doe", description: "اسم المستخدم للطبيب"),
+                        new OA\Property(property: "license_number", type: "string", example: "MED123456", description: "رقم ترخيص الطبيب"),
                         new OA\Property(property: "first_name", type: "string", example: "John", description: "الاسم الأول"),
                         new OA\Property(property: "last_name", type: "string", example: "Doe", description: "الاسم الأخير"),
                         new OA\Property(property: "phone", type: "string", example: "07771234567", description: "رقم الهاتف"),
@@ -127,7 +129,7 @@ class DoctorApi
                         new OA\Property(property: "facebook_link", type: "string", format: "uri", example: "https://facebook.com/doctor", description: "رابط صفحة فيسبوك"),
                         new OA\Property(property: "instagram_link", type: "string", format: "uri", example: "https://instagram.com/doctor", description: "رابط حساب إنستقرام"),
                     ],
-                    required: ["first_name", "last_name", "phone", "email", "password", "password_confirmation", "date_of_birth", "gender", "governorate_id", "specializations_ids[0]", "practicing_profession_date", "bio"]
+                    required: ["username", "license_number", "first_name", "last_name", "phone", "email", "password", "password_confirmation", "date_of_birth", "gender", "governorate_id", "specializations_ids[0]", "practicing_profession_date", "bio"]
                 )
             )
         ),
@@ -290,6 +292,8 @@ class DoctorApi
                         //     example: "PUT",
                         //     description: "HTTP method override for Laravel (required for multipart/form-data PUT requests)"
                         // ),
+                        new OA\Property(property: "username", type: "string", example: "dr_john_doe", description: "اسم المستخدم (اختياري)"),
+                        new OA\Property(property: "license_number", type: "string", example: "MED123456", description: "رقم الترخيص (اختياري)"),
                         new OA\Property(property: "first_name", type: "string", example: "John", description: "الاسم الأول (اختياري)"),
                         new OA\Property(property: "last_name", type: "string", example: "Doe", description: "الاسم الأخير (اختياري)"),
                         new OA\Property(property: "phone", type: "string", example: "07771234567", description: "رقم الهاتف (اختياري)"),
@@ -416,6 +420,8 @@ class DoctorApi
                             properties: [
                                 new OA\Property(property: "id", type: "integer", example: 1),
                                 new OA\Property(property: "user_id", type: "integer", example: 1),
+                                new OA\Property(property: "username", type: "string", example: "dr_john_doe"),
+                                new OA\Property(property: "license_number", type: "string", example: "MED123456"),
                                 new OA\Property(property: "full_name", type: "string", example: "Dr. John Doe"),
                                 new OA\Property(property: "bio", type: "string", example: "Experienced cardiologist"),
                                 new OA\Property(property: "practicing_profession_date", type: "string", format: "date", example: "2020-01-01"),

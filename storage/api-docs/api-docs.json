@@ -12,6 +12,116 @@
         }
     ],
     "paths": {
+        "/api/admin/login": {
+            "post": {
+                "tags": [
+                    "Admin Authentication"
+                ],
+                "summary": "Admin login",
+                "description": "Authenticates an admin user and returns a JWT token",
+                "operationId": "89f211ab272fde98384a1fbb83252b9c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "identifier",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "identifier": {
+                                        "description": "Email or phone number",
+                                        "type": "string",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "maxLength": 18,
+                                        "minLength": 8,
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الدخول بنجاح"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "bearer"
+                                        },
+                                        "expires_in": {
+                                            "type": "integer",
+                                            "example": 3600
+                                        },
+                                        "user": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "first_name": {
+                                                    "type": "string",
+                                                    "example": "Admin"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "User"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "admin@example.com"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "admin"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data or credentials"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Access denied - not an admin"
+                    }
+                }
+            }
+        },
         "/api/clinic/login": {
             "post": {
                 "tags": [
@@ -3547,9 +3657,1292 @@
                     }
                 }
             }
+        },
+        "/api/secretaries/updateAccounte": {
+            "post": {
+                "tags": [
+                    "Secretary Management"
+                ],
+                "summary": "Update secretary account",
+                "description": "Updates an existing secretary account information",
+                "operationId": "2635978e05bf5b37006085c499ffe5f1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "description": "First name of the secretary (optional)",
+                                        "type": "string",
+                                        "example": "Ahmad"
+                                    },
+                                    "last_name": {
+                                        "description": "Last name of the secretary (optional)",
+                                        "type": "string",
+                                        "example": "Al-Hassan"
+                                    },
+                                    "phone_number": {
+                                        "description": "Phone number in Syrian format (optional)",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "email": {
+                                        "description": "Email address (optional)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ahmad.secretary@example.com"
+                                    },
+                                    "username": {
+                                        "description": "Unique username for the secretary (optional)",
+                                        "type": "string",
+                                        "example": "ahmad_secretary"
+                                    },
+                                    "password": {
+                                        "description": "New password (optional)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation (required if password is provided)",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "Date of birth in YYYY-MM-DD format (optional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "profile_image": {
+                                        "description": "Profile image URL (optional)",
+                                        "type": "string",
+                                        "example": "path/to/image.jpg"
+                                    },
+                                    "gender": {
+                                        "description": "Gender of the secretary (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "entity_id": {
+                                        "description": "ID of the clinic or medical center to associate with (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "entity_type": {
+                                        "description": "Type of entity (clinic or medical_center) (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic",
+                                            "medical_center"
+                                        ],
+                                        "example": "clinic"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Secretary account updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "secretary account has been updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "Ahmad"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "Al-Hassan"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "ahmad.secretary@example.com"
+                                                        },
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "ahmad_secretary"
+                                                        },
+                                                        "date_of_birth": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "1990-01-01"
+                                                        },
+                                                        "gender": {
+                                                            "type": "string",
+                                                            "example": "male"
+                                                        },
+                                                        "profile_photo_url": {
+                                                            "type": "string",
+                                                            "example": "path/to/image.jpg"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "secretary": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "entity_type": {
+                                                            "type": "string",
+                                                            "example": "clinic"
+                                                        },
+                                                        "entity_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "active"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2023-01-01T00:00:00.000000Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "field_name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "An error occurred while processing your request."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/subscription-plans": {
+            "get": {
+                "tags": [
+                    "Subscription Plans"
+                ],
+                "summary": "Get all subscription plans",
+                "description": "Returns a list of all active subscription plans",
+                "operationId": "702dc3948d5d142aa50e93a43af322de",
+                "parameters": [
+                    {
+                        "name": "target_type",
+                        "in": "query",
+                        "description": "Filter plans by target type (clinic or medical_center)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clinic",
+                                "medical_center"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of subscription plans",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Basic Plan"
+                                                    },
+                                                    "target_type": {
+                                                        "type": "string",
+                                                        "example": "clinic"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "example": 100
+                                                    },
+                                                    "duration_days": {
+                                                        "type": "integer",
+                                                        "example": 30
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Basic subscription plan"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "features": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "text": {
+                                                                    "type": "string",
+                                                                    "example": "Up to 5 doctors"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "entitlements": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "key": {
+                                                                    "type": "string",
+                                                                    "example": "enable_secretary"
+                                                                },
+                                                                "value": {
+                                                                    "type": "string",
+                                                                    "example": "true"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string",
+                                                                    "example": "boolean"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/subscription-plans/{id}": {
+            "get": {
+                "tags": [
+                    "Subscription Plans"
+                ],
+                "summary": "Get a specific subscription plan",
+                "description": "Returns details of a specific subscription plan",
+                "operationId": "0aae9ab87c48dee63caca8c0a1be2870",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Subscription plan ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Basic Plan"
+                                                },
+                                                "target_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 100
+                                                },
+                                                "duration_days": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Basic subscription plan"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "features": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "Up to 5 doctors"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "entitlements": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "key": {
+                                                                "type": "string",
+                                                                "example": "enable_secretary"
+                                                            },
+                                                            "value": {
+                                                                "type": "string",
+                                                                "example": "true"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "boolean"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Subscription plan not found"
+                    }
+                }
+            }
+        },
+        "/api/my-subscription": {
+            "get": {
+                "tags": [
+                    "Subscriptions"
+                ],
+                "summary": "Get current user's subscription",
+                "description": "Returns the current subscription of the authenticated user",
+                "operationId": "6d7354c296d109139523ec723c473aea",
+                "responses": {
+                    "200": {
+                        "description": "Current subscription details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "subscription": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "plan": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Basic Plan"
+                                                                },
+                                                                "target_type": {
+                                                                    "type": "string",
+                                                                    "example": "clinic"
+                                                                },
+                                                                "price": {
+                                                                    "type": "number",
+                                                                    "example": 100
+                                                                },
+                                                                "duration_days": {
+                                                                    "type": "integer",
+                                                                    "example": 30
+                                                                },
+                                                                "features": {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "type": "integer",
+                                                                                "example": 1
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string",
+                                                                                "example": "Up to 5 doctors"
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    }
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "starts_at": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2023-01-01"
+                                                        },
+                                                        "ends_at": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2023-01-31"
+                                                        },
+                                                        "status": {
+                                                            "type": "string",
+                                                            "example": "active"
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "days_remaining": {
+                                                            "type": "integer",
+                                                            "example": 15
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "No subscription found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/subscriptions": {
+            "get": {
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Get all subscriptions (Admin)",
+                "description": "Returns a list of all subscriptions (Admin only)",
+                "operationId": "ee2d52eb29394a10fa8ad126374eaef2",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter subscriptions by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "trial",
+                                "active",
+                                "expired",
+                                "canceled"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "subscribable_type",
+                        "in": "query",
+                        "description": "Filter subscriptions by subscribable type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "clinic",
+                                "medical_center"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of subscriptions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "plan": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Basic Plan"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "subscribable": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "clinic_name": {
+                                                                "type": "string",
+                                                                "example": "Sample Clinic"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "starts_at": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-01-01"
+                                                    },
+                                                    "ends_at": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-01-31"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Create a new subscription (Admin)",
+                "description": "Creates a new subscription for a clinic or medical center (Admin only)",
+                "operationId": "0c12b0087f391d29b4bc620c2548a302",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "subscribable_type",
+                                    "subscribable_id",
+                                    "plan_id"
+                                ],
+                                "properties": {
+                                    "subscribable_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic",
+                                            "medical_center"
+                                        ],
+                                        "example": "clinic"
+                                    },
+                                    "subscribable_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "plan_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "starts_at": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "trial",
+                                            "active",
+                                            "expired",
+                                            "canceled"
+                                        ],
+                                        "example": "active"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Initial subscription"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Subscription created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تعيين الاشتراك بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Clinic/medical center or plan not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/subscription-plans": {
+            "post": {
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Create a new subscription plan (Admin)",
+                "description": "Creates a new subscription plan (Admin only)",
+                "operationId": "d95dff6166fc315a38420c0c9ec0c481",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "target_type",
+                                    "price",
+                                    "duration_days",
+                                    "features"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Premium Plan"
+                                    },
+                                    "target_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic",
+                                            "medical_center"
+                                        ],
+                                        "example": "clinic"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 200
+                                    },
+                                    "duration_days": {
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Premium subscription plan"
+                                    },
+                                    "features": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "example": "Unlimited appointments"
+                                        }
+                                    },
+                                    "entitlements": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "key": {
+                                                    "type": "string",
+                                                    "example": "enable_secretary"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "true"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "boolean",
+                                                        "integer",
+                                                        "string",
+                                                        "decimal"
+                                                    ],
+                                                    "example": "boolean"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Subscription plan created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم إنشاء الخطة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Premium Plan"
+                                                },
+                                                "target_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 200
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/subscription-plans/{id}": {
+            "put": {
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Update a subscription plan (Admin)",
+                "description": "Updates an existing subscription plan (Admin only)",
+                "operationId": "cbcbc61ce2ce6e3628f19199b850fd39",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Subscription plan ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Updated Premium Plan"
+                                    },
+                                    "target_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic",
+                                            "medical_center"
+                                        ],
+                                        "example": "clinic"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 250
+                                    },
+                                    "duration_days": {
+                                        "type": "integer",
+                                        "example": 45
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Updated premium subscription plan"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "features": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "Updated feature"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث الخطة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Updated Premium Plan"
+                                                },
+                                                "target_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "example": 250
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Subscription plan not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin Subscription Plans"
+                ],
+                "summary": "Delete a subscription plan (Admin)",
+                "description": "Deletes an existing subscription plan (Admin only)",
+                "operationId": "bc2a3cd68a4ba4e8c1333cd5730a4aa8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Subscription plan ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription plan deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم حذف الخطة وجميع الميزات المرتبطة بها بنجاح"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Subscription plan not found"
+                    },
+                    "400": {
+                        "description": "Cannot delete plan with active subscriptions"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/subscriptions/{id}": {
+            "patch": {
+                "tags": [
+                    "Admin Subscriptions"
+                ],
+                "summary": "Update a subscription (Admin)",
+                "description": "Updates an existing subscription (Admin only)",
+                "operationId": "c0e2a74ab9ed9071c6757e3ad891bca2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Subscription ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "trial",
+                                            "active",
+                                            "expired",
+                                            "canceled"
+                                        ],
+                                        "example": "canceled"
+                                    },
+                                    "notes": {
+                                        "type": "string",
+                                        "example": "Subscription canceled due to non-payment"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Subscription updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث الاشتراك بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "canceled"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Subscription not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
         }
     },
     "tags": [
+        {
+            "name": "Admin Authentication",
+            "description": "Admin Authentication"
+        },
         {
             "name": "Clinic Authentication",
             "description": "Clinic Authentication"
@@ -3593,6 +4986,22 @@
         {
             "name": "Secretary Authentication",
             "description": "Secretary Authentication"
+        },
+        {
+            "name": "Subscription Plans",
+            "description": "Subscription Plans"
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Subscriptions"
+        },
+        {
+            "name": "Admin Subscriptions",
+            "description": "Admin Subscriptions"
+        },
+        {
+            "name": "Admin Subscription Plans",
+            "description": "Admin Subscription Plans"
         }
     ],
     "components": {

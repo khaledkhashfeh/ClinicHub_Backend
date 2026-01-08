@@ -11,6 +11,7 @@ class Secretary extends Model
 
     protected $fillable = [
         'user_id',
+        'username',
         'entity_type',
         'entity_id',
         'status',

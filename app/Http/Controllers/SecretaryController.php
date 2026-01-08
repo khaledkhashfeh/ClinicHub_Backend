@@ -24,6 +24,7 @@ class SecretaryController extends Controller
 
                 $secretary = Secretary::create([
                     'user_id' => $user->id,
+                    'username' => $validatedData['username'],
                     'entity_id' => $validatedData['entity_id'],
                     'entity_type' => $validatedData['entity_type']
                 ]);

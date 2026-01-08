@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('doctors', function (Blueprint $table) {
-            $table->string('username')->unique()->after('user_id');
-            $table->string('license_number')->unique()->after('username');
+        Schema::table('secretaries', function (Blueprint $table) {
+            $table->string('username')->unique()->nullable()->after('user_id');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('doctors', function (Blueprint $table) {
-            $table->dropColumn(['username', 'license_number']);
+        Schema::table('secretaries', function (Blueprint $table) {
+            $table->dropColumn('username');
         });
     }
 };

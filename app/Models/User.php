@@ -7,6 +7,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Hash;
 
 
 class User extends Authenticatable implements JWTSubject
@@ -52,7 +53,14 @@ class User extends Authenticatable implements JWTSubject
     public function setPasswordAttribute($value)
     {
         if ($value) {
-            $this->attributes['password'] = bcrypt($value);
+            // Check if the value is already hashed (starts with $2y$, $2a$, or $2x$ which are bcrypt formats)
+            if (preg_match('/^\$(2[ayx]|2)\$/', $value)) {
+                // Value is already hashed, store as is
+                $this->attributes['password'] = $value;
+            } else {
+                // Value is plain text, hash it
+                $this->attributes['password'] = bcrypt($value);
+            }
         }
     }
 

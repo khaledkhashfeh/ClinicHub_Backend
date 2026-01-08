@@ -104,6 +104,8 @@ class DoctorController extends Controller
         $user->phone = $request->phone;
         $user->email = $request->email;
         $user->password = $request->password; // Don't hash here - let the mutator handle it
+        $user->birth_date = $request->date_of_birth; // Map date_of_birth from request to birth_date in model
+        $user->gender = $request->gender; // Save gender from request
         $user->status = 'approved'; // Users created via doctor registration are auto-approved
         $user->save();
 

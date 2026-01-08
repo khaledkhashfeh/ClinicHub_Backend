@@ -29,9 +29,28 @@ class UserController extends Controller
         // Determine if identifier is email, phone, or username
         $fieldType = $this->getFieldType($identifier);
 
-        // Attempt to find user by the determined field type
-        $user = User::where($fieldType, $identifier)->first();
+        // Initialize user variable
+        $user = null;
 
+        if ($fieldType === 'email' || $fieldType === 'phone') {
+            // For email or phone, look directly in users table
+            $user = User::where($fieldType, $identifier)->first();
+        } else {
+            // For username, check doctor and secretary tables
+            // Check if username belongs to a doctor
+            $doctor = \App\Models\Doctor::where('username', $identifier)->first();
+            if ($doctor) {
+                $user = $doctor->user;
+            }
+
+            if (!$user) {
+                // Check if username belongs to a secretary
+                $secretary = \App\Models\Secretary::where('username', $identifier)->first();
+                if ($secretary) {
+                    $user = $secretary->user;
+                }
+            }
+        }
         if (!$user || !Hash::check($password, $user->password)) {
             return response()->json([
                 'success' => false,

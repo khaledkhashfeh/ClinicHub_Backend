@@ -29,6 +29,8 @@ class UserFactory extends Factory
             'phone' => fake()->unique()->phoneNumber(),
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make('password'),
+            'gender' => fake()->randomElement(['male', 'female']),
+            'birth_date' => fake()->date('Y-m-d', '-20 years'),
             'remember_token' => Str::random(10),
         ];
     }

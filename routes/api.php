@@ -9,3 +9,5 @@ require __DIR__ . '/api/doctors.php';
 require __DIR__ . '/api/medical-team.php';
 require __DIR__ . '/api/patients.php';
 require __DIR__ . '/api/clinics.php';
+require __DIR__ . '/api/subscriptions.php';
+require __DIR__ . '/api/admin-management.php';

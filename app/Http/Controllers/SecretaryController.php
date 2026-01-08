@@ -19,6 +19,43 @@ class SecretaryController extends Controller
         $validatedData = $request->validated();
 
         try {
+            // ✅ التحقق من أن الخطة تدعم السكرتيرة
+            $entityType = $validatedData['entity_type'];
+            $entityId = $validatedData['entity_id'];
+            
+            $entity = $entityType::find($entityId);
+            
+            if (!$entity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'العيادة أو المركز غير موجود'
+                ], 404);
+            }
+
+            // جلب الاشتراك الفعّال
+            $subscription = $entity->subscriptions()
+                ->where('status', 'active')
+                ->with('plan')
+                ->latest()
+                ->first();
+
+            if (!$subscription) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'لا يوجد اشتراك نشط. يرجى الترقية للخطة المناسبة'
+                ], 403);
+            }
+
+            // التحقق من صلاحية إضافة سكرتيرة
+            $enableSecretary = $subscription->plan->getEntitlement('enable_secretary', false);
+            
+            if (!$enableSecretary) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'خطتك الحالية لا تدعم إضافة سكرتيرة. يرجى الترقية'
+                ], 403);
+            }
+
             $result = DB::transaction(function () use ($validatedData, $userService) {
                 $user = $userService->SignUp($validatedData);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PhoneHelper;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,10 @@ class UserController extends Controller
         // Determine if identifier is email, phone, or username
         $fieldType = $this->getFieldType($identifier);
 
+        // إذا كان رقم هاتف، طبّعه إلى الصيغة الدولية
+        if ($fieldType === 'phone') {
+            $identifier = PhoneHelper::normalize($identifier);
+        }
         // Initialize user variable
         $user = null;
 

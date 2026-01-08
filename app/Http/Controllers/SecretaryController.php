@@ -16,7 +16,7 @@ class SecretaryController extends Controller
 {
     // this function for creating secretary account
     public function createSecretary(SecretaryCreateRequest $request, UserService $userService) {
-        $validatedData = $request->validate();
+        $validatedData = $request->validated();
 
         try {
             $result = DB::transaction(function () use ($validatedData, $userService) {

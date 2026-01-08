@@ -12,7 +12,12 @@ class MedicalFile extends Model
     protected $fillable = [
         'patient_id',
         'blood_type',
+        'has_chronic_diseases',
         'past_medical_history',
+    ];
+
+    protected $casts = [
+        'has_chronic_diseases' => 'boolean',
     ];
 
     public function patient()

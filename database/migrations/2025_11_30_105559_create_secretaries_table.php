@@ -13,20 +13,12 @@ return new class extends Migration
     {
         Schema::create('secretaries', function (Blueprint $table) {
             $table->id();
+            $table->morphs('entity');
     
             $table->foreignId('user_id')
                   ->unique()
                   ->constrained()
                   ->cascadeOnDelete();
-    
-            $table->foreignId('clinic_id')
-                  ->constrained('clinics')
-                  ->cascadeOnDelete();
-    
-            $table->foreignId('doctor_id')
-                  ->nullable()
-                  ->constrained('doctors')
-                  ->nullOnDelete();
     
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
     

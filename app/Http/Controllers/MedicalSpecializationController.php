@@ -40,7 +40,7 @@ class MedicalSpecializationController extends Controller
         $imageUrl = null;
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('medical_specializations', 'public');
-            $imageUrl = Storage::disk('public')->url($path);
+            $imageUrl = url('storage/' . $path); // Using url helper instead of Storage::url
         }
 
         $specialization = MedicalSpecialization::create([
@@ -89,7 +89,7 @@ class MedicalSpecializationController extends Controller
                 $this->deleteOldImage($medicalSpecialization->image_url);
             }
             $path = $request->file('image')->store('medical_specializations', 'public');
-            $medicalSpecialization->image_url = Storage::disk('public')->url($path);
+            $medicalSpecialization->image_url = url('storage/' . $path); // Using url helper instead of Storage::url
         }
 
         $medicalSpecialization->save();
@@ -132,10 +132,10 @@ class MedicalSpecializationController extends Controller
     private function deleteOldImage(string $url): void
     {
         // Convert url back to storage path if it belongs to public disk
-        $publicUrl = Storage::disk('public')->url('');
-        if (str_starts_with($url, $publicUrl)) {
-            $relative = ltrim(str_replace($publicUrl, '', $url), '/');
-            Storage::disk('public')->delete($relative);
+        $storagePath = public_path('storage/');
+        $relativePath = str_replace(url('storage/'), '', $url);
+        if ($relativePath !== $url) { // If replacement happened, it was a storage URL
+            Storage::disk('public')->delete($relativePath);
         }
     }
 }

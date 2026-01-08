@@ -98,6 +98,40 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
         return $this->morphMany(Secretary::class, 'entity');
     }
 
+    /**
+     * العلاقة: الاشتراك الخاص بالعيادة
+     */
+    public function subscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')->latest();
+    }
+
+    /**
+     * العلاقة: كل الاشتراكات (تاريخ الاشتراكات)
+     */
+    public function subscriptions()
+    {
+        return $this->morphMany(Subscription::class, 'subscribable');
+    }
+
+    /**
+     * Method: الحصول على الاشتراك النشط
+     */
+    public function activeSubscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')
+            ->active()
+            ->with('plan.features');
+    }
+
+    /**
+     * Method: هل لدى العيادة اشتراك نشط؟
+     */
+    public function hasActiveSubscription()
+    {
+        return $this->activeSubscription()->exists();
+    }
+
     public function offers()
     {
         return $this->hasMany(Offer::class);

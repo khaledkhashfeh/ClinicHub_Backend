@@ -50,4 +50,38 @@ class MedicalCenter extends Model
     {
         return $this->morphMany(Secretary::class, 'entity');
     }
+
+    /**
+     * العلاقة: الاشتراك الخاص بالمركز الطبي
+     */
+    public function subscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')->latest();
+    }
+
+    /**
+     * العلاقة: كل الاشتراكات (تاريخ الاشتراكات)
+     */
+    public function subscriptions()
+    {
+        return $this->morphMany(Subscription::class, 'subscribable');
+    }
+
+    /**
+     * Method: الحصول على الاشتراك النشط
+     */
+    public function activeSubscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')
+            ->active()
+            ->with('plan.features');
+    }
+
+    /**
+     * Method: هل لدى المركز اشتراك نشط؟
+     */
+    public function hasActiveSubscription()
+    {
+        return $this->activeSubscription()->exists();
+    }
 }

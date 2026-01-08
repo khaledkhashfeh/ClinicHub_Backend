@@ -37,8 +37,8 @@ return [
 
     'evolution' => [
         'url' => env('EVOLUTION_BASE_URL'),
-        'key' => env('EVOLUTION_API_KEY'),
-        'instance' => env('EVOLUTION_INSTANCE'),
+    'key' => env('EVOLUTION_API_KEY'),
+    'instance' => env('EVOLUTION_INSTANCE'),
     ],
 
 ];

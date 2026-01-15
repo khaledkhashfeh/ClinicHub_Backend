@@ -14,3 +14,12 @@ composer.lock
 .DS_Store
 Thumbs.db
 *.all.php
+.git
+node_modules
+vendor
+storage
+.env
+docker-compose.override.yml
+.DS_Store
+*.log
+tests

@@ -20,7 +20,7 @@ services:
       - DB_PASSWORD=mohammad123
       - SESSION_DRIVER=file
     volumes:
-      - .:/var/www/html
+      - .:/var/www/
     depends_on:
       - db
 

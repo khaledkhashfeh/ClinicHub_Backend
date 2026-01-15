@@ -18,14 +18,22 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 
 WORKDIR /var/www
 
-# Copy entire project first to ensure all files are available
-COPY . .
+# Copy composer files first for better caching
+COPY composer.json composer.lock ./
 
 # Install dependencies but skip scripts initially
 RUN composer install --ignore-platform-reqs --no-scripts --no-autoloader --no-interaction --optimize-autoloader
 
-# Run scripts with artisan file available
+# Copy entire project
+COPY . .
+
+# Run package discovery and dump autoloader
 RUN composer dump-autoload --ignore-platform-reqs
+
+# Publish L5-Swagger assets if the package is installed
+RUN if [ -d "vendor/darkaonline/l5-swagger" ]; then \
+        php artisan vendor:publish --provider="L5Swagger\L5SwaggerServiceProvider" --force; \
+    fi
 
 # Stage 2: Final Image
 FROM php:8.4-cli
@@ -63,6 +71,9 @@ RUN mkdir -p storage/logs storage/framework/sessions storage/framework/views sto
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Copy the artisan command before creating the startup script
+COPY --from=composer /var/www/artisan ./artisan
+
 # Create startup script
 RUN echo '#!/bin/bash\n\
     # Fix directory permissions\n\
@@ -70,6 +81,9 @@ RUN echo '#!/bin/bash\n\
     chown -R www-data:www-data storage bootstrap/cache\n\
     find storage bootstrap/cache -type d -exec chmod 775 {} \\;\n\
     find storage bootstrap/cache -type f -exec chmod 664 {} \\;\n\
+    \n\
+    # Run package discovery to ensure all packages are properly loaded\n\
+    php artisan package:discover --ansi\n\
     \n\
     # Wait for database to be ready before running migrations\n\
     until nc -z db 5432; do\n\

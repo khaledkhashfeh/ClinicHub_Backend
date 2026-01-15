@@ -19,7 +19,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 WORKDIR /var/www
 
 # Copy composer files first for better caching
-COPY composer.json composer.lock ./
+COPY composer.json ./
 
 # Install dependencies but skip scripts initially
 RUN composer install --ignore-platform-reqs --no-scripts --no-autoloader --no-interaction --optimize-autoloader

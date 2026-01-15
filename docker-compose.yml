@@ -21,6 +21,7 @@ services:
       - SESSION_DRIVER=file
     volumes:
       - .:/var/www/
+      - vendor:/var/www/vendor
     depends_on:
       - db
 

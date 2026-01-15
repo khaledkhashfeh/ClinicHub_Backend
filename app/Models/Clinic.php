@@ -2,59 +2,89 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Clinic extends Model
+class Clinic extends Model implements JWTSubject, AuthenticatableContract
 {
-    use HasFactory;
+    use Authenticatable, HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'medical_center_id',
-        'governorate_id',
-        'city_id',
-        'name',
-        'address',
+        'clinic_name',
         'phone',
         'email',
+        'specialization_id',
+        'governorate_id',
+        'city_id',
+        'district_id',
+        'address',
+        'detailed_address',
         'floor',
         'room_number',
+        'consultation_fee',
+        'description',
+        'username',
+        'password',
+        'main_image',
+        'working_hours',
+        'latitude',
+        'longitude',
         'status',
+        'otp_code',
+        'otp_expires_at',
+        'phone_verified_at',
     ];
 
     protected $casts = [
-        'status' => 'string',
+        'consultation_fee' => 'decimal:2',
+        'working_hours' => 'array',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     // Relations
-    public function user()
+    public function specialization(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Specialization::class);
     }
 
-    public function governorate()
+    public function governorate(): BelongsTo
     {
         return $this->belongsTo(Governorate::class);
     }
 
-    public function city()
+    public function district(): BelongsTo
     {
-        return $this->belongsTo(City::class);
+        return $this->belongsTo(District::class);
     }
 
-    public function medicalCenter()
+    public function services(): HasMany
     {
-        return $this->belongsTo(MedicalCenter::class);
+        return $this->hasMany(ClinicService::class);
     }
 
-    public function doctors()
+    public function galleryImages(): HasMany
     {
-        return $this->belongsToMany(Doctor::class)
-                    ->withTimestamps()
-                    ->withPivot('is_primary');
+        return $this->hasMany(ClinicGalleryImage::class);
     }
 
+    // Mutator for password hashing
+    public function setPasswordAttribute($value)
+    {
+            if ($value) {
+            $this->attributes['password'] = bcrypt($value);
+        }
+    }
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
@@ -67,7 +97,41 @@ class Clinic extends Model
 
     public function secretaries()
     {
-        return $this->hasMany(Secretary::class);
+        return $this->morphMany(Secretary::class, 'entity');
+    }
+
+    /**
+     * العلاقة: الاشتراك الخاص بالعيادة
+     */
+    public function subscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')->latest();
+    }
+
+    /**
+     * العلاقة: كل الاشتراكات (تاريخ الاشتراكات)
+     */
+    public function subscriptions()
+    {
+        return $this->morphMany(Subscription::class, 'subscribable');
+    }
+
+    /**
+     * Method: الحصول على الاشتراك النشط
+     */
+    public function activeSubscription()
+    {
+        return $this->morphOne(Subscription::class, 'subscribable')
+            ->active()
+            ->with('plan.features');
+    }
+
+    /**
+     * Method: هل لدى العيادة اشتراك نشط؟
+     */
+    public function hasActiveSubscription()
+    {
+        return $this->activeSubscription()->exists();
     }
 
     public function offers()
@@ -75,6 +139,16 @@ class Clinic extends Model
         return $this->hasMany(Offer::class);
     }
 
+    // JWT Methods
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
     public function reviews()
     {
         return $this->hasMany(Review::class);

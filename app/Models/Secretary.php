@@ -11,8 +11,9 @@ class Secretary extends Model
 
     protected $fillable = [
         'user_id',
-        'clinic_id',
-        'doctor_id',
+        'username',
+        'entity_type',
+        'entity_id',
         'status',
     ];
 
@@ -26,13 +27,8 @@ class Secretary extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function clinic()
+    public function entity() 
     {
-        return $this->belongsTo(Clinic::class);
-    }
-
-    public function doctor()
-    {
-        return $this->belongsTo(Doctor::class);
+        return $this->morphTo();
     }
 }

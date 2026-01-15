@@ -7,11 +7,12 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Hash;
 
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable, HasRoles, JWTSubject;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'first_name',
@@ -23,6 +24,10 @@ class User extends Authenticatable implements JWTSubject
         'birth_date',
         'profile_photo_url',
         'status',
+        'otp_code',
+        'otp_expires_at',
+        'otp_attempts',
+        'otp_last_sent_at',
     ];
 
     protected $hidden = [
@@ -32,6 +37,8 @@ class User extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'birth_date' => 'date',
+        'otp_expires_at' => 'datetime',
+        'otp_last_sent_at' => 'datetime',
     ];
 
     protected $appends = ['full_name'];
@@ -46,7 +53,14 @@ class User extends Authenticatable implements JWTSubject
     public function setPasswordAttribute($value)
     {
         if ($value) {
-            $this->attributes['password'] = bcrypt($value);
+            // Check if the value is already hashed (starts with $2y$, $2a$, or $2x$ which are bcrypt formats)
+            if (preg_match('/^\$(2[ayx]|2)\$/', $value)) {
+                // Value is already hashed, store as is
+                $this->attributes['password'] = $value;
+            } else {
+                // Value is plain text, hash it
+                $this->attributes['password'] = bcrypt($value);
+            }
         }
     }
 
@@ -66,11 +80,6 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(MedicalCenter::class);
     }
 
-    public function clinic()
-    {
-        return $this->hasOne(Clinic::class);
-    }
-
     public function secretary()
     {
         return $this->hasOne(Secretary::class);
@@ -86,5 +95,5 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    
+
 }

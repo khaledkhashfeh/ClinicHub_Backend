@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Doctor extends Model
 {
@@ -11,61 +14,71 @@ class Doctor extends Model
 
     protected $fillable = [
         'user_id',
+        'username',
+        'license_number',
         'specialty',
         'consultation_price',
-        'city',
+        'practicing_profession_date',
+        'governorate_id',
+        'city_id',
+        'district_id',
         'area',
         'address_details',
         'bio',
+        'distinguished_specialties',
+        'facebook_link',
+        'instagram_link',
         'status',
-        'has_secretary_service',
+        'phone_verified',
+        'has_secretary_service'
     ];
 
     protected $casts = [
-        'consultation_price' => 'float',
+        'consultation_price' => 'decimal:2',
         'has_secretary_service' => 'boolean',
+        'phone_verified' => 'boolean',
+        'practicing_profession_date' => 'integer'
     ];
 
-    // Relations
-    public function user()
+    protected $appends = ['full_name', 'is_approved'];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function clinics()
+    public function specializations(): BelongsToMany
     {
-        return $this->belongsToMany(Clinic::class)
-                    ->withTimestamps()
-                    ->withPivot('is_primary');
+        return $this->belongsToMany(Specialization::class, 'doctor_specialization');
     }
 
-    public function scheduleSlots()
+    public function certifications(): HasMany
     {
-        return $this->hasMany(ScheduleSlot::class);
+        return $this->hasMany(Certification::class);
     }
 
-    public function appointments()
+    public function governorate(): BelongsTo
     {
-        return $this->hasMany(Appointment::class);
+        return $this->belongsTo(Governorate::class);
     }
 
-    public function visitRecords()
+    public function district(): BelongsTo
     {
-        return $this->hasMany(VisitRecord::class);
+        return $this->belongsTo(District::class);
     }
 
-    public function offers()
+    public function city(): BelongsTo
     {
-        return $this->hasMany(Offer::class);
+        return $this->belongsTo(City::class);
     }
 
-    public function reviews()
+    public function getFullNameAttribute(): string
     {
-        return $this->hasMany(Review::class);
+        return $this->user->first_name . ' ' . $this->user->last_name;
     }
 
-    public function secretaries()
+    public function getIsApprovedAttribute(): bool
     {
-        return $this->hasMany(Secretary::class);
+        return $this->status === 'approved';
     }
 }

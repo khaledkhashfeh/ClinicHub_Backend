@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SecretaryCreateRequest;
-use App\Http\Requests\SecretaryEditRequest;
+use App\Http\Requests\Secretary\SecretaryCreateRequest;
+use App\Http\Requests\Secretary\SecretaryEditRequest;
 use App\Models\Secretary;
 use App\Models\User;
 use App\Services\UserService;

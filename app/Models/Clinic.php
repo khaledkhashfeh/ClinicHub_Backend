@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -11,7 +12,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class Clinic extends Model implements JWTSubject, AuthenticatableContract
 {
-    use Authenticatable;
+    use Authenticatable, HasFactory;
+
     protected $fillable = [
         'clinic_name',
         'phone',

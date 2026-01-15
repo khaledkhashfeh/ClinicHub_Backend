@@ -41,4 +41,8 @@ return [
     'instance' => env('EVOLUTION_INSTANCE'),
     ],
 
+    'firebase' => [
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+    ],
+
 ];

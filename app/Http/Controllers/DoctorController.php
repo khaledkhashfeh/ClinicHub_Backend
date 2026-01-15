@@ -97,6 +97,21 @@ class DoctorController extends Controller
     {
         $request->validated();
 
+        // Check if there's an authenticated clinic user by attempting to authenticate with clinic guard
+        $isClinic = false;
+
+        try {
+            // Attempt to get the authenticated clinic using the clinic guard
+            $clinic = auth()->guard('clinic')->user();
+
+            if ($clinic) {
+                $isClinic = true;
+            }
+        } catch (\Exception $e) {
+            // If there's an exception during authentication, assume no clinic is authenticated
+            $isClinic = false;
+        }
+
         // Create user first - using model to ensure mutator is called
         $user = new User();
         $user->first_name = $request->first_name;
@@ -106,10 +121,13 @@ class DoctorController extends Controller
         $user->password = $request->password; // Don't hash here - let the mutator handle it
         $user->birth_date = $request->date_of_birth; // Map date_of_birth from request to birth_date in model
         $user->gender = $request->gender; // Save gender from request
-        $user->status = 'approved'; // Users created via doctor registration are auto-approved
+        $user->status = 'approved'; // Users created via doctor registration start as approved
         $user->save();
 
-        // Create doctor profile with pending status
+        // Determine doctor status based on who is registering
+        $doctorStatus = $isClinic ? 'approved' : 'pending';
+
+        // Create doctor profile with appropriate status
         $doctor = Doctor::create([
             'user_id' => $user->id,
             'username' => $request->username,
@@ -120,7 +138,7 @@ class DoctorController extends Controller
             'distinguished_specialties' => $request->distinguished_specialties,
             'facebook_link' => $request->facebook_link,
             'instagram_link' => $request->instagram_link,
-            'status' => 'approved', // New registrations start as pending
+            'status' => $doctorStatus, // Set to approved if registered by clinic, pending otherwise
             'phone_verified' => true
         ]);
 
@@ -148,10 +166,15 @@ class DoctorController extends Controller
         //     \Log::error('Failed to send OTP to doctor: ' . $request->phone . ', Error: ' . $otpResponse['message']);
         // }
 
-        // Return accepted response (registration request submitted for review)
+        // Prepare response message based on registration source
+        $message = $isClinic
+            ? 'تم تسجيل الطبيب بنجاح مع حالة معتمد نظراً لتسجيله من قبل عيادة.'
+            : 'تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة.';
+
         $response = [
             'success' => true,
-            'message' => 'تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة.'
+            'message' => $message,
+            'doctor_status' => $doctorStatus
         ];
 
         // If OTP was sent successfully, include a success message about verification

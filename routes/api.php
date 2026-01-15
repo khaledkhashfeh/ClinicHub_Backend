@@ -12,3 +12,4 @@ require __DIR__ . '/api/clinics.php';
 require __DIR__ . '/api/subscriptions.php';
 require __DIR__ . '/api/admin-management.php';
 require __DIR__ . '/api/notification.php';
+require __DIR__ . '/api/invitations.php';

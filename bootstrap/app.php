@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'subscription' => \App\Http\Middleware\CheckSubscription::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

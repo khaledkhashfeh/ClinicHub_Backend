@@ -33,6 +33,7 @@ RUN composer dump-autoload --ignore-platform-reqs
 # Publish L5-Swagger assets if the package is installed
 RUN if [ -d "vendor/darkaonline/l5-swagger" ]; then \
         php artisan vendor:publish --provider="L5Swagger\L5SwaggerServiceProvider" --force; \
+        php artisan vendor:publish --provider="L5Swagger\L5SwaggerServiceProvider" --tag=swagger-ui --force; \
     fi
 
 # Stage 2: Final Image

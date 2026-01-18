@@ -9,7 +9,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/send-otp', [PatientController::class, 'sendOtp']);
     Route::post('/verify-otp', [PatientController::class, 'verifyOtp']);
     Route::post('/resend-otp', [PatientController::class, 'resendOtp']);
-    Route::post('/register', [PatientController::class, 'register']);
+    Route::post('/register', [PatientController::class, 'register'])->middleware('auth:api'); // يحتاج token من verify-otp
 });
 
 // Protected Patient Routes

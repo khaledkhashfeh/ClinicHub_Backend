@@ -173,6 +173,7 @@ class PatientController extends Controller
             $user->first_name = '';
             $user->last_name = '';
             $user->password = Hash::make(str()->random(32)); // كلمة مرور مؤقتة
+            $user->gender = 'male'; // قيمة افتراضية (سيتم تحديثها عند التسجيل)
             $user->status = 'pending';
         }
         
@@ -281,27 +282,41 @@ class PatientController extends Controller
         $user->otp_code = null;
         $user->otp_expires_at = null;
         $user->otp_attempts = 0;
-        $user->phone_verified_at = now();
         $user->save();
 
-        // إذا كان مسجلاً، تسجيل الدخول وإرجاع Token
-        if ($isRegistered) {
-            $token = JWTAuth::fromUser($user);
+        // إنشاء Token دائماً (سواء كان مسجلاً أم لا)
+        $token = JWTAuth::fromUser($user);
 
+        // إعداد البيانات للاستجابة
+        $responseData = [
+            'patient_id' => $patient ? $patient->id : null,
+            'first_name' => $user->first_name ?: null,
+            'last_name' => $user->last_name ?: null,
+            'phone' => $user->phone,
+        ];
+
+        // إذا كان مسجلاً
+        if ($isRegistered) {
+            $message = 'تم التحقق بنجاح، مرحباً بعودتك' . ($user->first_name ? ' يا ' . $user->first_name : '') . '.';
+            
             return response()->json([
                 'success' => true,
                 'is_registered' => true,
-                'message' => 'تم التحقق بنجاح. تسجيل دخول.',
+                'message' => $message,
                 'token' => $token,
-                'patient_id' => $patient->id,
+                'role' => 'Patient',
+                'data' => $responseData,
             ], 200);
         }
 
-        // إذا لم يكن مسجلاً، إرجاع رسالة لإكمال التسجيل
+        // إذا لم يكن مسجلاً
         return response()->json([
             'success' => true,
             'is_registered' => false,
-            'message' => 'تم التحقق بنجاح. يرجى إكمال بيانات التسجيل.',
+            'message' => 'تم التحقق من الرقم، يرجى إكمال إنشاء حسابك.',
+            'token' => $token,
+            'role' => 'Patient',
+            'data' => $responseData,
         ], 200);
     }
 
@@ -390,33 +405,25 @@ class PatientController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'full_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/', 'exists:users,phone'],
-            'governorate' => ['required', 'integer', 'exists:governorates,id'],
-            'district' => ['required', 'integer', 'exists:cities,id'],
+            'governorate_id' => ['required', 'integer', 'exists:governorates,id'],
+            'district_id' => ['required', 'integer', 'exists:cities,id'],
             'gender' => ['required', 'in:male,female'],
             'date_of_birth' => ['required', 'date', 'before:today'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'email' => ['nullable', 'email', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'occupation' => ['nullable', 'string', 'max:255'],
-            'blood_type' => ['nullable', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'has_chronic_diseases' => ['nullable', 'boolean'],
-            'chronic_diseases_details' => ['required_if:has_chronic_diseases,true', 'nullable', 'string', 'max:1000'],
         ], [
-            'full_name.required' => 'الاسم الكامل مطلوب.',
+            'first_name.required' => 'الاسم الأول مطلوب.',
+            'last_name.required' => 'الاسم الأخير مطلوب.',
             'phone.required' => 'رقم الهاتف مطلوب.',
             'phone.exists' => 'لم يتم التحقق من رقم الهاتف.',
-            'governorate.required' => 'المحافظة مطلوبة.',
-            'governorate.exists' => 'المحافظة المحددة غير صحيحة.',
-            'district.required' => 'المنطقة مطلوبة.',
-            'district.exists' => 'المنطقة المحددة غير صحيحة.',
+            'governorate_id.required' => 'المحافظة مطلوبة.',
+            'governorate_id.exists' => 'المحافظة المحددة غير صحيحة.',
+            'district_id.required' => 'المنطقة مطلوبة.',
+            'district_id.exists' => 'المنطقة المحددة غير صحيحة.',
             'gender.required' => 'الجنس مطلوب.',
             'date_of_birth.required' => 'تاريخ الميلاد مطلوب.',
-            'password.required' => 'كلمة المرور مطلوبة.',
-            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 8 أحرف.',
-            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
-            'chronic_diseases_details.required_if' => 'تفاصيل الأمراض المزمنة مطلوبة عند تحديد وجود أمراض مزمنة.',
         ]);
 
         if ($validator->fails()) {
@@ -425,6 +432,16 @@ class PatientController extends Controller
                 'message' => 'البيانات غير صحيحة.',
                 'errors' => $validator->errors(),
             ], 400);
+        }
+
+        // التحقق من Token (مطلوب - من verify-otp)
+        $authenticatedUser = auth('api')->user();
+
+        if (!$authenticatedUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'يجب التحقق من رقم الهاتف أولاً.',
+            ], 401);
         }
 
         // البحث عن المستخدم
@@ -437,57 +454,31 @@ class PatientController extends Controller
             ], 400);
         }
 
-        // التحقق من أنه لم يسجل من قبل (يجب أن يكون phone_verified_at موجود لكن لا يوجد patient أو password مؤقت)
-        if ($user->patient) {
+        // التحقق من أن Token يخص نفس المستخدم
+        if ($authenticatedUser->id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token غير صحيح لهذا المستخدم.',
+            ], 403);
+        }
+
+        // التحقق من أنه لم يسجل من قبل (يجب أن يكون phone verified لكن لا يوجد patient أو first_name/last_name فارغين)
+        if ($user->patient && !empty($user->first_name) && !empty($user->last_name)) {
             return response()->json([
                 'success' => false,
                 'message' => 'هذا الحساب مسجل مسبقاً.',
             ], 400);
         }
 
-        // تقسيم الاسم الكامل
-        $nameParts = explode(' ', trim($request->input('full_name')), 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
-
-        // التحقق من أن البريد الإلكتروني غير مستخدم من قبل مستخدم آخر
-        if ($request->filled('email')) {
-            $existingUser = User::where('email', $request->input('email'))
-                ->where('id', '!=', $user->id)
-                ->first();
-            
-            if ($existingUser) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'البريد الإلكتروني مستخدم مسبقاً.',
-                    'errors' => ['email' => ['البريد الإلكتروني مستخدم مسبقاً.']],
-                ], 400);
-            }
-        }
-
         // تحديث بيانات المستخدم
-        $user->first_name = $firstName;
-        $user->last_name = $lastName;
-        $user->email = $request->input('email');
+        $user->first_name = $request->input('first_name');
+        $user->last_name = $request->input('last_name');
         $user->gender = $request->input('gender');
         $user->birth_date = $request->input('date_of_birth');
-        // استخدام الـ mutator في User model (لا نستخدم Hash::make لأن الـ mutator يقوم بالـ hash تلقائياً)
-        $user->password = $request->input('password');
+        // لا نغير password - تم إنشاؤه عند send-otp
         $user->status = 'approved';
         
-        try {
-            $user->save();
-        } catch (\Illuminate\Database\QueryException $e) {
-            // معالجة خطأ duplicate key
-            if ($e->getCode() == '23505') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'البريد الإلكتروني مستخدم مسبقاً.',
-                    'errors' => ['email' => ['البريد الإلكتروني مستخدم مسبقاً.']],
-                ], 400);
-            }
-            throw $e;
-        }
+        $user->save();
 
         // رفع صورة الملف الشخصي إن وجدت
         if ($request->hasFile('image')) {
@@ -501,9 +492,8 @@ class PatientController extends Controller
         $patient = Patient::updateOrCreate(
             ['user_id' => $user->id],
             [
-                'governorate_id' => $request->input('governorate'),
-                'city_id' => $request->input('district'),
-                'occupation' => $request->input('occupation'),
+                'governorate_id' => $request->input('governorate_id'),
+                'city_id' => $request->input('district_id'),
             ]
         );
 
@@ -518,27 +508,18 @@ class PatientController extends Controller
             $user->assignRole($role);
         }
 
-        // إنشاء أو تحديث الملف الطبي
-        $medicalFile = MedicalFile::updateOrCreate(
-            ['patient_id' => $patient->id],
-            [
-                'blood_type' => $request->input('blood_type'),
-                'has_chronic_diseases' => $request->boolean('has_chronic_diseases', false),
-                'past_medical_history' => $request->input('chronic_diseases_details'),
-            ]
-        );
-
         // تسجيل الدخول وإنشاء Token
         $token = JWTAuth::fromUser($user);
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء الحساب بنجاح وتسجيل الدخول.',
+            'message' => 'تم إنشاء الحساب بنجاح.',
             'token' => $token,
             'role' => 'Patient',
             'data' => [
                 'patient_id' => $patient->id,
-                'full_name' => $user->full_name,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'phone' => $user->phone,
             ],
         ], 201);
@@ -564,26 +545,23 @@ class PatientController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'full_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'first_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255', 'unique:users,email,' . $patient->user_id],
-            'governorate' => ['sometimes', 'nullable', 'integer', 'exists:governorates,id'],
-            'district' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
+            'governorate_id' => ['sometimes', 'nullable', 'integer', 'exists:governorates,id'],
+            'district_id' => ['sometimes', 'nullable', 'integer', 'exists:cities,id'],
             'gender' => ['sometimes', 'nullable', 'in:male,female'],
             'date_of_birth' => ['sometimes', 'nullable', 'date', 'before:today'],
             'image' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'occupation' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'blood_type' => ['sometimes', 'nullable', 'string', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'has_chronic_diseases' => ['sometimes', 'nullable', 'boolean'],
-            'chronic_diseases_details' => ['required_if:has_chronic_diseases,true', 'nullable', 'string', 'max:1000'],
         ], [
-            'full_name.required' => 'الاسم الكامل مطلوب.',
+            'first_name.required' => 'الاسم الأول مطلوب.',
+            'last_name.required' => 'الاسم الأخير مطلوب.',
             'email.email' => 'البريد الإلكتروني غير صحيح.',
             'email.unique' => 'البريد الإلكتروني مستخدم مسبقاً.',
-            'governorate.exists' => 'المحافظة المحددة غير صحيحة.',
-            'district.exists' => 'المنطقة المحددة غير صحيحة.',
+            'governorate_id.exists' => 'المحافظة المحددة غير صحيحة.',
+            'district_id.exists' => 'المنطقة المحددة غير صحيحة.',
             'gender.in' => 'الجنس غير صحيح.',
             'date_of_birth.date' => 'تاريخ الميلاد غير صحيح.',
-            'chronic_diseases_details.required_if' => 'تفاصيل الأمراض المزمنة مطلوبة عند تحديد وجود أمراض مزمنة.',
         ]);
 
         if ($validator->fails()) {
@@ -605,11 +583,15 @@ class PatientController extends Controller
 
             // تحديث بيانات المستخدم
             // استخدام input() مباشرة للتحقق من multipart/form-data
-            $fullName = $request->input('full_name');
-            if ($fullName !== null && trim($fullName) !== '') {
-                $nameParts = explode(' ', trim($fullName), 2);
-                $userData['first_name'] = $nameParts[0];
-                $userData['last_name'] = $nameParts[1] ?? '';
+            $firstName = $request->input('first_name');
+            if ($firstName !== null && trim($firstName) !== '') {
+                $userData['first_name'] = trim($firstName);
+                $hasUpdates = true;
+            }
+
+            $lastName = $request->input('last_name');
+            if ($lastName !== null && trim($lastName) !== '') {
+                $userData['last_name'] = trim($lastName);
                 $hasUpdates = true;
             }
 
@@ -651,21 +633,15 @@ class PatientController extends Controller
             }
 
             // تحديث بيانات المريض
-            $governorate = $request->input('governorate');
-            if ($governorate !== null) {
-                $patientData['governorate_id'] = !empty($governorate) ? (int)$governorate : null;
+            $governorateId = $request->input('governorate_id');
+            if ($governorateId !== null) {
+                $patientData['governorate_id'] = !empty($governorateId) ? (int)$governorateId : null;
                 $hasUpdates = true;
             }
 
-            $district = $request->input('district');
-            if ($district !== null) {
-                $patientData['city_id'] = !empty($district) ? (int)$district : null;
-                $hasUpdates = true;
-            }
-
-            $occupation = $request->input('occupation');
-            if ($occupation !== null && $occupation !== '') {
-                $patientData['occupation'] = $occupation;
+            $districtId = $request->input('district_id');
+            if ($districtId !== null) {
+                $patientData['city_id'] = !empty($districtId) ? (int)$districtId : null;
                 $hasUpdates = true;
             }
 
@@ -735,23 +711,12 @@ class PatientController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'تم تحديث بيانات المريض بنجاح.',
+                'message' => 'تم تحديث البيانات بنجاح.',
                 'data' => [
                     'id' => $patient->id,
-                    'full_name' => $patient->user->full_name,
                     'first_name' => $patient->user->first_name,
                     'last_name' => $patient->user->last_name,
                     'phone' => $patient->user->phone,
-                    'email' => $patient->user->email,
-                    'gender' => $patient->user->gender,
-                    'date_of_birth' => $patient->user->birth_date?->format('Y-m-d'),
-                    'profile_photo_url' => $patient->user->profile_photo_url,
-                    'governorate_id' => $patient->governorate_id,
-                    'city_id' => $patient->city_id,
-                    'occupation' => $patient->occupation,
-                    'blood_type' => $patient->medicalFile?->blood_type,
-                    'has_chronic_diseases' => $patient->medicalFile?->has_chronic_diseases,
-                    'chronic_diseases_details' => $patient->medicalFile?->past_medical_history,
                 ],
             ], 200);
 

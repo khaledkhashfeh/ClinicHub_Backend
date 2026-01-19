@@ -48,6 +48,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'clinics',
         ],
+        'medical_center' => [
+            'driver' => 'jwt',
+            'provider' => 'medical_centers',
+        ],
     ],
 
     /*
@@ -76,6 +80,11 @@ return [
         'clinics' => [
             'driver' => 'eloquent',
             'model' => App\Models\Clinic::class,
+        ],
+
+        'medical_centers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\MedicalCenter::class,
         ],
 
         // 'users' => [

@@ -285,7 +285,7 @@ class PatientController extends Controller
         $user->save();
 
         // إنشاء Token دائماً (سواء كان مسجلاً أم لا)
-        $token = JWTAuth::fromUser($user);
+            $token = JWTAuth::fromUser($user);
 
         // إعداد البيانات للاستجابة
         $responseData = [
@@ -298,7 +298,7 @@ class PatientController extends Controller
         // إذا كان مسجلاً
         if ($isRegistered) {
             $message = 'تم التحقق بنجاح، مرحباً بعودتك' . ($user->first_name ? ' يا ' . $user->first_name : '') . '.';
-            
+
             return response()->json([
                 'success' => true,
                 'is_registered' => true,

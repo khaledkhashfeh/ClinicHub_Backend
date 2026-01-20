@@ -4,16 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class MedicalCenter extends Model
+class MedicalCenter extends Model implements JWTSubject, AuthenticatableContract
 {
-    use HasFactory;
+    use HasFactory, Authenticatable;
 
     protected $fillable = [
         'user_id',
         'governorate_id',
         'city_id',
-        'name',
+        'center_name',
         'address',
         'phone',
         'email',
@@ -23,7 +26,48 @@ class MedicalCenter extends Model
         'description',
         'logo_url',
         'status',
+        'username',
+        'password',
+        'clinic_count',
+        'latitude',
+        'longitude',
+        'facebook_link',
+        'instagram_link',
+        'website_link',
+        'working_hours',
     ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+        'clinic_count' => 'integer',
+        'working_hours' => 'array',
+    ];
+
+    // JWT Methods
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    // Mutator for password hashing
+    public function setPasswordAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['password'] = bcrypt($value);
+        }
+    }
+
 
     // Relations
     public function user()
@@ -83,5 +127,21 @@ class MedicalCenter extends Model
     public function hasActiveSubscription()
     {
         return $this->activeSubscription()->exists();
+    }
+
+    /**
+     * العلاقة: خدمات المركز الطبي
+     */
+    public function services()
+    {
+        return $this->hasMany(MedicalCenterService::class);
+    }
+
+    /**
+     * العلاقة: صور المعرض للمركز الطبي
+     */
+    public function galleryImages()
+    {
+        return $this->hasMany(MedicalCenterGalleryImage::class);
     }
 }

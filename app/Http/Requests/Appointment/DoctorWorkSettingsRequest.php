@@ -26,7 +26,7 @@ class DoctorWorkSettingsRequest extends FormRequest
         return [
             'clinic_id' => 'required|exists:clinics,id',
             'doctor_id' => 'required|exists:doctors,id',
-            'method_id' => 'required|exists:methods,id',
+            'method_id' => 'required|integer|exists:methods,id|in:1,2,3',
             'appointment_period' => 'required|integer|min:15|max:120',
             'queue' => 'required|boolean',
             'queue_number' => 'required_if:queue,true|nullable|integer|min:1'
@@ -45,6 +45,7 @@ class DoctorWorkSettingsRequest extends FormRequest
             'doctor_id.exists' => 'The specified doctor does not exist',
             'method_id.required' => 'Method ID is required',
             'method_id.exists' => 'The specified method does not exist',
+            'method_id.in' => 'Method ID must be one of: 1 (Auto), 2 (Manual), 3 (Order)',
             'appointment_period.required' => 'Appointment period is required',
             'appointment_period.integer' => 'Appointment period must be a number',
             'appointment_period.min' => 'Appointment period must be at least 15 minutes',

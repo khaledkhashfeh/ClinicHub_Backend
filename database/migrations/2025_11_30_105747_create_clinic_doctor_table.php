@@ -26,9 +26,11 @@ return new class extends Migration
 
             $table->foreignId('method_id')
                   ->constrained('methods')
-                  ->nullOnDelete();
-            $table->integer('appointment_period');
-            $table->boolean('queue')->default(false);
+                  ->nullOnDelete()
+                  ->nullable();
+
+            $table->integer('appointment_period')->nullable();
+            $table->boolean('queue')->default(false)->nullable();
             $table->integer('queue_number')->nullable();
     
             $table->timestamps();

@@ -23,6 +23,13 @@ return new class extends Migration
                   ->cascadeOnDelete();
     
             $table->boolean('is_primary')->default(false);
+
+            $table->foreignId('method_id')
+                  ->constrained('methods')
+                  ->nullOnDelete();
+            $table->integer('appointment_period');
+            $table->boolean('queue')->default(false);
+            $table->integer('queue_number')->nullable();
     
             $table->timestamps();
     

@@ -8,20 +8,28 @@ use App\Http\Requests\Clinic\UpdateClinicRequest;
 use App\Models\Clinic;
 use App\Models\User;
 use App\Services\OtpService;
+use App\Services\FirebaseService;
+use App\Services\EvolutionApiService;
+use App\Helpers\PhoneHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class ClinicController extends Controller
 {
     private $otpService;
+    private $firebaseService;
+    private $evolutionApiService;
 
-    public function __construct(OtpService $otpService)
+    public function __construct(OtpService $otpService, FirebaseService $firebaseService, EvolutionApiService $evolutionApiService)
     {
         $this->otpService = $otpService;
+        $this->firebaseService = $firebaseService;
+        $this->evolutionApiService = $evolutionApiService;
     }
 
     // Authentication Methods
@@ -152,9 +160,15 @@ class ClinicController extends Controller
             ]);
         }
 
+        // Send notification to admin users about the new clinic registration
+        $this->notifyAdminsOfNewClinic($clinic);
+
+        // Send WhatsApp message to the clinic
+        $this->sendWhatsAppConfirmationToClinic($clinic, $defaultPlan);
+
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء العيادة بنجاح.',
+            'message' => 'تم استلام طلب تسجيل العيادة بنجاح. في انتظار الموافقة من قبل الإدارة.',
             'data' => [
                 'id' => $clinic->id,
                 'clinic_name' => $clinic->clinic_name,
@@ -379,5 +393,74 @@ class ClinicController extends Controller
             'success' => true,
             'data' => $clinic
         ]);
+    }
+
+    /**
+     * Notify admin users about a new clinic registration
+     */
+    private function notifyAdminsOfNewClinic($clinic)
+    {
+        try {
+            // Get all admin users
+            $adminRole = Role::findByName('admin');
+            $adminUsers = $adminRole ? $adminRole->users : collect();
+
+            foreach ($adminUsers as $admin) {
+                // Get admin's FCM token
+                $token = \App\Models\UserFcmToken::where('user_id', $admin->id)->value('fcm_token');
+
+                if ($token) {
+                    // Send notification via Firebase
+                    $this->firebaseService->sendNotification(
+                        $token,
+                        'طلب تسجيل عيادة جديد',
+                        "تم استلام طلب تسجيل لعيادة جديدة: {$clinic->clinic_name}. الرجاء مراجعة لوحة التحكم للموافقة."
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the registration process
+            \Log::error('Failed to send notification to admins about new clinic registration: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send WhatsApp confirmation message to the clinic
+     */
+    private function sendWhatsAppConfirmationToClinic($clinic, $defaultPlan = null)
+    {
+        try {
+            // إرسال رسالة على الواتساب مع زر (same as medical center)
+            $formattedPhone = PhoneHelper::normalize($clinic->phone);
+            $message = "شكراً لتسجيلك في ClinicHub!\n\n";
+            $message .= "تم استلام طلب تسجيل العيادة ({$clinic->clinic_name}) بنجاح.\n";
+            $message .= "سيتم مراجعة البيانات والرد عليك قريباً.\n\n";
+            if ($defaultPlan) {
+                $message .= "الخطة المختارة: {$defaultPlan->name}\n";
+            }
+            $message .= "\nنتمنى لك تجربة ممتعة معنا! 🏥";
+
+            // رابط الزر (يمكن تعديله حسب الحاجة)
+            $buttonUrl = 'https://clinichub.space'; // الرابط المطلوب
+            $buttonText = "تسجيل الدخول"; // نص الزر
+
+            // إرسال الرسالة مع زر على الواتساب (لا نوقف العملية إذا فشل الإرسال)
+            $whatsappResponse = $this->evolutionApiService->sendMessageWithButton(
+                $formattedPhone,
+                $message,
+                $buttonText,
+                $buttonUrl
+            );
+            if (!$whatsappResponse['success']) {
+                \Log::warning('Failed to send WhatsApp message with button to clinic', [
+                    'phone' => $formattedPhone,
+                    'clinic_id' => $clinic->id,
+                    'error' => $whatsappResponse['message'] ?? 'Unknown error'
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Log the error but don't fail the registration process
+            \Log::error('Failed to send WhatsApp confirmation to clinic: ' . $e->getMessage());
+        }
     }
 }

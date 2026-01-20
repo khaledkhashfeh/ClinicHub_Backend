@@ -62,7 +62,10 @@ class ClinicController extends Controller
             'role' => 'Clinic',
             'clinic' => [
                 'id' => $clinic->id,
-                'clinic_name' => $clinic->clinic_name
+                'clinic_name' => $clinic->clinic_name,
+                'facebook_link' => $clinic->facebook_link,
+                'instagram_link' => $clinic->instagram_link,
+                'website_link' => $clinic->website_link
             ]
         ]);
     }
@@ -128,6 +131,27 @@ class ClinicController extends Controller
             }
         }
 
+        // Assign default subscription to the clinic
+        $defaultPlan = \App\Models\SubscriptionPlan::where('target_type', 'clinic')
+            ->where('is_active', true)
+            ->orderBy('price', 'asc') // Get the lowest priced plan (usually free trial)
+            ->first();
+
+        if ($defaultPlan) {
+            $startsAt = now();
+            $endsAt = $startsAt->copy()->addDays($defaultPlan->duration_days);
+
+            $subscription = \App\Models\Subscription::create([
+                'subscription_plan_id' => $defaultPlan->id,
+                'subscribable_type' => \App\Models\Clinic::class,
+                'subscribable_id' => $clinic->id,
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+                'status' => 'active', // Default to active for new clinics
+                'notes' => 'Subscription assigned during clinic registration'
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'تم إنشاء العيادة بنجاح.',
@@ -136,6 +160,7 @@ class ClinicController extends Controller
                 'clinic_name' => $clinic->clinic_name,
                 'phone' => $clinic->phone,
                 'consultation_fee' => $clinic->consultation_fee,
+                'subscription_plan_id' => $defaultPlan ? $defaultPlan->id : null, // Return the plan ID
                 'services' => $clinic->services->map(function ($service) {
                     return [
                         'name' => $service->name,

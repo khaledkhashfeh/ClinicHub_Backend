@@ -38,6 +38,9 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
         'otp_code',
         'otp_expires_at',
         'phone_verified_at',
+        'facebook_link',
+        'instagram_link',
+        'website_link',
     ];
 
     protected $casts = [

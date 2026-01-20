@@ -39,6 +39,9 @@ class ClinicApi
                             properties: [
                                 new OA\Property(property: "id", type: "integer", example: 1),
                                 new OA\Property(property: "clinic_name", type: "string", example: "Al-Rashid Clinic"),
+                                new OA\Property(property: "facebook_link", type: "string", example: "https://www.facebook.com/clinic", nullable: true),
+                                new OA\Property(property: "instagram_link", type: "string", example: "https://www.instagram.com/clinic", nullable: true),
+                                new OA\Property(property: "website_link", type: "string", example: "https://www.clinic.com", nullable: true),
                             ]
                         ),
                     ]
@@ -238,12 +241,32 @@ class ClinicApi
         ),
         responses: [
             new OA\Response(
-                response: 202,
-                description: "Registration request submitted successfully",
+                response: 201,
+                description: "Clinic registered successfully",
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: "success", type: "boolean", example: true),
-                        new OA\Property(property: "message", type: "string", example: "تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة."),
+                        new OA\Property(property: "message", type: "string", example: "تم إنشاء العيادة بنجاح."),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "clinic_name", type: "string", example: "عيادة الدكتور علي لطب الأسنان"),
+                                new OA\Property(property: "phone", type: "string", example: "0912345678"),
+                                new OA\Property(property: "consultation_fee", type: "number", example: 15000),
+                                new OA\Property(property: "subscription_plan_id", type: "integer", example: 1, description: "معرف خطة الاشتراك المعينة للعيادة"),
+                                new OA\Property(
+                                    property: "services",
+                                    type: "array",
+                                    items: new OA\Items(
+                                        properties: [
+                                            new OA\Property(property: "name", type: "string", example: "تنظيف الأسنان"),
+                                            new OA\Property(property: "price", type: "number", example: 25000),
+                                        ]
+                                    )
+                                ),
+                            ]
+                        ),
                     ]
                 )
             ),

@@ -9,6 +9,10 @@
         {
             "url": "http://localhost:8000",
             "description": "Development server"
+        },
+        {
+            "url": "http://72.62.80.169:8000",
+            "description": "Production server"
         }
     ],
     "paths": {
@@ -188,6 +192,21 @@
                                                 "clinic_name": {
                                                     "type": "string",
                                                     "example": "Al-Rashid Clinic"
+                                                },
+                                                "facebook_link": {
+                                                    "type": "string",
+                                                    "example": "https://www.facebook.com/clinic",
+                                                    "nullable": true
+                                                },
+                                                "instagram_link": {
+                                                    "type": "string",
+                                                    "example": "https://www.instagram.com/clinic",
+                                                    "nullable": true
+                                                },
+                                                "website_link": {
+                                                    "type": "string",
+                                                    "example": "https://www.clinic.com",
+                                                    "nullable": true
                                                 }
                                             },
                                             "type": "object"
@@ -532,8 +551,8 @@
                     }
                 },
                 "responses": {
-                    "202": {
-                        "description": "Registration request submitted successfully",
+                    "201": {
+                        "description": "Clinic registered successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -544,7 +563,49 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "تم استلام طلب إنشاء الحساب بنجاح. سيتم مراجعته والموافقة عليه من قبل الإدارة."
+                                            "example": "تم إنشاء العيادة بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "عيادة الدكتور علي لطب الأسنان"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0912345678"
+                                                },
+                                                "consultation_fee": {
+                                                    "type": "number",
+                                                    "example": 15000
+                                                },
+                                                "subscription_plan_id": {
+                                                    "description": "معرف خطة الاشتراك المعينة للعيادة",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "تنظيف الأسنان"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 25000
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"

@@ -13,6 +13,10 @@ use OpenApi\Attributes as OA;
     url: "http://localhost:8000",
     description: "Development server"
 )]
+#[OA\Server(
+    url: "http://72.62.80.169:8000",
+    description: "Production server"
+)]
 class ApiDocumentation
 {
     // This class is used to provide global OpenAPI documentation information

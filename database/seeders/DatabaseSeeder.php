@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             DoctorSeeder::class,
+            SubscriptionPlanSeeder::class,
         ]);
     }
 }

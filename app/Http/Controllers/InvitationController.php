@@ -279,4 +279,111 @@ class InvitationController extends Controller
         }
     }
 
+    /**
+     * Get invitations sent by the authenticated clinic
+     */
+    public function getClinicInvitations(Request $request): JsonResponse
+    {
+        try {
+            $clinic = auth()->guard('clinic')->user();
+
+            if (!$clinic) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access - must be authenticated as clinic'
+                ], 403);
+            }
+
+            $status = $request->query('status'); // Optional filter by status
+
+            $query = \App\Models\Invitation::with(['doctor.user', 'clinic'])
+                ->where('clinic_id', $clinic->id);
+
+            if ($status) {
+                $query->where('status', $status);
+            }
+
+            $invitations = $query->orderBy('created_at', 'desc')->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $invitations
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting clinic invitations: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving invitations',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel an invitation
+     */
+    public function cancelInvitation(Request $request, $invitationId): JsonResponse
+    {
+        try {
+            $clinic = auth()->guard('clinic')->user();
+
+            if (!$clinic) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access - must be authenticated as clinic'
+                ], 403);
+            }
+
+            $invitation = \App\Models\Invitation::where('id', $invitationId)
+                ->where('clinic_id', $clinic->id)
+                ->first();
+
+            if (!$invitation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invitation not found or does not belong to this clinic'
+                ], 404);
+            }
+
+            // Cannot cancel if already accepted/rejected
+            if (!in_array($invitation->status, ['pending'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot cancel invitation - it has already been ' . $invitation->status
+                ], 400);
+            }
+
+            // Update status to cancelled
+            $invitation->update([
+                'status' => 'cancelled',
+                'responded_at' => now()
+            ]);
+
+            // Send notification to doctor about cancellation
+            $this->pushNotificationService->sendToDoctor(
+                $invitation->doctor_id,
+                'تم إلغاء الدعوة 📭',
+                "لقد تم إلغاء دعوة العمل من قبل {$clinic->clinic_name}."
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invitation cancelled successfully',
+                'data' => [
+                    'invitation_id' => $invitation->id,
+                    'status' => $invitation->status
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error cancelling invitation: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error cancelling invitation',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
 }

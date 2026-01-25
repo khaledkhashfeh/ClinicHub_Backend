@@ -126,6 +126,845 @@
                 }
             }
         },
+        "/api/admin/doctors/pending": {
+            "get": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Get pending doctors",
+                "description": "Returns a list of doctors awaiting approval",
+                "operationId": "78787ea41f1e6070e3ce73b80bdaf5f0",
+                "responses": {
+                    "200": {
+                        "description": "List of pending doctors",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "full_name": {
+                                                        "type": "string",
+                                                        "example": "Dr. John Doe"
+                                                    },
+                                                    "username": {
+                                                        "type": "string",
+                                                        "example": "johndoe"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "pending"
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "first_name": {
+                                                                "type": "string",
+                                                                "example": "John"
+                                                            },
+                                                            "last_name": {
+                                                                "type": "string",
+                                                                "example": "Doe"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "07771234567"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "john@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "specializations": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Cardiology"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "governorate": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Baghdad"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "city": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Al-Karkh"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "district": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Rasheed"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctors/{id}/approve": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Approve a doctor",
+                "description": "Approves a doctor registration request",
+                "operationId": "89ee9358d86552759c267081e9b70834",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Doctor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctor approved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم قبول تسجيل الدكتور بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    },
+                    "400": {
+                        "description": "Doctor already approved"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/doctors/{id}/reject": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Reject a doctor",
+                "description": "Rejects a doctor registration request",
+                "operationId": "51428c67e6ceb4c3547e821de3e0ea78",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Doctor ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctor rejected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم رفض تسجيل الدكتور بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "full_name": {
+                                                    "type": "string",
+                                                    "example": "Dr. John Doe"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "rejected"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    },
+                    "400": {
+                        "description": "Doctor already rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/clinics/pending": {
+            "get": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Get pending clinics",
+                "description": "Returns a list of clinics awaiting approval",
+                "operationId": "45b85388bc0f810162bbc4cbcbe47495",
+                "responses": {
+                    "200": {
+                        "description": "List of pending clinics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "clinic_name": {
+                                                        "type": "string",
+                                                        "example": "Al-Rashid Clinic"
+                                                    },
+                                                    "phone": {
+                                                        "type": "string",
+                                                        "example": "07771234567"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "pending"
+                                                    },
+                                                    "specialization": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Cardiology"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "governorate": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Baghdad"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "city": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Al-Karkh"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "district": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Rasheed"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/clinics/{id}/approve": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Approve a clinic",
+                "description": "Approves a clinic registration request",
+                "operationId": "2f5bc86314bf7cdca3a467fe5a6d15c7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clinic ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinic approved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم قبول تسجيل العيادة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Clinic not found"
+                    },
+                    "400": {
+                        "description": "Clinic already approved"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/clinics/{id}/reject": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Reject a clinic",
+                "description": "Rejects a clinic registration request",
+                "operationId": "aa1646277211c9795fc2567046d95e7c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clinic ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinic rejected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم رفض تسجيل العيادة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "rejected"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Clinic not found"
+                    },
+                    "400": {
+                        "description": "Clinic already rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/secretaries/pending": {
+            "get": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Get pending secretaries",
+                "description": "Returns a list of secretaries awaiting approval",
+                "operationId": "113cffabae5bee06a14644b74cf6fc2c",
+                "responses": {
+                    "200": {
+                        "description": "List of pending secretaries",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "entity_type": {
+                                                        "type": "string",
+                                                        "example": "clinic"
+                                                    },
+                                                    "entity_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "pending"
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "first_name": {
+                                                                "type": "string",
+                                                                "example": "Ahmad"
+                                                            },
+                                                            "last_name": {
+                                                                "type": "string",
+                                                                "example": "Al-Hassan"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "07771234567"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "ahmad@example.com"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "entity": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "clinic_name": {
+                                                                "type": "string",
+                                                                "example": "Al-Rashid Clinic"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/secretaries/{id}/approve": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Approve a secretary",
+                "description": "Approves a secretary registration request",
+                "operationId": "cbd33e4fc1b6c85d55ff151c4d088587",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Secretary ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Secretary approved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم قبول تسجيل السكرتيرة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "ahmad_secretary"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                },
+                                                "entity_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "entity_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Secretary not found"
+                    },
+                    "400": {
+                        "description": "Secretary already approved"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/secretaries/{id}/reject": {
+            "put": {
+                "tags": [
+                    "Admin Management"
+                ],
+                "summary": "Reject a secretary",
+                "description": "Rejects a secretary registration request",
+                "operationId": "00cf7f63409d1d0c6483099eb53fa4e6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Secretary ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Secretary rejected successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم رفض تسجيل السكرتيرة بنجاح"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "ahmad_secretary"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "rejected"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Secretary not found"
+                    },
+                    "400": {
+                        "description": "Secretary already rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
         "/api/clinic/login": {
             "post": {
                 "tags": [
@@ -389,6 +1228,137 @@
             }
         },
         "/api/clinics": {
+            "get": {
+                "tags": [
+                    "Clinic Management"
+                ],
+                "summary": "Get all clinics",
+                "description": "Returns a list of all clinics (Admin only)",
+                "operationId": "8f6e25a7148092621026f5e337817bd4",
+                "responses": {
+                    "200": {
+                        "description": "List of clinics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "clinic_name": {
+                                                                "type": "string",
+                                                                "example": "Al-Rashid Clinic"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "07771234567"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "example": "clinic@example.com"
+                                                            },
+                                                            "specialization_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "governorate_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "city_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "district_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "detailed_address": {
+                                                                "type": "string",
+                                                                "example": "123 Main Street, Baghdad"
+                                                            },
+                                                            "consultation_fee": {
+                                                                "type": "number",
+                                                                "example": 25
+                                                            },
+                                                            "description": {
+                                                                "type": "string",
+                                                                "example": "A modern clinic providing quality healthcare services"
+                                                            },
+                                                            "username": {
+                                                                "type": "string",
+                                                                "example": "alrashid_clinic"
+                                                            },
+                                                            "main_image": {
+                                                                "type": "string",
+                                                                "example": "images/clinics/main_image.jpg"
+                                                            },
+                                                            "working_hours": {
+                                                                "type": "object",
+                                                                "example": "{\"saturday\": {\"open\": \"09:00\", \"close\": \"18:00\"}}"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "approved"
+                                                            },
+                                                            "phone_verified_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-01-01T00:00:00.000000Z"
+                                                            },
+                                                            "created_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-01-01T00:00:00.000000Z"
+                                                            },
+                                                            "updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-01-01T00:00:00.000000Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "links": {
+                                                    "type": "object"
+                                                },
+                                                "meta": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Clinic Authentication"
@@ -1061,6 +2031,357 @@
                         "jwt": [
                             "clinic"
                         ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/{id}": {
+            "get": {
+                "tags": [
+                    "Clinic Management"
+                ],
+                "summary": "Get a specific clinic",
+                "description": "Returns details of a specific clinic",
+                "operationId": "95094e1c3aef22270b6d5bec0134abf8",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clinic ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinic details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Clinic"
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "07771234567"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "clinic@example.com"
+                                                },
+                                                "specialization_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "governorate_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "city_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "district_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "detailed_address": {
+                                                    "type": "string",
+                                                    "example": "123 Main Street, Baghdad"
+                                                },
+                                                "consultation_fee": {
+                                                    "type": "number",
+                                                    "example": 25
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "A modern clinic providing quality healthcare services"
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "alrashid_clinic"
+                                                },
+                                                "main_image": {
+                                                    "type": "string",
+                                                    "example": "images/clinics/main_image.jpg"
+                                                },
+                                                "working_hours": {
+                                                    "type": "object",
+                                                    "example": "{\"saturday\": {\"open\": \"09:00\", \"close\": \"18:00\"}}"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                },
+                                                "phone_verified_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "specialization": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Cardiology"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "governorate": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name_ar": {
+                                                            "type": "string",
+                                                            "example": "بغداد"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "district": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name_ar": {
+                                                            "type": "string",
+                                                            "example": "الكرخ"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "services": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "General Consultation"
+                                                            },
+                                                            "price": {
+                                                                "type": "number",
+                                                                "example": 25
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "galleryImages": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "image_path": {
+                                                                "type": "string",
+                                                                "example": "images/clinics/gallery/image.jpg"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not authorized to view this clinic"
+                    },
+                    "404": {
+                        "description": "Clinic not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/clinics/{id}/activate": {
+            "patch": {
+                "tags": [
+                    "Clinic Management"
+                ],
+                "summary": "Activate a clinic",
+                "description": "Activates a clinic (Admin only)",
+                "operationId": "f9a2bb2114c384fc9590ad33a7a1698f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clinic ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinic activated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Clinic activated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Clinic not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/clinics/{id}/deactivate": {
+            "patch": {
+                "tags": [
+                    "Clinic Management"
+                ],
+                "summary": "Deactivate a clinic",
+                "description": "Deactivates a clinic (Admin only)",
+                "operationId": "ba69dee67a6fca8a3768f8a33678742d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Clinic ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Clinic deactivated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Clinic deactivated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "inactive"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not an admin"
+                    },
+                    "404": {
+                        "description": "Clinic not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
                     }
                 ]
             }
@@ -2120,10 +3441,10 @@
         "/api/available-doctors": {
             "get": {
                 "tags": [
-                    "Doctor Invitations"
+                    "Invitations"
                 ],
-                "summary": "Search & List Available doctors",
-                "description": "This endpoint is dedicated to exploring available medical professionals for contracting. If you send a query, it will search in (name, email, or specialization). If you don't send a query, it will display a list of all available doctors with pagination.",
+                "summary": "Search available doctors",
+                "description": "Searches and lists available doctors based on criteria",
                 "operationId": "4b5b3e787f2d107d0fd619079e1c931e",
                 "parameters": [
                     {
@@ -2132,7 +3453,8 @@
                         "description": "Search query to filter doctors by name, email, or specialization",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "example": "cardiology"
                         }
                     }
                 ],
@@ -2149,7 +3471,7 @@
                                         },
                                         "total_count": {
                                             "type": "integer",
-                                            "example": 120
+                                            "example": 10
                                         },
                                         "data": {
                                             "type": "array",
@@ -2157,28 +3479,28 @@
                                                 "properties": {
                                                     "id": {
                                                         "type": "integer",
-                                                        "example": 101
+                                                        "example": 1
                                                     },
                                                     "full_name": {
                                                         "type": "string",
-                                                        "example": "د. أحمد محمد"
+                                                        "example": "Dr. John Doe"
                                                     },
                                                     "email": {
                                                         "type": "string",
-                                                        "format": "email",
-                                                        "example": "dr.ahmed@example.com"
+                                                        "example": "john@example.com"
                                                     },
                                                     "phone": {
                                                         "type": "string",
-                                                        "example": "+966500000000"
+                                                        "example": "07771234567"
                                                     },
                                                     "specialization": {
                                                         "type": "string",
-                                                        "example": "طب وجراحة العظام"
+                                                        "example": "Cardiology"
                                                     },
                                                     "profile_image": {
                                                         "type": "string",
-                                                        "example": "https://cdn.example.com/images/dr101.jpg"
+                                                        "example": "path/to/image.jpg",
+                                                        "nullable": true
                                                     },
                                                     "governorate": {
                                                         "properties": {
@@ -2188,7 +3510,7 @@
                                                             },
                                                             "name": {
                                                                 "type": "string",
-                                                                "example": "دمشق"
+                                                                "example": "Baghdad"
                                                             }
                                                         },
                                                         "type": "object"
@@ -2197,18 +3519,18 @@
                                                         "properties": {
                                                             "id": {
                                                                 "type": "integer",
-                                                                "example": 5
+                                                                "example": 1
                                                             },
                                                             "name": {
                                                                 "type": "string",
-                                                                "example": "برامكة"
+                                                                "example": "Al-Karkh"
                                                             }
                                                         },
                                                         "type": "object"
                                                     },
                                                     "years_of_experience": {
                                                         "type": "integer",
-                                                        "example": 10
+                                                        "example": 5
                                                     }
                                                 },
                                                 "type": "object"
@@ -2222,11 +3544,12 @@
                                                 },
                                                 "last": {
                                                     "type": "string",
-                                                    "example": "http://example.com/api/available-doctors?page=10"
+                                                    "example": "http://example.com/api/available-doctors?page=2"
                                                 },
                                                 "prev": {
                                                     "type": "string",
-                                                    "example": null
+                                                    "example": null,
+                                                    "nullable": true
                                                 },
                                                 "next": {
                                                     "type": "string",
@@ -2247,7 +3570,7 @@
                                                 },
                                                 "last_page": {
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 2
                                                 },
                                                 "path": {
                                                     "type": "string",
@@ -2259,11 +3582,11 @@
                                                 },
                                                 "to": {
                                                     "type": "integer",
-                                                    "example": 15
+                                                    "example": 10
                                                 },
                                                 "total": {
                                                     "type": "integer",
-                                                    "example": 150
+                                                    "example": 10
                                                 }
                                             },
                                             "type": "object"
@@ -2280,10 +3603,10 @@
         "/api/clinics/invitations/send": {
             "post": {
                 "tags": [
-                    "Doctor Invitations"
+                    "Invitations"
                 ],
-                "summary": "Send Job Invitation",
-                "description": "When the clinic finds the right doctor, they send a formal invitation that arrives as an instant notification on the doctor's phone.",
+                "summary": "Send invitation to doctor",
+                "description": "Sends a job invitation from clinic to a doctor",
                 "operationId": "ad8c1127a9e51d6d761d896a660daf18",
                 "requestBody": {
                     "required": true,
@@ -2291,21 +3614,23 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "doctor_id",
-                                    "clinic_id"
+                                    "doctor_id"
                                 ],
                                 "properties": {
                                     "doctor_id": {
+                                        "description": "ID of the doctor to invite",
                                         "type": "integer",
-                                        "example": 101
+                                        "example": 1
                                     },
                                     "clinic_id": {
+                                        "description": "ID of the clinic (auto-filled from authenticated clinic)",
                                         "type": "integer",
-                                        "example": 45
+                                        "example": 1
                                     },
                                     "message": {
+                                        "description": "Custom message to include in the invitation (optional)",
                                         "type": "string",
-                                        "example": "دعوة للانضمام إلى الطاقم الطبي في المركز الحديث"
+                                        "example": "We would like to invite you to join our medical team."
                                     }
                                 },
                                 "type": "object"
@@ -2350,11 +3675,239 @@
                     "401": {
                         "description": "Unauthorized"
                     },
+                    "403": {
+                        "description": "Forbidden - not authorized to send invitation"
+                    },
                     "404": {
                         "description": "Doctor or clinic not found"
                     },
                     "400": {
-                        "description": "Duplicate invitation"
+                        "description": "Invitation already exists"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error during invitation"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/invitations": {
+            "get": {
+                "tags": [
+                    "Invitations"
+                ],
+                "summary": "Get invitations sent by clinic",
+                "description": "Gets all invitations sent by the authenticated clinic",
+                "operationId": "af3a0a191ffc6ddb9f9c218999514aff",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter invitations by status (pending, accepted, rejected, cancelled)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "pending"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of invitations sent by clinic",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "doctor_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "clinic_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "message": {
+                                                        "type": "string",
+                                                        "example": "We would like to invite you to join our medical team."
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "pending"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-01-01T00:00:00.000000Z"
+                                                    },
+                                                    "responded_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": null,
+                                                        "nullable": true
+                                                    },
+                                                    "doctor": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "full_name": {
+                                                                "type": "string",
+                                                                "example": "Dr. John Doe"
+                                                            },
+                                                            "user": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 1
+                                                                    },
+                                                                    "first_name": {
+                                                                        "type": "string",
+                                                                        "example": "John"
+                                                                    },
+                                                                    "last_name": {
+                                                                        "type": "string",
+                                                                        "example": "Doe"
+                                                                    },
+                                                                    "phone": {
+                                                                        "type": "string",
+                                                                        "example": "07771234567"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string",
+                                                                        "example": "john@example.com"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "clinic": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "clinic_name": {
+                                                                "type": "string",
+                                                                "example": "Al-Rashid Clinic"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not authorized to view invitations"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/invitations/{invitation_id}/cancel": {
+            "patch": {
+                "tags": [
+                    "Invitations"
+                ],
+                "summary": "Cancel an invitation",
+                "description": "Cancels an invitation sent by the clinic",
+                "operationId": "d92a39ce8a9fadfbc5968bf024de7d98",
+                "parameters": [
+                    {
+                        "name": "invitation_id",
+                        "in": "path",
+                        "description": "Invitation ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Invitation cancelled successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invitation cancelled successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "invitation_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "cancelled"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not authorized to cancel this invitation"
+                    },
+                    "404": {
+                        "description": "Invitation not found or does not belong to this clinic"
+                    },
+                    "400": {
+                        "description": "Cannot cancel invitation - it has already been processed"
                     }
                 },
                 "security": [
@@ -2369,19 +3922,20 @@
         "/api/doctor/invitations/{invitation_id}": {
             "patch": {
                 "tags": [
-                    "Doctor Invitations"
+                    "Invitations"
                 ],
-                "summary": "Respond to Job Invitation",
-                "description": "Here the doctor makes a decision, and the system automatically completes the procedures based on their response.",
+                "summary": "Respond to invitation",
+                "description": "Responds to an invitation from a clinic (accept/reject)",
                 "operationId": "1b46e0b7ad619710aeee85a8ef7ded2d",
                 "parameters": [
                     {
                         "name": "invitation_id",
                         "in": "path",
-                        "description": "ID of the invitation",
+                        "description": "Invitation ID",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -2395,6 +3949,7 @@
                                 ],
                                 "properties": {
                                     "status": {
+                                        "description": "Response to the invitation",
                                         "type": "string",
                                         "enum": [
                                             "accepted",
@@ -2446,18 +4001,538 @@
                         "description": "Unauthorized"
                     },
                     "403": {
-                        "description": "Not authorized to respond to this invitation"
+                        "description": "Forbidden - not authorized to respond to this invitation"
                     },
                     "404": {
                         "description": "Invitation not found"
                     },
                     "400": {
                         "description": "Invitation already responded to"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "500": {
+                        "description": "Server error during response processing"
                     }
                 },
                 "security": [
                     {
                         "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/center/login": {
+            "post": {
+                "tags": [
+                    "Medical Center Authentication"
+                ],
+                "summary": "Medical Center login",
+                "description": "Authenticates a medical center and returns a JWT token",
+                "operationId": "c7b3d941181127487821b1e31b78e80c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "description": "Username of the medical center",
+                                        "type": "string",
+                                        "example": "medical_center"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تسجيل الدخول بنجاح."
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+                                        },
+                                        "role": {
+                                            "type": "string",
+                                            "example": "Medical_Center"
+                                        },
+                                        "center": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "center_name": {
+                                                    "type": "string",
+                                                    "example": "Al-Rashid Medical Center"
+                                                },
+                                                "is_approved": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "403": {
+                        "description": "Account not approved"
+                    }
+                }
+            }
+        },
+        "/api/center/register-request": {
+            "post": {
+                "tags": [
+                    "Medical Center Authentication"
+                ],
+                "summary": "Medical Center registration request",
+                "description": "Submits a request to register a new medical center account",
+                "operationId": "322ad2375189d22b33c3fe2f1c9ab8a1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "center_name",
+                                    "phone",
+                                    "governorate_id",
+                                    "clinic_count",
+                                    "username",
+                                    "password",
+                                    "password_confirmation",
+                                    "working_hours"
+                                ],
+                                "properties": {
+                                    "center_name": {
+                                        "description": "Name of the medical center",
+                                        "type": "string",
+                                        "example": "Medical Center Name"
+                                    },
+                                    "phone": {
+                                        "description": "Phone number",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "governorate_id": {
+                                        "description": "Governorate ID",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "district_id": {
+                                        "description": "District ID (required if city_id not provided)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "city_id": {
+                                        "description": "City ID (required if district_id not provided)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "clinic_count": {
+                                        "description": "Number of clinics in the center",
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "username": {
+                                        "description": "Username for the medical center",
+                                        "type": "string",
+                                        "example": "medical_center_username"
+                                    },
+                                    "password": {
+                                        "description": "Password",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "detailed_address": {
+                                        "description": "Detailed address (optional)",
+                                        "type": "string",
+                                        "example": "Detailed address"
+                                    },
+                                    "latitude": {
+                                        "description": "Latitude (optional)",
+                                        "type": "number",
+                                        "example": 33.5138
+                                    },
+                                    "longitude": {
+                                        "description": "Longitude (optional)",
+                                        "type": "number",
+                                        "example": 36.2765
+                                    },
+                                    "image": {
+                                        "description": "Logo image file (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images.*": {
+                                        "description": "Gallery images (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "working_hours": {
+                                        "description": "Working hours in JSON format",
+                                        "type": "string",
+                                        "example": "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}"
+                                    },
+                                    "services.*.name": {
+                                        "description": "Service name - use services[0].name, services[0].price, services[1].name, services[1].price, etc.",
+                                        "type": "string",
+                                        "example": "General Consultation"
+                                    },
+                                    "services.*.price": {
+                                        "description": "Service price",
+                                        "type": "number",
+                                        "example": 25000
+                                    },
+                                    "facebook_link": {
+                                        "description": "Facebook link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://facebook.com/medicalcenter"
+                                    },
+                                    "instagram_link": {
+                                        "description": "Instagram link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://instagram.com/medicalcenter"
+                                    },
+                                    "website_link": {
+                                        "description": "Website link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://medicalcenter.com"
+                                    },
+                                    "plan_id": {
+                                        "description": "Subscription plan ID (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Registration request submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم استلام طلب تسجيل المركز الطبي بنجاح. سيتم مراجعة البيانات والرد عليك عبر الواتساب."
+                                        },
+                                        "plan_id": {
+                                            "description": "Subscription plan ID if provided",
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        },
+        "/api/centers/{id}": {
+            "put": {
+                "tags": [
+                    "Medical Center Profile"
+                ],
+                "summary": "Update medical center profile",
+                "description": "Updates the profile information of the authenticated medical center",
+                "operationId": "60a8327d34bedf76df7c4ccd393666dd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medical Center ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "center_name": {
+                                        "description": "Name of the medical center (optional)",
+                                        "type": "string",
+                                        "example": "Updated Medical Center Name"
+                                    },
+                                    "username": {
+                                        "description": "Username for the medical center (optional)",
+                                        "type": "string",
+                                        "example": "updated_username"
+                                    },
+                                    "clinic_count": {
+                                        "description": "Number of clinics in the center (optional)",
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "latitude": {
+                                        "description": "Latitude (optional)",
+                                        "type": "number",
+                                        "example": 33.5138
+                                    },
+                                    "longitude": {
+                                        "description": "Longitude (optional)",
+                                        "type": "number",
+                                        "example": 36.2765
+                                    },
+                                    "detailed_address": {
+                                        "description": "Detailed address (optional)",
+                                        "type": "string",
+                                        "example": "Updated detailed address"
+                                    },
+                                    "image": {
+                                        "description": "Logo image file (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "gallery_images.*": {
+                                        "description": "Gallery images (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "working_hours": {
+                                        "description": "Working hours in JSON format (optional)",
+                                        "type": "string",
+                                        "example": "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}"
+                                    },
+                                    "services.*.name": {
+                                        "description": "Service name - use services[0].name, services[0].price, services[1].name, services[1].price, etc. (optional)",
+                                        "type": "string",
+                                        "example": "Updated Service"
+                                    },
+                                    "services.*.price": {
+                                        "description": "Service price (optional)",
+                                        "type": "number",
+                                        "example": 30000
+                                    },
+                                    "facebook_link": {
+                                        "description": "Facebook link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://facebook.com/updatedmedicalcenter"
+                                    },
+                                    "instagram_link": {
+                                        "description": "Instagram link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://instagram.com/updatedmedicalcenter"
+                                    },
+                                    "website_link": {
+                                        "description": "Website link (optional)",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://updatedmedicalcenter.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Medical center profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم تحديث بيانات المركز الطبي بنجاح."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "center_name": {
+                                                    "type": "string",
+                                                    "example": "Updated Medical Center Name"
+                                                },
+                                                "username": {
+                                                    "type": "string",
+                                                    "example": "updated_username"
+                                                },
+                                                "clinic_count": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "latitude": {
+                                                    "type": "number",
+                                                    "example": 33.5138
+                                                },
+                                                "longitude": {
+                                                    "type": "number",
+                                                    "example": 36.2765
+                                                },
+                                                "phone": {
+                                                    "type": "string",
+                                                    "example": "0912345678"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "approved"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid data"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Not authorized to update this profile"
+                    },
+                    "404": {
+                        "description": "Medical center not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "medical_center"
+                        ]
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Medical Center Profile"
+                ],
+                "summary": "Delete medical center profile",
+                "description": "Deletes the profile of the authenticated medical center",
+                "operationId": "f47a49072a26de078d26030a7d6f0ad3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medical Center ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Medical center profile deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم حذف المركز الطبي بنجاح من النظام."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Not authorized to delete this profile"
+                    },
+                    "404": {
+                        "description": "Medical center not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "medical_center"
+                        ]
                     }
                 ]
             }
@@ -2909,6 +4984,83 @@
                     },
                     "500": {
                         "description": "Failed to logout"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/notification/send-notification": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Send notification to user",
+                "description": "Sends a push notification to a specific user",
+                "operationId": "f1a1ed4f7094d835ec3b01a9ed2d18a3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id",
+                                    "title",
+                                    "body"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "description": "ID of the user to send notification to",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "description": "Title of the notification",
+                                        "type": "string",
+                                        "example": "Notification Title"
+                                    },
+                                    "body": {
+                                        "description": "Body content of the notification",
+                                        "type": "string",
+                                        "example": "Notification body content"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Notification sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification sent successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden - not authorized to send notifications"
+                    },
+                    "404": {
+                        "description": "User FCM token not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -4320,6 +6472,326 @@
                 ]
             }
         },
+        "/api/secretaries/profile": {
+            "get": {
+                "tags": [
+                    "Secretary Management"
+                ],
+                "summary": "Get secretary profile",
+                "description": "Returns the authenticated secretary's profile information",
+                "operationId": "a6343fe45521c441325c03dda954d9d2",
+                "responses": {
+                    "200": {
+                        "description": "Secretary profile retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "entity_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "entity_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "Ahmad"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "Al-Hassan"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "ahmad.secretary@example.com"
+                                                        },
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "ahmad_secretary"
+                                                        },
+                                                        "date_of_birth": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "1990-01-01"
+                                                        },
+                                                        "gender": {
+                                                            "type": "string",
+                                                            "example": "male"
+                                                        },
+                                                        "profile_photo_url": {
+                                                            "type": "string",
+                                                            "example": "path/to/image.jpg"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Secretary not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Secretary Management"
+                ],
+                "summary": "Update secretary profile",
+                "description": "Updates the authenticated secretary's profile information",
+                "operationId": "e600c5fdc00aec69e455d114b96f6703",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "description": "First name of the secretary (optional)",
+                                        "type": "string",
+                                        "example": "Ahmad"
+                                    },
+                                    "last_name": {
+                                        "description": "Last name of the secretary (optional)",
+                                        "type": "string",
+                                        "example": "Al-Hassan"
+                                    },
+                                    "phone": {
+                                        "description": "Phone number in Syrian format (optional)",
+                                        "type": "string",
+                                        "example": "0912345678"
+                                    },
+                                    "email": {
+                                        "description": "Email address (optional)",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "ahmad.secretary@example.com"
+                                    },
+                                    "username": {
+                                        "description": "Unique username for the secretary (optional)",
+                                        "type": "string",
+                                        "example": "ahmad_secretary"
+                                    },
+                                    "date_of_birth": {
+                                        "description": "Date of birth in YYYY-MM-DD format (optional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1990-01-01"
+                                    },
+                                    "gender": {
+                                        "description": "Gender of the secretary (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "male",
+                                            "female"
+                                        ],
+                                        "example": "male"
+                                    },
+                                    "profile_image": {
+                                        "description": "Profile image file (optional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "entity_id": {
+                                        "description": "ID of the clinic or medical center to associate with (optional)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "entity_type": {
+                                        "description": "Type of entity (clinic or medical_center) (optional)",
+                                        "type": "string",
+                                        "enum": [
+                                            "clinic",
+                                            "medical_center"
+                                        ],
+                                        "example": "clinic"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Secretary profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Secretary profile updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "entity_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "entity_type": {
+                                                    "type": "string",
+                                                    "example": "clinic"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                },
+                                                "user": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "first_name": {
+                                                            "type": "string",
+                                                            "example": "Ahmad"
+                                                        },
+                                                        "last_name": {
+                                                            "type": "string",
+                                                            "example": "Al-Hassan"
+                                                        },
+                                                        "phone": {
+                                                            "type": "string",
+                                                            "example": "0912345678"
+                                                        },
+                                                        "email": {
+                                                            "type": "string",
+                                                            "format": "email",
+                                                            "example": "ahmad.secretary@example.com"
+                                                        },
+                                                        "username": {
+                                                            "type": "string",
+                                                            "example": "ahmad_secretary"
+                                                        },
+                                                        "date_of_birth": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "1990-01-01"
+                                                        },
+                                                        "gender": {
+                                                            "type": "string",
+                                                            "example": "male"
+                                                        },
+                                                        "profile_photo_url": {
+                                                            "type": "string",
+                                                            "example": "path/to/image.jpg"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Secretary not found"
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "field_name": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The field is required."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
         "/api/subscription-plans": {
             "get": {
                 "tags": [
@@ -5350,12 +7822,20 @@
             "description": "Admin Authentication"
         },
         {
+            "name": "Admin Management",
+            "description": "Admin Management"
+        },
+        {
             "name": "Clinic Authentication",
             "description": "Clinic Authentication"
         },
         {
             "name": "Clinic Profile",
             "description": "Clinic Profile"
+        },
+        {
+            "name": "Clinic Management",
+            "description": "Clinic Management"
         },
         {
             "name": "Doctor Authentication",
@@ -5370,8 +7850,16 @@
             "description": "Governorates"
         },
         {
-            "name": "Doctor Invitations",
-            "description": "Doctor Invitations"
+            "name": "Invitations",
+            "description": "Invitations"
+        },
+        {
+            "name": "Medical Center Authentication",
+            "description": "Medical Center Authentication"
+        },
+        {
+            "name": "Medical Center Profile",
+            "description": "Medical Center Profile"
         },
         {
             "name": "Medical Specializations",
@@ -5380,6 +7868,10 @@
         {
             "name": "Medical Team Authentication",
             "description": "Medical Team Authentication"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
         },
         {
             "name": "Patient Authentication",

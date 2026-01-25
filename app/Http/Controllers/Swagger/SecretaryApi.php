@@ -300,4 +300,154 @@ class SecretaryApi
     public function updateAccounte()
     {
     }
+
+    #[OA\Get(
+        path: "/api/secretaries/profile",
+        summary: "Get secretary profile",
+        description: "Returns the authenticated secretary's profile information",
+        tags: ["Secretary Management"],
+        security: [["jwt" => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Secretary profile retrieved successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "user_id", type: "integer", example: 1),
+                                new OA\Property(property: "entity_id", type: "integer", example: 1),
+                                new OA\Property(property: "entity_type", type: "string", example: "clinic"),
+                                new OA\Property(property: "status", type: "string", example: "active"),
+                                new OA\Property(
+                                    property: "user",
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "first_name", type: "string", example: "Ahmad"),
+                                        new OA\Property(property: "last_name", type: "string", example: "Al-Hassan"),
+                                        new OA\Property(property: "phone", type: "string", example: "0912345678"),
+                                        new OA\Property(property: "email", type: "string", format: "email", example: "ahmad.secretary@example.com"),
+                                        new OA\Property(property: "username", type: "string", example: "ahmad_secretary"),
+                                        new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "1990-01-01"),
+                                        new OA\Property(property: "gender", type: "string", example: "male"),
+                                        new OA\Property(property: "profile_photo_url", type: "string", example: "path/to/image.jpg"),
+                                    ]
+                                ),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Secretary not found"
+            )
+        ]
+    )]
+    public function getProfile()
+    {
+    }
+
+    #[OA\Put(
+        path: "/api/secretaries/profile",
+        summary: "Update secretary profile",
+        description: "Updates the authenticated secretary's profile information",
+        tags: ["Secretary Management"],
+        security: [["jwt" => []]],
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "first_name", type: "string", example: "Ahmad", description: "First name of the secretary (optional)"),
+                        new OA\Property(property: "last_name", type: "string", example: "Al-Hassan", description: "Last name of the secretary (optional)"),
+                        new OA\Property(property: "phone", type: "string", example: "0912345678", description: "Phone number in Syrian format (optional)"),
+                        new OA\Property(property: "email", type: "string", format: "email", example: "ahmad.secretary@example.com", description: "Email address (optional)"),
+                        new OA\Property(property: "username", type: "string", example: "ahmad_secretary", description: "Unique username for the secretary (optional)"),
+                        new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "1990-01-01", description: "Date of birth in YYYY-MM-DD format (optional)"),
+                        new OA\Property(property: "gender", type: "string", enum: ["male", "female"], example: "male", description: "Gender of the secretary (optional)"),
+                        new OA\Property(property: "profile_image", type: "string", format: "binary", description: "Profile image file (optional)"),
+                        new OA\Property(property: "entity_id", type: "integer", example: 1, description: "ID of the clinic or medical center to associate with (optional)"),
+                        new OA\Property(property: "entity_type", type: "string", enum: ["clinic", "medical_center"], example: "clinic", description: "Type of entity (clinic or medical_center) (optional)"),
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Secretary profile updated successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Secretary profile updated successfully"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "user_id", type: "integer", example: 1),
+                                new OA\Property(property: "entity_id", type: "integer", example: 1),
+                                new OA\Property(property: "entity_type", type: "string", example: "clinic"),
+                                new OA\Property(property: "status", type: "string", example: "active"),
+                                new OA\Property(
+                                    property: "user",
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "first_name", type: "string", example: "Ahmad"),
+                                        new OA\Property(property: "last_name", type: "string", example: "Al-Hassan"),
+                                        new OA\Property(property: "phone", type: "string", example: "0912345678"),
+                                        new OA\Property(property: "email", type: "string", format: "email", example: "ahmad.secretary@example.com"),
+                                        new OA\Property(property: "username", type: "string", example: "ahmad_secretary"),
+                                        new OA\Property(property: "date_of_birth", type: "string", format: "date", example: "1990-01-01"),
+                                        new OA\Property(property: "gender", type: "string", example: "male"),
+                                        new OA\Property(property: "profile_photo_url", type: "string", example: "path/to/image.jpg"),
+                                    ]
+                                ),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Secretary not found"
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Validation error",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: false),
+                        new OA\Property(property: "message", type: "string", example: "The given data was invalid."),
+                        new OA\Property(
+                            property: "errors",
+                            type: "object",
+                            properties: [
+                                new OA\Property(
+                                    property: "field_name",
+                                    type: "array",
+                                    items: new OA\Items(type: "string", example: "The field is required.")
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    public function updateProfile()
+    {
+    }
 }

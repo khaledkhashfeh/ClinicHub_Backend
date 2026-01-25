@@ -463,4 +463,407 @@ class ClinicController extends Controller
             \Log::error('Failed to send WhatsApp confirmation to clinic: ' . $e->getMessage());
         }
     }
+
+    /**
+     * List all clinics (for admin or authorized users)
+     */
+    public function index(): JsonResponse
+    {
+        try {
+            // Check if user is admin or has appropriate permissions
+            $user = auth()->user();
+
+            // For now, restrict to admin users only
+            if (!$user || !$user->hasRole('admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $clinics = \App\Models\Clinic::with(['specialization', 'governorate', 'district', 'services', 'galleryImages'])
+                ->paginate(15);
+
+            return response()->json([
+                'success' => true,
+                'data' => $clinics
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving clinics',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Show a specific clinic by ID
+     */
+    public function showById($id): JsonResponse
+    {
+        try {
+            $clinic = \App\Models\Clinic::with(['specialization', 'governorate', 'district', 'services', 'galleryImages'])
+                ->find($id);
+
+            if (!$clinic) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Clinic not found'
+                ], 404);
+            }
+
+            // Check if user has permission to view this clinic
+            $authenticatedClinic = auth()->guard('clinic')->user();
+            $user = auth()->user();
+
+            if (!$authenticatedClinic || $authenticatedClinic->id !== $clinic->id) {
+                // If not the clinic owner, check if user is admin
+                if (!$user || !$user->hasRole('admin')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized access'
+                    ], 403);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $clinic
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving clinic',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Activate a clinic
+     */
+    public function activate($id): JsonResponse
+    {
+        try {
+            // Check if user is admin
+            $user = auth()->user();
+            if (!$user || !$user->hasRole('admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $clinic = \App\Models\Clinic::find($id);
+            if (!$clinic) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Clinic not found'
+                ], 404);
+            }
+
+            $clinic->update(['status' => 'approved']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Clinic activated successfully',
+                'data' => [
+                    'id' => $clinic->id,
+                    'status' => $clinic->status
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error activating clinic',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Deactivate a clinic
+     */
+    public function deactivate($id): JsonResponse
+    {
+        try {
+            // Check if user is admin
+            $user = auth()->user();
+            if (!$user || !$user->hasRole('admin')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $clinic = \App\Models\Clinic::find($id);
+            if (!$clinic) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Clinic not found'
+                ], 404);
+            }
+
+            $clinic->update(['status' => 'inactive']); // Assuming 'inactive' status exists
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Clinic deactivated successfully',
+                'data' => [
+                    'id' => $clinic->id,
+                    'status' => $clinic->status
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deactivating clinic',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Get doctors associated with the clinic
+     */
+    public function getDoctors(Request $request): JsonResponse
+    {
+        try {
+            $clinic = $request->user(); // Since middleware is auth:clinic, this should be the clinic
+
+            // If the authenticated user is not a clinic, check if they're an admin
+            $user = auth()->user();
+            if (!$clinic || get_class($clinic) !== \App\Models\Clinic::class) {
+                if (!$user || !$user->hasRole('admin')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthorized access'
+                    ], 403);
+                }
+                // If admin, they can view any clinic's doctors if they provide clinic_id
+                $clinicId = $request->query('clinic_id');
+                if (!$clinicId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'clinic_id is required for admin access'
+                    ], 400);
+                }
+                $clinic = \App\Models\Clinic::find($clinicId);
+                if (!$clinic) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Clinic not found'
+                    ], 404);
+                }
+            } else {
+                // Authenticated as clinic, so use the authenticated clinic
+                $clinic = auth()->guard('clinic')->user();
+            }
+
+            $doctors = $clinic->doctors()->with(['user', 'specializations'])->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $doctors
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving doctors',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Add a doctor to the clinic
+     */
+    public function addDoctor(Request $request): JsonResponse
+    {
+        try {
+            $clinic = auth()->guard('clinic')->user();
+
+            // Check if authenticated user is a clinic
+            if (!$clinic || get_class($clinic) !== \App\Models\Clinic::class) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access - must be authenticated as clinic'
+                ], 403);
+            }
+
+            $request->validate([
+                'doctor_id' => 'required|exists:doctors,id'
+            ]);
+
+            $doctor = \App\Models\Doctor::find($request->doctor_id);
+            if (!$doctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor not found'
+                ], 404);
+            }
+
+            // Check if doctor is already associated with this clinic
+            $existingAssociation = DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->where('doctor_id', $doctor->id)
+                ->first();
+
+            if ($existingAssociation) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is already associated with this clinic'
+                ], 400);
+            }
+
+            // Add doctor to clinic
+            DB::table('clinic_doctor')->insert([
+                'clinic_id' => $clinic->id,
+                'doctor_id' => $doctor->id,
+                'is_primary' => false,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Doctor added to clinic successfully',
+                'data' => [
+                    'clinic_id' => $clinic->id,
+                    'doctor_id' => $doctor->id
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error adding doctor to clinic',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove a doctor from the clinic
+     */
+    public function removeDoctor($doctorId): JsonResponse
+    {
+        try {
+            $clinic = auth()->guard('clinic')->user();
+
+            // Check if authenticated user is a clinic
+            if (!$clinic || get_class($clinic) !== \App\Models\Clinic::class) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access - must be authenticated as clinic'
+                ], 403);
+            }
+
+            $doctor = \App\Models\Doctor::find($doctorId);
+            if (!$doctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor not found'
+                ], 404);
+            }
+
+            // Check if doctor is associated with this clinic
+            $association = DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->where('doctor_id', $doctor->id)
+                ->first();
+
+            if (!$association) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with this clinic'
+                ], 400);
+            }
+
+            // Remove doctor from clinic
+            DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->where('doctor_id', $doctor->id)
+                ->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Doctor removed from clinic successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error removing doctor from clinic',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Set a doctor as primary doctor for the clinic
+     */
+    public function setPrimaryDoctor($doctorId): JsonResponse
+    {
+        try {
+            $clinic = auth()->guard('clinic')->user();
+
+            // Check if authenticated user is a clinic
+            if (!$clinic || get_class($clinic) !== \App\Models\Clinic::class) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access - must be authenticated as clinic'
+                ], 403);
+            }
+
+            $doctor = \App\Models\Doctor::find($doctorId);
+            if (!$doctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor not found'
+                ], 404);
+            }
+
+            // Check if doctor is associated with this clinic
+            $association = DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->where('doctor_id', $doctor->id)
+                ->first();
+
+            if (!$association) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with this clinic'
+                ], 400);
+            }
+
+            // First, unset any existing primary doctor
+            DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->update(['is_primary' => false]);
+
+            // Set this doctor as primary
+            DB::table('clinic_doctor')
+                ->where('clinic_id', $clinic->id)
+                ->where('doctor_id', $doctor->id)
+                ->update([
+                    'is_primary' => true,
+                    'updated_at' => now()
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Primary doctor set successfully',
+                'data' => [
+                    'clinic_id' => $clinic->id,
+                    'doctor_id' => $doctor->id
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error setting primary doctor',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
 }

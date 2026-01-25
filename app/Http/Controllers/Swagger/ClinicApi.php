@@ -510,4 +510,274 @@ class ClinicApi
     public function destroy()
     {
     }
+
+    #[OA\Get(
+        path: "/api/clinics",
+        summary: "Get all clinics",
+        description: "Returns a list of all clinics (Admin only)",
+        tags: ["Clinic Management"],
+        security: [["jwt" => []]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "List of clinics",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            type: "object",
+                            properties: [
+                                new OA\Property(property: "data", type: "array", items: new OA\Items(
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "clinic_name", type: "string", example: "Al-Rashid Clinic"),
+                                        new OA\Property(property: "phone", type: "string", example: "07771234567"),
+                                        new OA\Property(property: "email", type: "string", example: "clinic@example.com"),
+                                        new OA\Property(property: "specialization_id", type: "integer", example: 1),
+                                        new OA\Property(property: "governorate_id", type: "integer", example: 1),
+                                        new OA\Property(property: "city_id", type: "integer", example: 1),
+                                        new OA\Property(property: "district_id", type: "integer", example: 1),
+                                        new OA\Property(property: "detailed_address", type: "string", example: "123 Main Street, Baghdad"),
+                                        new OA\Property(property: "consultation_fee", type: "number", example: 25.0),
+                                        new OA\Property(property: "description", type: "string", example: "A modern clinic providing quality healthcare services"),
+                                        new OA\Property(property: "username", type: "string", example: "alrashid_clinic"),
+                                        new OA\Property(property: "main_image", type: "string", example: "images/clinics/main_image.jpg"),
+                                        new OA\Property(property: "working_hours", type: "object", example: '{"saturday": {"open": "09:00", "close": "18:00"}}'),
+                                        new OA\Property(property: "status", type: "string", example: "approved"),
+                                        new OA\Property(property: "phone_verified_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                        new OA\Property(property: "created_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                        new OA\Property(property: "updated_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                    ]
+                                )),
+                                new OA\Property(property: "links", type: "object"),
+                                new OA\Property(property: "meta", type: "object"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden - not an admin"
+            )
+        ]
+    )]
+    public function index()
+    {
+    }
+
+    #[OA\Get(
+        path: "/api/clinics/{id}",
+        summary: "Get a specific clinic",
+        description: "Returns details of a specific clinic",
+        tags: ["Clinic Management"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Clinic details",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "clinic_name", type: "string", example: "Al-Rashid Clinic"),
+                                new OA\Property(property: "phone", type: "string", example: "07771234567"),
+                                new OA\Property(property: "email", type: "string", example: "clinic@example.com"),
+                                new OA\Property(property: "specialization_id", type: "integer", example: 1),
+                                new OA\Property(property: "governorate_id", type: "integer", example: 1),
+                                new OA\Property(property: "city_id", type: "integer", example: 1),
+                                new OA\Property(property: "district_id", type: "integer", example: 1),
+                                new OA\Property(property: "detailed_address", type: "string", example: "123 Main Street, Baghdad"),
+                                new OA\Property(property: "consultation_fee", type: "number", example: 25.0),
+                                new OA\Property(property: "description", type: "string", example: "A modern clinic providing quality healthcare services"),
+                                new OA\Property(property: "username", type: "string", example: "alrashid_clinic"),
+                                new OA\Property(property: "main_image", type: "string", example: "images/clinics/main_image.jpg"),
+                                new OA\Property(property: "working_hours", type: "object", example: '{"saturday": {"open": "09:00", "close": "18:00"}}'),
+                                new OA\Property(property: "status", type: "string", example: "approved"),
+                                new OA\Property(property: "phone_verified_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                new OA\Property(property: "created_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                new OA\Property(property: "updated_at", type: "string", format: "date-time", example: "2023-01-01T00:00:00.000000Z"),
+                                new OA\Property(
+                                    property: "specialization",
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "name", type: "string", example: "Cardiology"),
+                                    ]
+                                ),
+                                new OA\Property(
+                                    property: "governorate",
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "name_ar", type: "string", example: "بغداد"),
+                                    ]
+                                ),
+                                new OA\Property(
+                                    property: "district",
+                                    properties: [
+                                        new OA\Property(property: "id", type: "integer", example: 1),
+                                        new OA\Property(property: "name_ar", type: "string", example: "الكرخ"),
+                                    ]
+                                ),
+                                new OA\Property(
+                                    property: "services",
+                                    type: "array",
+                                    items: new OA\Items(
+                                        properties: [
+                                            new OA\Property(property: "id", type: "integer", example: 1),
+                                            new OA\Property(property: "name", type: "string", example: "General Consultation"),
+                                            new OA\Property(property: "price", type: "number", example: 25.0),
+                                        ]
+                                    )
+                                ),
+                                new OA\Property(
+                                    property: "galleryImages",
+                                    type: "array",
+                                    items: new OA\Items(
+                                        properties: [
+                                            new OA\Property(property: "id", type: "integer", example: 1),
+                                            new OA\Property(property: "image_path", type: "string", example: "images/clinics/gallery/image.jpg"),
+                                        ]
+                                    )
+                                ),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden - not authorized to view this clinic"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Clinic not found"
+            )
+        ]
+    )]
+    public function showById()
+    {
+    }
+
+    #[OA\Patch(
+        path: "/api/clinics/{id}/activate",
+        summary: "Activate a clinic",
+        description: "Activates a clinic (Admin only)",
+        tags: ["Clinic Management"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Clinic activated successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Clinic activated successfully"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "approved"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden - not an admin"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Clinic not found"
+            )
+        ]
+    )]
+    public function activate()
+    {
+    }
+
+    #[OA\Patch(
+        path: "/api/clinics/{id}/deactivate",
+        summary: "Deactivate a clinic",
+        description: "Deactivates a clinic (Admin only)",
+        tags: ["Clinic Management"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Clinic deactivated successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Clinic deactivated successfully"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "inactive"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 401,
+                description: "Unauthorized"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Forbidden - not an admin"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Clinic not found"
+            )
+        ]
+    )]
+    public function deactivate()
+    {
+    }
 }

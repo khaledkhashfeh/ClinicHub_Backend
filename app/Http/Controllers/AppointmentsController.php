@@ -42,8 +42,8 @@ class AppointmentsController extends Controller
 
         try {
             // Update the work settings
-            $connection->method_id = $validatedData['method_id'];
-            $connection->appointment_period = $validatedData['appointment_period'];
+                $connection->method_id = $validatedData['method_id'];
+                $connection->appointment_period = $validatedData['appointment_period'];
             $connection->queue = $validatedData['queue'];
             
             // Set queue_number only if queue is enabled, otherwise set to null
@@ -53,7 +53,7 @@ class AppointmentsController extends Controller
                 $connection->queue_number = null;
             }
             
-            $connection->save();
+                $connection->save();
 
             // Reload the model with relationships for response
             $connection->load(['clinic', 'doctor', 'method']);
@@ -81,7 +81,7 @@ class AppointmentsController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while updating settings'
             ], 500);
         }
-    }
+        }
 
     /**
      * Create or update a weekly schedule template for a doctor in a clinic.
@@ -200,7 +200,7 @@ class AppointmentsController extends Controller
                 }
             });
 
-            return response()->json([
+        return response()->json([
                 'success' => true,
                 'message' => 'Weekly schedule created successfully',
                 'data' => [

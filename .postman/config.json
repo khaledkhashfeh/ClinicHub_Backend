@@ -1,0 +1,17 @@
+{
+  "workspace": {
+    "id": "8fa309e3-3693-4561-b935-eed483af6e43"
+  },
+  "entities": {
+    "environments": [],
+    "flows": [],
+    "globals": [],
+    "mocks": [],
+    "specs": [
+      "..\\storage\\api-docs\\api-docs.json",
+      "..\\vendor\\google\\grpc-gcp\\src\\grpc_gcp.proto",
+      "..\\vendor\\google\\gax\\src\\Testing\\mocks.proto"
+    ],
+    "collections": []
+  }
+}

@@ -14,7 +14,11 @@ class Appointment extends Model
         'doctor_id',
         'clinic_id',
         'schedule_slot_id',
-        'date_time',
+        'schedule_id',
+        'override_id',
+        'start_time',
+        'end_time',
+        'date',
         'status',
         'type',
         'payment_status',
@@ -26,7 +30,7 @@ class Appointment extends Model
     ];
 
     protected $casts = [
-        'date_time'       => 'datetime',
+        'date'            => 'date',
         'price_at_booking'=> 'float',
         'no_show'         => 'boolean',
     ];
@@ -50,6 +54,16 @@ class Appointment extends Model
     public function scheduleSlot()
     {
         return $this->belongsTo(ScheduleSlot::class);
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(DoctorClinicSchedule::class, 'schedule_id');
+    }
+
+    public function override()
+    {
+        return $this->belongsTo(ScheduleOverride::class, 'override_id');
     }
 
     public function loyaltyTransactions()

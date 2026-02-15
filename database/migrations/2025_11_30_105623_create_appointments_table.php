@@ -26,12 +26,10 @@ return new class extends Migration
                   ->constrained('clinics')
                   ->cascadeOnDelete();
     
-            $table->foreignId('schedule_slot_id')
-                  ->nullable()
-                  ->constrained('schedule_slots')
-                  ->nullOnDelete();
-    
-            $table->dateTime('date_time');
+            $table->date('date');
+
+            $table->time('start_time');
+            $table->time('end_time');
     
             $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');
             $table->enum('type', ['consultation', 'checkup'])->default('consultation');

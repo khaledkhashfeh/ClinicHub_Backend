@@ -81,4 +81,9 @@ class Doctor extends Model
     {
         return $this->status === 'approved';
     }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
 }

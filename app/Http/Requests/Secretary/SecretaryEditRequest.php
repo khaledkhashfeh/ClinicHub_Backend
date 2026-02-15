@@ -30,6 +30,7 @@ class SecretaryEditRequest extends FormRequest
             'username'      => ['sometimes', 'string', 'max:255'],
             'entity_type'   => ['sometimes', 'in:clinic,medical_center'],
             'entity_id'     => ['sometimes', 'integer'],
+            'status'        => ['sometimes', 'in:pending,approved,rejected'], // Allow status field
         ];
     }
 }

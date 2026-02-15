@@ -19,13 +19,17 @@ class UserService
     }
 
     // this function used as general account sign up.
-    public function SignUp(array $data): User {
+    public function SignUp(array $data, $status = 'pending'): User {
         $user = User::where('phone', $data['phone_number'])->exists();
 
         if ($user) {
             throw new \RuntimeException(
                 'Phone number already exists'
             );
+        }
+
+        if (!isset($data['profile_image'])) {
+            $data['profile_image'] = null;
         }
 
         return User::create([
@@ -37,6 +41,7 @@ class UserService
             'gender' => $data['gender'],
             'birth_date' => $data['date_of_birth'],
             'profile_photo_url' => $data['profile_image'],
+            'status' => $status ?? 'pending',
         ]);
     }
 

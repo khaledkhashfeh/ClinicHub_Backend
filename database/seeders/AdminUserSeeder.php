@@ -27,13 +27,13 @@ class AdminUserSeeder extends Seeder
 
         if ($existingAdmin) {
             echo "⚠️ مستخدم Admin موجود مسبقاً: {$existingAdmin->email}\n";
-            
+
             // التأكد من أن لديه Role admin
             if (!$existingAdmin->hasRole($adminRole)) {
                 $existingAdmin->assignRole($adminRole);
                 echo "✅ تم تعيين Role admin للمستخدم الموجود\n";
             }
-            
+
             return;
         }
 

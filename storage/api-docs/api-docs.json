@@ -5381,38 +5381,40 @@
                         "multipart/form-data": {
                             "schema": {
                                 "required": [
-                                    "full_name",
-                                    "phone",
-                                    "governorate",
-                                    "district",
+                                    "first_name",
+                                    "last_name",
+                                    "governorate_id",
+                                    "district_id",
                                     "gender",
-                                    "date_of_birth",
-                                    "password",
-                                    "password_confirmation"
+                                    "date_of_birth"
                                 ],
                                 "properties": {
-                                    "full_name": {
-                                        "description": "Full name",
+                                    "first_name": {
+                                        "description": "First name (required)",
                                         "type": "string",
-                                        "example": "Ahmad Ali"
+                                        "maxLength": 255,
+                                        "example": "Ahmad"
                                     },
-                                    "phone": {
-                                        "description": "Phone number (must be verified with OTP)",
+                                    "last_name": {
+                                        "description": "Last name (required)",
                                         "type": "string",
-                                        "example": "07771234567"
+                                        "maxLength": 255,
+                                        "example": "Ali"
                                     },
-                                    "governorate": {
-                                        "description": "Governorate ID",
+                                    "governorate_id": {
+                                        "description": "Governorate ID (must exist in governorates table)",
                                         "type": "integer",
+                                        "minimum": 1,
                                         "example": 1
                                     },
-                                    "district": {
-                                        "description": "District ID",
+                                    "district_id": {
+                                        "description": "District ID (must exist in cities table)",
                                         "type": "integer",
+                                        "minimum": 1,
                                         "example": 1
                                     },
                                     "gender": {
-                                        "description": "Gender",
+                                        "description": "Gender (required)",
                                         "type": "string",
                                         "enum": [
                                             "male",
@@ -5421,63 +5423,15 @@
                                         "example": "male"
                                     },
                                     "date_of_birth": {
-                                        "description": "Date of birth",
+                                        "description": "Date of birth (required, before today)",
                                         "type": "string",
                                         "format": "date",
                                         "example": "1990-01-01"
                                     },
-                                    "password": {
-                                        "description": "Password",
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password123"
-                                    },
-                                    "password_confirmation": {
-                                        "description": "Password confirmation",
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password123"
-                                    },
-                                    "email": {
-                                        "description": "Email (optional)",
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "patient@example.com"
-                                    },
                                     "image": {
-                                        "description": "Profile image (optional)",
+                                        "description": "Profile image (optional, jpeg/png/jpg/webp, max 2MB)",
                                         "type": "string",
                                         "format": "binary"
-                                    },
-                                    "occupation": {
-                                        "description": "Occupation (optional)",
-                                        "type": "string",
-                                        "example": "Engineer"
-                                    },
-                                    "blood_type": {
-                                        "description": "Blood type (optional)",
-                                        "type": "string",
-                                        "enum": [
-                                            "A+",
-                                            "A-",
-                                            "B+",
-                                            "B-",
-                                            "AB+",
-                                            "AB-",
-                                            "O+",
-                                            "O-"
-                                        ],
-                                        "example": "A+"
-                                    },
-                                    "has_chronic_diseases": {
-                                        "description": "Whether patient has chronic diseases (optional)",
-                                        "type": "boolean",
-                                        "example": false
-                                    },
-                                    "chronic_diseases_details": {
-                                        "description": "Details of chronic diseases (required if has_chronic_diseases is true)",
-                                        "type": "string",
-                                        "example": "Diabetes"
                                     }
                                 },
                                 "type": "object"
@@ -5498,7 +5452,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "تم إنشاء الحساب بنجاح وتسجيل الدخول."
+                                            "example": "تم إنشاء الحساب بنجاح."
                                         },
                                         "token": {
                                             "type": "string",
@@ -5514,9 +5468,13 @@
                                                     "type": "integer",
                                                     "example": 1
                                                 },
-                                                "full_name": {
+                                                "first_name": {
                                                     "type": "string",
-                                                    "example": "Ahmad Ali"
+                                                    "example": "Ahmad"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Ali"
                                                 },
                                                 "phone": {
                                                     "type": "string",
@@ -5534,8 +5492,11 @@
                     "400": {
                         "description": "Invalid data or phone not verified"
                     },
-                    "409": {
-                        "description": "Account already exists"
+                    "401": {
+                        "description": "Unauthorized - must verify phone first"
+                    },
+                    "403": {
+                        "description": "Forbidden - token mismatch"
                     },
                     "422": {
                         "description": "Validation error",

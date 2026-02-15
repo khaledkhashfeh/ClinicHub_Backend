@@ -26,3 +26,5 @@ Homestead.yaml
 Thumbs.db
 package-lock.json
 *.all.php
+
+/.qwen

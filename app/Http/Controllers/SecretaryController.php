@@ -17,16 +17,21 @@ class SecretaryController extends Controller
 {
     // this function for creating secretary account
     public function createSecretary(SecretaryCreateRequest $request, UserService $userService) {
-        $validatedData = $request->validate();
+        $validatedData = $request->validated();
 
         try {
-            $result = DB::transaction(function () use ($validatedData, $userService) {
-                $user = $userService->SignUp($validatedData);
+            $result = DB::transaction(function () use ($validatedData, $userService, $request) {
+
+                // Determine the status based on the authenticated user type
+                $status = $this->determineSecretaryStatusFromGuard($request);
+                $user = $userService->SignUp($validatedData, $status);
 
                 $secretary = Secretary::create([
                     'user_id' => $user->id,
+                    'username' => $validatedData['username'],
                     'entity_id' => $validatedData['entity_id'],
-                    'entity_type' => $validatedData['entity_type']
+                    'entity_type' => $validatedData['entity_type'],
+                    'status' => $status
                 ]);
 
                 return compact('user', 'secretary');
@@ -45,6 +50,36 @@ class SecretaryController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Determine the secretary status based on the authenticated guard
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return string
+     */
+    private function determineSecretaryStatusFromGuard($request)
+    {
+        // Check if authenticated as a user (which could be a doctor)
+        $user = $request->user('api'); // Using 'api' guard for regular users
+        if ($user && ($user->doctor || $user->medicalCenter)) {
+            return 'approved';
+        }
+
+        // Check if authenticated as a clinic
+        $clinic = $request->user('clinic');
+        if ($clinic) {
+            return 'approved';
+        }
+
+        // Check if authenticated as a medical center
+        $medicalCenter = $request->user('medical_center');
+        if ($medicalCenter) {
+            return 'approved';
+        }
+
+        // Default status for other cases
+        return 'pending';
     }
 
     //this function for editing secretary account

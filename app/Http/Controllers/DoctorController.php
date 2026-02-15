@@ -112,6 +112,9 @@ class DoctorController extends Controller
             $isClinic = false;
         }
 
+        // Determine doctor status based on who is registering
+        $doctorStatus = $isClinic ? 'approved' : 'pending';
+
         // Create user first - using model to ensure mutator is called
         $user = new User();
         $user->first_name = $request->first_name;
@@ -121,11 +124,8 @@ class DoctorController extends Controller
         $user->password = $request->password; // Don't hash here - let the mutator handle it
         $user->birth_date = $request->date_of_birth; // Map date_of_birth from request to birth_date in model
         $user->gender = $request->gender; // Save gender from request
-        $user->status = 'approved'; // Users created via doctor registration start as approved
+        $user->status = $doctorStatus; // Users created via doctor registration start as approved
         $user->save();
-
-        // Determine doctor status based on who is registering
-        $doctorStatus = $isClinic ? 'approved' : 'pending';
 
         // Create doctor profile with appropriate status
         $doctor = Doctor::create([

@@ -6,10 +6,10 @@ use App\Models\User;
 use App\Models\Patient;
 use App\Models\MedicalFile;
 use App\Services\OtpService;
+use App\Services\ImageKitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -18,10 +18,12 @@ use Spatie\Permission\Models\Role;
 class PatientController extends Controller
 {
     private $otpService;
+    private $imageKitService;
 
-    public function __construct(OtpService $otpService)
+    public function __construct(OtpService $otpService, ImageKitService $imageKitService)
     {
         $this->otpService = $otpService;
+        $this->imageKitService = $imageKitService;
     }
     /**
      * تسجيل الدخول التقليدي للمريض
@@ -482,9 +484,9 @@ class PatientController extends Controller
 
         // رفع صورة الملف الشخصي إن وجدت
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $path = $image->store('profiles/patients', 'public');
-            $user->profile_photo_url = Storage::disk('public')->url($path);
+            $uploadResult = $this->imageKitService->upload($request->file('image'), 'patients/profiles');
+            $user->profile_photo_url = $uploadResult['url'];
+            $user->profile_photo_file_id = $uploadResult['fileId'];
             $user->save();
         }
 
@@ -616,14 +618,13 @@ class PatientController extends Controller
             // تحديث صورة الملف الشخصي
             if ($request->hasFile('image')) {
                 // حذف الصورة القديمة إن وجدت
-                if ($user->profile_photo_url) {
-                    $oldPath = str_replace(Storage::disk('public')->url(''), '', $user->profile_photo_url);
-                    Storage::disk('public')->delete($oldPath);
+                if ($user->profile_photo_file_id) {
+                    $this->imageKitService->delete($user->profile_photo_file_id);
                 }
-
-                $image = $request->file('image');
-                $path = $image->store('profiles/patients', 'public');
-                $userData['profile_photo_url'] = Storage::disk('public')->url($path);
+                
+                $uploadResult = $this->imageKitService->upload($request->file('image'), 'patients/profiles');
+                $userData['profile_photo_url'] = $uploadResult['url'];
+                $userData['profile_photo_file_id'] = $uploadResult['fileId'];
                 $hasUpdates = true;
             }
 

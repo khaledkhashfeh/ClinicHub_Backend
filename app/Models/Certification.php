@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Certification extends Model
 {
-    protected $fillable = ['doctor_id', 'name', 'image_url'];
+    protected $fillable = ['doctor_id', 'name', 'image_url', 'image_file_id'];
 
     public function doctor(): BelongsTo
     {

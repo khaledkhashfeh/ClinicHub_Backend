@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\MedicalCenter;
 use App\Models\SubscriptionPlan;
 use App\Services\EvolutionApiService;
+use App\Services\ImageKitService;
 use App\Helpers\PhoneHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -17,10 +17,12 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class MedicalCenterController extends Controller
 {
     private $evolutionApiService;
+    private $imageKitService;
 
-    public function __construct(EvolutionApiService $evolutionApiService)
+    public function __construct(EvolutionApiService $evolutionApiService, ImageKitService $imageKitService)
     {
         $this->evolutionApiService = $evolutionApiService;
+        $this->imageKitService = $imageKitService;
     }
     /**
      * تسجيل دخول المركز الطبي
@@ -199,9 +201,11 @@ class MedicalCenterController extends Controller
 
             // رفع صورة المركز الرئيسية
             if ($request->hasFile('image')) {
-                $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
-                $path = $request->image->storeAs('images/medical_centers', $imageName, 'public');
-                $center->update(['logo_url' => Storage::disk('public')->url($path)]);
+                $uploadResult = $this->imageKitService->upload($request->image, 'medical-centers/logo');
+                $center->update([
+                    'logo_url' => $uploadResult['url'],
+                    'logo_file_id' => $uploadResult['fileId']
+                ]);
             }
 
             // معالجة الخدمات
@@ -219,10 +223,10 @@ class MedicalCenterController extends Controller
             // رفع صور المعرض
             if ($request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $image) {
-                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
-                    $path = $image->storeAs('images/medical_centers/gallery', $imageName, 'public');
+                    $uploadResult = $this->imageKitService->upload($image, 'medical-centers/gallery');
                     $center->galleryImages()->create([
-                        'image_path' => Storage::disk('public')->url($path),
+                        'image_path' => $uploadResult['url'],
+                        'file_id' => $uploadResult['fileId'],
                     ]);
                 }
             }
@@ -410,10 +414,10 @@ class MedicalCenterController extends Controller
             // معالجة صور المعرض
             if ($request->hasFile('gallery_images')) {
                 foreach ($request->file('gallery_images') as $image) {
-                    $imageName = time() . '_' . uniqid() . '.' . $image->extension();
-                    $path = $image->storeAs('images/medical_centers/gallery', $imageName, 'public');
+                    $uploadResult = $this->imageKitService->upload($image, 'medical-centers/gallery');
                     $center->galleryImages()->create([
-                        'image_path' => Storage::disk('public')->url($path),
+                        'image_path' => $uploadResult['url'],
+                        'file_id' => $uploadResult['fileId'],
                     ]);
                 }
             }
@@ -421,14 +425,15 @@ class MedicalCenterController extends Controller
             // تحديث الصورة إذا كانت موجودة
             if ($request->hasFile('image')) {
                 // حذف الصورة القديمة إن وجدت
-                if ($center->logo_url) {
-                    $oldPath = str_replace(Storage::disk('public')->url(''), '', $center->logo_url);
-                    Storage::disk('public')->delete($oldPath);
+                if ($center->logo_file_id) {
+                    $this->imageKitService->delete($center->logo_file_id);
                 }
-
-                $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
-                $path = $request->image->storeAs('images/medical_centers', $imageName, 'public');
-                $center->update(['logo_url' => Storage::disk('public')->url($path)]);
+                
+                $uploadResult = $this->imageKitService->upload($request->image, 'medical-centers/logo');
+                $center->update([
+                    'logo_url' => $uploadResult['url'],
+                    'logo_file_id' => $uploadResult['fileId']
+                ]);
             }
 
             $center->refresh();
@@ -475,12 +480,19 @@ class MedicalCenterController extends Controller
         }
 
         try {
-            // حذف الصورة إن وجدت
-            if ($center->logo_url) {
-                $oldPath = str_replace(Storage::disk('public')->url(''), '', $center->logo_url);
-                Storage::disk('public')->delete($oldPath);
+            // حذف الصور من ImageKit قبل حذف السجلات
+            if ($center->logo_file_id) {
+                $this->imageKitService->delete($center->logo_file_id);
             }
 
+            // حذف صور المعرض من ImageKit
+            foreach ($center->galleryImages as $galleryImage) {
+                if ($galleryImage->file_id) {
+                    $this->imageKitService->delete($galleryImage->file_id);
+                }
+            }
+
+            // حذف المركز
             $center->delete();
 
             return response()->json([

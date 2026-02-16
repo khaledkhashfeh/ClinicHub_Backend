@@ -11,6 +11,8 @@ class ClinicService extends Model
         'clinic_id',
         'name',
         'price',
+        'currency',
+        'description',
     ];
 
     protected $casts = [

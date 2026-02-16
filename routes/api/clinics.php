@@ -36,6 +36,21 @@ Route::prefix('clinics')->middleware('auth:clinic')->group(function () {
     Route::put('/doctors/{doctorId}/primary', [ClinicController::class, 'setPrimaryDoctor']); // Set primary doctor
 });
 
+// Clinic Gallery Routes (v1 API)
+Route::prefix('v1/clinic')->middleware('auth:clinic')->group(function () {
+    Route::post('/gallery', [ClinicController::class, 'uploadGalleryImages']);
+    Route::get('/gallery', [ClinicController::class, 'getGalleryImages']);
+    Route::delete('/gallery/{image_id}', [ClinicController::class, 'deleteGalleryImage']);
+});
+
+// Clinic Services Routes (v1 API)
+Route::prefix('v1/clinic')->middleware('auth:clinic')->group(function () {
+    Route::get('/services', [ClinicController::class, 'getServices']);
+    Route::post('/services', [ClinicController::class, 'createService']);
+    Route::patch('/services/{service_id}', [ClinicController::class, 'updateService']);
+    Route::delete('/services/{service_id}', [ClinicController::class, 'deleteService']);
+});
+
 // Invitation routes that were in the wrong file
 Route::prefix('clinics/invitations')->middleware('auth:clinic')->group(function () {
     Route::get('/', [InvitationController::class, 'getClinicInvitations']); // Get invitations sent by clinic

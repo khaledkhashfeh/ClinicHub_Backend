@@ -23,6 +23,7 @@ class User extends Authenticatable implements JWTSubject
         'gender',
         'birth_date',
         'profile_photo_url',
+        'profile_photo_file_id',
         'status',
         'otp_code',
         'otp_expires_at',

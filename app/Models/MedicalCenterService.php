@@ -14,6 +14,8 @@ class MedicalCenterService extends Model
         'medical_center_id',
         'name',
         'price',
+        'currency',
+        'description',
     ];
 
     protected $casts = [

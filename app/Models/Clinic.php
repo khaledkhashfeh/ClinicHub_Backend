@@ -31,6 +31,7 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
         'username',
         'password',
         'main_image',
+        'main_image_file_id',
         'working_hours',
         'latitude',
         'longitude',

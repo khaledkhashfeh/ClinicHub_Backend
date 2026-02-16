@@ -386,6 +386,229 @@ class ClinicApi
     {
     }
 
+    #[OA\Get(
+        path: "/api/clinics/doctors",
+        summary: "Get doctors associated with clinic",
+        description: "Returns the list of doctors associated with the authenticated clinic",
+        tags: ["Clinic Doctors"],
+        security: [["jwt" => ["clinic"]]],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Doctors retrieved successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "id", type: "integer", example: 1),
+                                    new OA\Property(property: "doctor_id", type: "integer", example: 1),
+                                    new OA\Property(property: "clinic_id", type: "integer", example: 1),
+                                    new OA\Property(property: "is_primary", type: "boolean", example: false),
+                                    new OA\Property(
+                                        property: "user",
+                                        properties: [
+                                            new OA\Property(property: "id", type: "integer", example: 1),
+                                            new OA\Property(property: "first_name", type: "string", example: "John"),
+                                            new OA\Property(property: "last_name", type: "string", example: "Doe"),
+                                            new OA\Property(property: "email", type: "string", format: "email", example: "john.doe@example.com"),
+                                            new OA\Property(property: "phone", type: "string", example: "07771234567"),
+                                        ]
+                                    ),
+                                    new OA\Property(
+                                        property: "specializations",
+                                        type: "array",
+                                        items: new OA\Items(
+                                            properties: [
+                                                new OA\Property(property: "id", type: "integer", example: 1),
+                                                new OA\Property(property: "name", type: "string", example: "Cardiology"),
+                                            ]
+                                        )
+                                    ),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized access"
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Error retrieving doctors"
+            )
+        ]
+    )]
+    public function getDoctors()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/clinics/doctors",
+        summary: "Add doctor to clinic",
+        description: "Adds a doctor to the authenticated clinic",
+        tags: ["Clinic Doctors"],
+        security: [["jwt" => ["clinic"]]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "application/json",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "doctor_id", type: "integer", example: 1, description: "ID of the doctor to add"),
+                    ],
+                    required: ["doctor_id"]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Doctor added to clinic successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Doctor added to clinic successfully"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "clinic_id", type: "integer", example: 1),
+                                new OA\Property(property: "doctor_id", type: "integer", example: 1),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Doctor is already associated with this clinic"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized access - must be authenticated as clinic"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor not found"
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Error adding doctor to clinic"
+            )
+        ]
+    )]
+    public function addDoctor()
+    {
+    }
+
+    #[OA\Delete(
+        path: "/api/clinics/doctors/{doctorId}",
+        summary: "Remove doctor from clinic",
+        description: "Removes a doctor from the authenticated clinic",
+        tags: ["Clinic Doctors"],
+        security: [["jwt" => ["clinic"]]],
+        parameters: [
+            new OA\Parameter(
+                name: "doctorId",
+                in: "path",
+                required: true,
+                description: "ID of the doctor to remove",
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Doctor removed from clinic successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Doctor removed from clinic successfully"),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Doctor is not associated with this clinic"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized access - must be authenticated as clinic"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor not found"
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Error removing doctor from clinic"
+            )
+        ]
+    )]
+    public function removeDoctor()
+    {
+    }
+
+    #[OA\Put(
+        path: "/api/clinics/doctors/{doctorId}/primary",
+        summary: "Set primary doctor for clinic",
+        description: "Sets a doctor as the primary doctor for the clinic",
+        tags: ["Clinic Doctors"],
+        security: [["jwt" => ["clinic"]]],
+        parameters: [
+            new OA\Parameter(
+                name: "doctorId",
+                in: "path",
+                required: true,
+                description: "ID of the doctor to set as primary",
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Primary doctor set successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "Primary doctor set successfully"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "clinic_id", type: "integer", example: 1),
+                                new OA\Property(property: "doctor_id", type: "integer", example: 1),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Doctor is not associated with this clinic"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized access - must be authenticated as clinic"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor not found"
+            ),
+            new OA\Response(
+                response: 500,
+                description: "Error setting primary doctor"
+            )
+        ]
+    )]
+    public function setPrimaryDoctor()
+    {
+    }
+
     #[OA\Put(
         path: "/api/clinics/profile",
         summary: "Update clinic profile",

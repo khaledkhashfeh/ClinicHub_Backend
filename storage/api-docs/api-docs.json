@@ -965,6 +965,765 @@
                 ]
             }
         },
+        "/api/appointments/set-doctor-work-settings": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Set doctor's work settings",
+                "description": "Updates the work settings for a doctor at a specific clinic, including method selection, appointment period, and queue settings",
+                "operationId": "847468974818a8563dc4153e77857356",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "clinic_id",
+                                    "doctor_id",
+                                    "method_id",
+                                    "appointment_period",
+                                    "queue"
+                                ],
+                                "properties": {
+                                    "clinic_id": {
+                                        "description": "ID of the clinic",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "ID of the doctor",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "method_id": {
+                                        "description": "Method ID (1 for Auto scheduling, 2 for Manual scheduling)",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "appointment_period": {
+                                        "description": "Default appointment period in minutes",
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "queue": {
+                                        "description": "Whether to enable queue system",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "queue_number": {
+                                        "description": "Queue number (required if queue is enabled)",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Doctor work settings updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doctor work settings updated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "method_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "appointment_period": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "queue": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "queue_number": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic": {
+                                                    "type": "object",
+                                                    "example": "{}"
+                                                },
+                                                "doctor": {
+                                                    "type": "object",
+                                                    "example": "{}"
+                                                },
+                                                "method": {
+                                                    "type": "object",
+                                                    "example": "{}"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Weekly schedules are only allowed for method 1 (Auto scheduling)"
+                    },
+                    "404": {
+                        "description": "Doctor is not associated with the specified clinic"
+                    },
+                    "500": {
+                        "description": "Failed to update doctor work settings"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/appointments/set-weekly-schedule": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Set weekly schedule for doctor",
+                "description": "Create or update a weekly schedule template for a doctor in a clinic",
+                "operationId": "c9bc9069a6396bc969e4285220b0ecde",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "clinic_id",
+                                    "doctor_id",
+                                    "appointment_duration",
+                                    "effective_from",
+                                    "weekly_schedule"
+                                ],
+                                "properties": {
+                                    "clinic_id": {
+                                        "description": "ID of the clinic",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "ID of the doctor",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "appointment_duration": {
+                                        "description": "Duration of each appointment in minutes",
+                                        "type": "integer",
+                                        "example": 30
+                                    },
+                                    "effective_from": {
+                                        "description": "Date when schedule becomes effective",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "effective_to": {
+                                        "description": "Date when schedule ends (optional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-12-31",
+                                        "nullable": true
+                                    },
+                                    "weekly_schedule": {
+                                        "description": "Array of weekly schedule days",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "day_of_week": {
+                                                    "description": "Day of week (1=Monday, 7=Sunday)",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "start_time": {
+                                                    "description": "Start time of the day",
+                                                    "type": "string",
+                                                    "example": "09:00:00"
+                                                },
+                                                "end_time": {
+                                                    "description": "End time of the day",
+                                                    "type": "string",
+                                                    "example": "17:00:00"
+                                                },
+                                                "breaks": {
+                                                    "description": "Array of break periods (optional)",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "start": {
+                                                                "description": "Break start time",
+                                                                "type": "string",
+                                                                "example": "12:00:00"
+                                                            },
+                                                            "end": {
+                                                                "description": "Break end time",
+                                                                "type": "string",
+                                                                "example": "13:00:00"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Weekly schedule created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Weekly schedule created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "appointment_duration": {
+                                                    "type": "integer",
+                                                    "example": 30
+                                                },
+                                                "effective_from": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-01"
+                                                },
+                                                "effective_to": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-12-31",
+                                                    "nullable": true
+                                                },
+                                                "week_days": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Doctor is not associated with the specified clinic"
+                    },
+                    "422": {
+                        "description": "Validation errors in the request data"
+                    },
+                    "500": {
+                        "description": "Failed to create weekly schedule"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/appointments/generate-slots": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Generate appointment slots",
+                "description": "Generate appointment slots from schedule templates for a date range",
+                "operationId": "900d138537beda552e70dfc901670a08",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "clinic_id",
+                                    "doctor_id",
+                                    "start_date",
+                                    "end_date"
+                                ],
+                                "properties": {
+                                    "clinic_id": {
+                                        "description": "ID of the clinic",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "ID of the doctor",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "start_date": {
+                                        "description": "Start date for slot generation",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "end_date": {
+                                        "description": "End date for slot generation",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Slots generated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Slots generated successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "start_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-01"
+                                                },
+                                                "end_date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-31"
+                                                },
+                                                "slots_created": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "slots_skipped": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "dates_processed": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Slot generation is only allowed for method 1 (Auto scheduling)"
+                    },
+                    "404": {
+                        "description": "Doctor is not associated with the specified clinic or no active schedule templates found"
+                    },
+                    "500": {
+                        "description": "Failed to generate slots"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/appointments/create-manual-slots": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Create manual appointment slots",
+                "description": "Create manual appointment slots for a specific date (method 2 - Manual scheduling)",
+                "operationId": "414d45e10e0e3a8f30862538f3dac3a0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "clinic_id",
+                                    "doctor_id",
+                                    "date",
+                                    "slots"
+                                ],
+                                "properties": {
+                                    "clinic_id": {
+                                        "description": "ID of the clinic",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "ID of the doctor",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date": {
+                                        "description": "Date for slot creation",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "slots": {
+                                        "description": "Array of manual slots to create",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "start": {
+                                                    "description": "Slot start time",
+                                                    "type": "string",
+                                                    "example": "09:00:00"
+                                                },
+                                                "end": {
+                                                    "description": "Slot end time",
+                                                    "type": "string",
+                                                    "example": "09:30:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "replace_existing": {
+                                        "description": "Whether to replace existing manual slots",
+                                        "type": "boolean",
+                                        "example": false,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Manual slots created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Manual slots created successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-01"
+                                                },
+                                                "slots_created": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "slots": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2023-01-01"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "example": "09:00:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "example": "09:30:00"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "available"
+                                                            },
+                                                            "creation_method": {
+                                                                "type": "string",
+                                                                "example": "manual"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Manual slot creation is only allowed for method 2 (Manual scheduling)"
+                    },
+                    "404": {
+                        "description": "Doctor is not associated with the specified clinic"
+                    },
+                    "500": {
+                        "description": "Failed to create manual slots"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/appointments/add-override": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Add schedule override",
+                "description": "Add an override for a specific date (closed or custom slots)",
+                "operationId": "3b5541d68235cb0535555f84be60ab72",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "clinic_id",
+                                    "doctor_id",
+                                    "date",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "clinic_id": {
+                                        "description": "ID of the clinic",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "doctor_id": {
+                                        "description": "ID of the doctor",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "date": {
+                                        "description": "Date for the override",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2023-01-01"
+                                    },
+                                    "type": {
+                                        "description": "Type of override",
+                                        "type": "string",
+                                        "enum": [
+                                            "closed",
+                                            "custom"
+                                        ],
+                                        "example": "closed"
+                                    },
+                                    "custom_slots": {
+                                        "description": "Custom slots for the day (required if type is 'custom')",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "start": {
+                                                    "description": "Slot start time",
+                                                    "type": "string",
+                                                    "example": "10:00:00"
+                                                },
+                                                "end": {
+                                                    "description": "Slot end time",
+                                                    "type": "string",
+                                                    "example": "11:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "reason": {
+                                        "description": "Reason for the override",
+                                        "type": "string",
+                                        "example": "Holiday",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Override added successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Override added successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2023-01-01"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "closed"
+                                                },
+                                                "custom_slots": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "start": {
+                                                                "description": "Slot start time",
+                                                                "type": "string",
+                                                                "example": "10:00:00"
+                                                            },
+                                                            "end": {
+                                                                "description": "Slot end time",
+                                                                "type": "string",
+                                                                "example": "11:00:00"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "nullable": true
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "example": "Holiday",
+                                                    "nullable": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-01T00:00:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Doctor is not associated with the specified clinic"
+                    },
+                    "500": {
+                        "description": "Failed to add/update override"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
         "/api/clinic/login": {
             "post": {
                 "tags": [
@@ -2024,6 +2783,334 @@
                     },
                     "401": {
                         "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/doctors": {
+            "get": {
+                "tags": [
+                    "Clinic Doctors"
+                ],
+                "summary": "Get doctors associated with clinic",
+                "description": "Returns the list of doctors associated with the authenticated clinic",
+                "operationId": "46e1fc67a0c98ffa6e9148c7827047e1",
+                "responses": {
+                    "200": {
+                        "description": "Doctors retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "doctor_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "clinic_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "is_primary": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "user": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "first_name": {
+                                                                "type": "string",
+                                                                "example": "John"
+                                                            },
+                                                            "last_name": {
+                                                                "type": "string",
+                                                                "example": "Doe"
+                                                            },
+                                                            "email": {
+                                                                "type": "string",
+                                                                "format": "email",
+                                                                "example": "john.doe@example.com"
+                                                            },
+                                                            "phone": {
+                                                                "type": "string",
+                                                                "example": "07771234567"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "specializations": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Cardiology"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized access"
+                    },
+                    "500": {
+                        "description": "Error retrieving doctors"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Clinic Doctors"
+                ],
+                "summary": "Add doctor to clinic",
+                "description": "Adds a doctor to the authenticated clinic",
+                "operationId": "2f4dda4760b6991fa708f6c4c344b950",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "doctor_id"
+                                ],
+                                "properties": {
+                                    "doctor_id": {
+                                        "description": "ID of the doctor to add",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Doctor added to clinic successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doctor added to clinic successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Doctor is already associated with this clinic"
+                    },
+                    "403": {
+                        "description": "Unauthorized access - must be authenticated as clinic"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    },
+                    "500": {
+                        "description": "Error adding doctor to clinic"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/doctors/{doctorId}": {
+            "delete": {
+                "tags": [
+                    "Clinic Doctors"
+                ],
+                "summary": "Remove doctor from clinic",
+                "description": "Removes a doctor from the authenticated clinic",
+                "operationId": "90907221692fc94e0a81e34e42a9993c",
+                "parameters": [
+                    {
+                        "name": "doctorId",
+                        "in": "path",
+                        "description": "ID of the doctor to remove",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Doctor removed from clinic successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doctor removed from clinic successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Doctor is not associated with this clinic"
+                    },
+                    "403": {
+                        "description": "Unauthorized access - must be authenticated as clinic"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    },
+                    "500": {
+                        "description": "Error removing doctor from clinic"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": [
+                            "clinic"
+                        ]
+                    }
+                ]
+            }
+        },
+        "/api/clinics/doctors/{doctorId}/primary": {
+            "put": {
+                "tags": [
+                    "Clinic Doctors"
+                ],
+                "summary": "Set primary doctor for clinic",
+                "description": "Sets a doctor as the primary doctor for the clinic",
+                "operationId": "df8329cd244fad7c3ab67f18087c3d49",
+                "parameters": [
+                    {
+                        "name": "doctorId",
+                        "in": "path",
+                        "description": "ID of the doctor to set as primary",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Primary doctor set successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Primary doctor set successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "clinic_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "doctor_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Doctor is not associated with this clinic"
+                    },
+                    "403": {
+                        "description": "Unauthorized access - must be authenticated as clinic"
+                    },
+                    "404": {
+                        "description": "Doctor not found"
+                    },
+                    "500": {
+                        "description": "Error setting primary doctor"
                     }
                 },
                 "security": [
@@ -7780,39 +8867,71 @@
     "tags": [
         {
             "name": "Admin Authentication",
-            "description": "Admin Authentication"
+            "description": "Endpoints for admin authentication"
         },
         {
             "name": "Admin Management",
-            "description": "Admin Management"
+            "description": "Endpoints for managing doctors, clinics, and secretaries"
         },
         {
             "name": "Clinic Authentication",
-            "description": "Clinic Authentication"
+            "description": "Endpoints for clinic authentication"
         },
         {
             "name": "Clinic Profile",
-            "description": "Clinic Profile"
+            "description": "Endpoints for managing clinic profile"
+        },
+        {
+            "name": "Clinic Doctors",
+            "description": "Endpoints for managing doctors associated with clinics"
+        },
+        {
+            "name": "Doctor Authentication",
+            "description": "Endpoints for doctor authentication"
+        },
+        {
+            "name": "Doctor Profile",
+            "description": "Endpoints for managing doctor profile"
+        },
+        {
+            "name": "Secretary Authentication",
+            "description": "Endpoints for secretary authentication"
+        },
+        {
+            "name": "Patient Authentication",
+            "description": "Endpoints for patient authentication"
+        },
+        {
+            "name": "Patient Profile",
+            "description": "Endpoints for managing patient profile"
+        },
+        {
+            "name": "Governorates",
+            "description": "Endpoints for managing governorates and districts"
+        },
+        {
+            "name": "Medical Specializations",
+            "description": "Endpoints for managing medical specializations"
+        },
+        {
+            "name": "Subscriptions",
+            "description": "Endpoints for managing subscriptions"
+        },
+        {
+            "name": "Notifications",
+            "description": "Endpoints for managing notifications"
+        },
+        {
+            "name": "Invitations",
+            "description": "Endpoints for managing invitations"
+        },
+        {
+            "name": "Appointments",
+            "description": "Endpoints for managing appointments and schedules"
         },
         {
             "name": "Clinic Management",
             "description": "Clinic Management"
-        },
-        {
-            "name": "Doctor Authentication",
-            "description": "Doctor Authentication"
-        },
-        {
-            "name": "Doctor Profile",
-            "description": "Doctor Profile"
-        },
-        {
-            "name": "Governorates",
-            "description": "Governorates"
-        },
-        {
-            "name": "Invitations",
-            "description": "Invitations"
         },
         {
             "name": "Medical Center Authentication",
@@ -7823,40 +8942,16 @@
             "description": "Medical Center Profile"
         },
         {
-            "name": "Medical Specializations",
-            "description": "Medical Specializations"
-        },
-        {
             "name": "Medical Team Authentication",
             "description": "Medical Team Authentication"
-        },
-        {
-            "name": "Notifications",
-            "description": "Notifications"
-        },
-        {
-            "name": "Patient Authentication",
-            "description": "Patient Authentication"
-        },
-        {
-            "name": "Patient Profile",
-            "description": "Patient Profile"
         },
         {
             "name": "Secretary Management",
             "description": "Secretary Management"
         },
         {
-            "name": "Secretary Authentication",
-            "description": "Secretary Authentication"
-        },
-        {
             "name": "Subscription Plans",
             "description": "Subscription Plans"
-        },
-        {
-            "name": "Subscriptions",
-            "description": "Subscriptions"
         },
         {
             "name": "Admin Subscriptions",

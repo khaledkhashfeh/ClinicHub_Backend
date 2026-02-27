@@ -12,6 +12,7 @@ class MedicalSpecialization extends Model
     protected $fillable = [
         'name',
         'image_url',
+        'image_file_id',
         'is_active',
     ];
 

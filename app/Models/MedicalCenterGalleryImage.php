@@ -13,6 +13,8 @@ class MedicalCenterGalleryImage extends Model
     protected $fillable = [
         'medical_center_id',
         'image_path',
+        'file_id',
+        'category',
     ];
 
     public function medicalCenter(): BelongsTo

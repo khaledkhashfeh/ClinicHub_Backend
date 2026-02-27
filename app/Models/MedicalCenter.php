@@ -25,6 +25,7 @@ class MedicalCenter extends Model implements JWTSubject, AuthenticatableContract
         'location_coords',
         'description',
         'logo_url',
+        'logo_file_id',
         'status',
         'username',
         'password',

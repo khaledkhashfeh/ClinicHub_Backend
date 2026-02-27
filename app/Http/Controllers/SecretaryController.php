@@ -7,6 +7,7 @@ use App\Http\Requests\Secretary\SecretaryEditRequest;
 use App\Models\Secretary;
 use App\Models\User;
 use App\Services\UserService;
+use App\Services\ImageKitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +16,13 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 
 class SecretaryController extends Controller
 {
+    protected ImageKitService $imageKitService;
+
+    public function __construct(ImageKitService $imageKitService)
+    {
+        $this->imageKitService = $imageKitService;
+    }
+
     // this function for creating secretary account
     public function createSecretary(SecretaryCreateRequest $request, UserService $userService) {
         $validatedData = $request->validated();
@@ -232,8 +240,14 @@ class SecretaryController extends Controller
             }
 
             if ($request->hasFile('profile_image')) {
-                $imagePath = $request->file('profile_image')->store('profiles/secretaries', 'public');
-                $user->profile_photo_url = $imagePath;
+                // حذف الصورة القديمة إن وجدت
+                if ($user->profile_photo_file_id) {
+                    $this->imageKitService->delete($user->profile_photo_file_id);
+                }
+                
+                $uploadResult = $this->imageKitService->upload($request->file('profile_image'), 'secretaries/profiles');
+                $user->profile_photo_url = $uploadResult['url'];
+                $user->profile_photo_file_id = $uploadResult['fileId'];
             }
 
             $user->save();

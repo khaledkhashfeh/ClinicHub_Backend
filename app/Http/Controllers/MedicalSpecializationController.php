@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\MedicalSpecialization;
+use App\Services\ImageKitService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class MedicalSpecializationController extends Controller
 {
+    protected ImageKitService $imageKitService;
+
+    public function __construct(ImageKitService $imageKitService)
+    {
+        $this->imageKitService = $imageKitService;
+    }
+
     /**
      * List all medical specializations.
      */
@@ -38,14 +45,17 @@ class MedicalSpecializationController extends Controller
         ]);
 
         $imageUrl = null;
+        $imageFileId = null;
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('medical_specializations', 'public');
-            $imageUrl = url('storage/' . $path); // Using url helper instead of Storage::url
+            $uploadResult = $this->imageKitService->upload($request->file('image'), 'medical-specializations');
+            $imageUrl = $uploadResult['url'];
+            $imageFileId = $uploadResult['fileId'];
         }
 
         $specialization = MedicalSpecialization::create([
             'name' => $data['name'],
             'image_url' => $imageUrl,
+            'image_file_id' => $imageFileId,
             'is_active' => $data['is_active'] ?? true,
         ]);
 
@@ -85,11 +95,14 @@ class MedicalSpecializationController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            if ($medicalSpecialization->image_url) {
-                $this->deleteOldImage($medicalSpecialization->image_url);
+            // حذف الصورة القديمة إن وجدت
+            if ($medicalSpecialization->image_file_id) {
+                $this->imageKitService->delete($medicalSpecialization->image_file_id);
             }
-            $path = $request->file('image')->store('medical_specializations', 'public');
-            $medicalSpecialization->image_url = url('storage/' . $path); // Using url helper instead of Storage::url
+            
+            $uploadResult = $this->imageKitService->upload($request->file('image'), 'medical-specializations');
+            $medicalSpecialization->image_url = $uploadResult['url'];
+            $medicalSpecialization->image_file_id = $uploadResult['fileId'];
         }
 
         $medicalSpecialization->save();
@@ -106,10 +119,11 @@ class MedicalSpecializationController extends Controller
      */
     public function destroy(MedicalSpecialization $medicalSpecialization): JsonResponse
     {
-        if ($medicalSpecialization->image_url) {
-            $this->deleteOldImage($medicalSpecialization->image_url);
+        // حذف الصورة من ImageKit
+        if ($medicalSpecialization->image_file_id) {
+            $this->imageKitService->delete($medicalSpecialization->image_file_id);
         }
-
+        
         $deletedName = $medicalSpecialization->name;
         $medicalSpecialization->delete();
 
@@ -129,14 +143,5 @@ class MedicalSpecializationController extends Controller
         ];
     }
 
-    private function deleteOldImage(string $url): void
-    {
-        // Convert url back to storage path if it belongs to public disk
-        $storagePath = public_path('storage/');
-        $relativePath = str_replace(url('storage/'), '', $url);
-        if ($relativePath !== $url) { // If replacement happened, it was a storage URL
-            Storage::disk('public')->delete($relativePath);
-        }
-    }
 }
 

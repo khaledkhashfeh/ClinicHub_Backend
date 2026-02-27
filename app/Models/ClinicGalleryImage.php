@@ -10,6 +10,8 @@ class ClinicGalleryImage extends Model
     protected $fillable = [
         'clinic_id',
         'image_path',
+        'file_id',
+        'category',
     ];
 
     public function clinic(): BelongsTo

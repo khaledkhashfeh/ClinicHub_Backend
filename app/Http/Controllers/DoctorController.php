@@ -11,6 +11,7 @@ use App\Models\Doctor;
 use App\Models\Certification;
 use App\Services\OtpService;
 use App\Services\EvolutionApiService;
+use App\Services\ImageKitService;
 use Carbon\Traits\ToStringFormat;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -24,11 +25,13 @@ class DoctorController extends Controller
 {
     private $otpService;
     private $evolutionApiService;
+    private $imageKitService;
 
-    public function __construct(OtpService $otpService, EvolutionApiService $evolutionApiService)
+    public function __construct(OtpService $otpService, EvolutionApiService $evolutionApiService, ImageKitService $imageKitService)
     {
         $this->otpService = $otpService;
         $this->evolutionApiService = $evolutionApiService;
+        $this->imageKitService = $imageKitService;
     }
 
     public function login(DoctorLoginRequest $request): JsonResponse
@@ -156,10 +159,11 @@ class DoctorController extends Controller
 
         // Handle profile image upload
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $path = $image->store('profiles/patients', 'public');
-            $user->profile_photo_url = Storage::disk('public')->url($path);
-            $user->save();
+            $uploadResult = $this->imageKitService->upload($request->image, 'doctors/profiles');
+            $doctor->update([
+                'image' => $uploadResult['url'],
+                'image_file_id' => $uploadResult['fileId']
+            ]);
         }
 
         // Send OTP to doctor's phone number for verification
@@ -193,13 +197,16 @@ class DoctorController extends Controller
         if (is_array($certifications)) {
             foreach ($certifications as $certificationData) {
                 if (isset($certificationData['name']) && isset($certificationData['image'])) {
-                    $imageName = time() . '_' . uniqid() . '.' . $certificationData['image']->extension();
-                    $certificationData['image']->move(public_path('storage/certifications'), $imageName);
+                    $uploadResult = $this->imageKitService->upload(
+                        $certificationData['image'],
+                        "doctors/$doctorId/certifications"
+                    );
 
                     Certification::create([
                         'doctor_id' => $doctorId,
                         'name' => $certificationData['name'],
-                        'image_url' => 'storage/certifications/' . $imageName
+                        'image_url' => $uploadResult['url'],
+                        'image_file_id' => $uploadResult['fileId']
                     ]);
                 }
             }
@@ -317,9 +324,14 @@ class DoctorController extends Controller
 
         // Handle profile image upload
         if ($request->hasFile('image')) {
-            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
-            $request->image->move(public_path('storage/images/doctors'), $imageName);
-            $doctorUpdateData['image'] = 'storage/images/doctors/' . $imageName;
+            // حذف الصورة القديمة إن وجدت
+            if ($doctor->image_file_id) {
+                $this->imageKitService->delete($doctor->image_file_id);
+            }
+
+            $uploadResult = $this->imageKitService->upload($request->image, 'doctors/profiles');
+            $doctorUpdateData['image'] = $uploadResult['url'];
+            $doctorUpdateData['image_file_id'] = $uploadResult['fileId'];
         }
 
         $doctor->update($doctorUpdateData);

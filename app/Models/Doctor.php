@@ -30,7 +30,9 @@ class Doctor extends Model
         'instagram_link',
         'status',
         'phone_verified',
-        'has_secretary_service'
+        'has_secretary_service',
+        'image',
+        'image_file_id'
     ];
 
     protected $casts = [

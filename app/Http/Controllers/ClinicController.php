@@ -102,6 +102,9 @@ class ClinicController extends Controller
             'status' => 'pending', // New clinics start as pending
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
+            'facebook_link' => $request->facebook_link,
+            'instagram_link' => $request->instagram_link,
+            'website_link' => $request->website_link,
         ]);
 
         // Handle main image upload

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Storage;
 
 class DoctorController extends Controller
 {
@@ -84,7 +85,7 @@ class DoctorController extends Controller
             'message' => 'تم تسجيل الدخول بنجاح.',
             'token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60, // Convert minutes to seconds
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
             'doctor' => [
                 'id' => $doctor->id,
                 'full_name' => $doctor->full_name,
@@ -125,6 +126,7 @@ class DoctorController extends Controller
         $user->birth_date = $request->date_of_birth; // Map date_of_birth from request to birth_date in model
         $user->gender = $request->gender; // Save gender from request
         $user->status = $doctorStatus; // Users created via doctor registration start as approved
+        // $user->profile_photo_url = $request->image;
         $user->save();
 
         // Create doctor profile with appropriate status
@@ -154,9 +156,10 @@ class DoctorController extends Controller
 
         // Handle profile image upload
         if ($request->hasFile('image')) {
-            $imageName = time() . '_' . uniqid() . '.' . $request->image->extension();
-            $request->image->move(public_path('storage/images/doctors'), $imageName);
-            $doctor->update(['image' => 'storage/images/doctors/' . $imageName]);
+            $image = $request->file('image');
+            $path = $image->store('profiles/patients', 'public');
+            $user->profile_photo_url = Storage::disk('public')->url($path);
+            $user->save();
         }
 
         // Send OTP to doctor's phone number for verification

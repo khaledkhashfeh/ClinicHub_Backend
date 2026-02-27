@@ -42,7 +42,12 @@ class ClinicRegisterRequest extends FormRequest
             'gallery_images' => 'nullable|array',
             'gallery_images.*' => 'image|mimes:jpeg,png,jpg|max:5120', // 5MB max each
             'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180'
+            'longitude' => 'nullable|numeric|between:-180,180',
+
+            // Social media links (optional)
+            'facebook_link' => 'nullable|url|max:255',
+            'instagram_link' => 'nullable|url|max:255',
+            'website_link' => 'nullable|url|max:255'
         ];
     }
 

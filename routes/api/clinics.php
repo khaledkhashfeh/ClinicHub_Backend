@@ -18,7 +18,7 @@ Route::prefix('clinic')->group(function () {
 Route::post('clinics', [ClinicController::class, 'register']);
 
 // Clinic Protected Routes
-Route::prefix('clinics')->middleware('auth:clinic')->group(function () {
+Route::prefix('clinics')->middleware('admin')->group(function () {
     Route::get('profile', [ClinicController::class, 'show']);
     Route::put('profile', [ClinicController::class, 'update']);
     Route::delete('profile', [ClinicController::class, 'destroy']);

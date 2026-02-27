@@ -7,11 +7,15 @@ use App\Http\Requests\Appointment\GenerateSlotsRequest;
 use App\Http\Requests\Appointment\WeeklyScheduleRequest;
 use App\Http\Requests\Appointment\OverrideRequest;
 use App\Http\Requests\Appointment\CreateManualSlotsRequest;
+use App\Models\Appointment;
 use App\Models\ClinicDoctor;
 use App\Models\DoctorClinicSchedule;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleSlot;
+use App\Models\WaitingList;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class AppointmentsController extends Controller
@@ -709,6 +713,737 @@ class AppointmentsController extends Controller
                 'success' => false,
                 'message' => 'Failed to add/update override',
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while saving the override'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get booking information for a specific doctor in a clinic
+     * 
+     * @param int $clinic_id
+     * @param int $doctor_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBookingInfo($clinic_id, $doctor_id)
+    {
+        try {
+            // Find the clinic-doctor relationship
+            $clinicDoctor = ClinicDoctor::where('clinic_id', $clinic_id)
+                                        ->where('doctor_id', $doctor_id)
+                                        ->with(['clinic', 'doctor', 'method'])
+                                        ->first();
+
+            if (!$clinicDoctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with the specified clinic'
+                ], 404);
+            }
+
+            // Get the schedule to determine appointment duration
+            $schedule = DoctorClinicSchedule::where('doctor_id', $doctor_id)
+                                           ->where('clinic_id', $clinic_id)
+                                           ->first();
+
+            $appointmentDuration = $schedule ? $schedule->appointment_duration : $clinicDoctor->appointment_period;
+
+            // Check if the doctor supports waiting list (based on queue settings)
+            $supportsWaitingList = $clinicDoctor->queue ?? false;
+
+            // Get waiting list settings if applicable
+            $waitingListSettings = null;
+            if ($supportsWaitingList) {
+                // You could add logic here to get max capacity and current count
+                $waitingListSettings = [
+                    'max_capacity' => $clinicDoctor->queue_number ?? null, // Max capacity from clinic doctor settings
+                    'current_count' => WaitingList::where('doctor_id', $doctor_id)
+                                                 ->where('clinic_id', $clinic_id)
+                                                 ->where('target_date', Carbon::today()->toDateString())
+                                                 ->where('status', 'active')
+                                                 ->count() // Current count of people in waiting list for today
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'doctor_id' => $clinicDoctor->doctor_id,
+                    'clinic_id' => $clinicDoctor->clinic_id,
+                    'appointment_method_id' => $clinicDoctor->method_id,
+                    'appointment_duration' => $appointmentDuration,
+                    'supports_waiting_list' => $supportsWaitingList,
+                    'waiting_list_settings' => $waitingListSettings
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve booking information',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while retrieving booking information'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get available appointments for a specific doctor in a clinic
+     * 
+     * @param int $clinic_id
+     * @param int $doctor_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getAvailableAppointments($clinic_id, $doctor_id, Request $request)
+    {
+        try {
+            // Validate inputs
+            $clinicDoctor = ClinicDoctor::where('clinic_id', $clinic_id)
+                                        ->where('doctor_id', $doctor_id)
+                                        ->first();
+
+            if (!$clinicDoctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with the specified clinic'
+                ], 404);
+            }
+
+            // Get the date from request or use today
+            $requestedDate = $request->query('date');
+            $selectedDate = null;
+            if (!$requestedDate) {
+                $selectedDate = Carbon::today()->toDateString();
+            } else {
+                // Validate the date format
+                try {
+                    $selectedDate = Carbon::parse($requestedDate)->toDateString();
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid date format. Please use YYYY-MM-DD format.'
+                    ], 400);
+                }
+            }
+
+            // Get available days for the month of the selected date (or current month)
+            $availableDays = collect();
+            $baseDate = Carbon::parse($selectedDate);
+            $currentDate = $baseDate->copy()->startOfMonth();
+            $endDate = $baseDate->copy()->endOfMonth();
+
+            $today = Carbon::today();
+            while ($currentDate->lte($endDate)) {
+                if ($currentDate->lt($today)) {
+                    $currentDate->addDay();
+                    continue;
+                }
+                $dateStr = $currentDate->toDateString();
+                
+                // Check if there are available slots for this date
+                $hasAvailableSlots = ScheduleSlot::where('doctor_id', $doctor_id)
+                                                ->where('clinic_id', $clinic_id)
+                                                ->where('date', $dateStr)
+                                                ->available()
+                                                ->exists();
+                
+                if ($hasAvailableSlots) {
+                    $availableDays->push($dateStr);
+                }
+                
+                $currentDate->addDay();
+            }
+
+            // If no date was requested and selected date has no slots, use first available date
+            if (!$requestedDate && !$availableDays->contains($selectedDate)) {
+                $selectedDate = $availableDays->first();
+            }
+
+            // Get appointments for the selected date
+            $appointments = [];
+            if ($selectedDate) {
+                $slots = ScheduleSlot::where('doctor_id', $doctor_id)
+                                   ->where('clinic_id', $clinic_id)
+                                   ->where('date', $selectedDate)
+                                   ->available()
+                                   ->orderBy('start_time')
+                                   ->get();
+
+                $appointments = $slots->map(function ($slot) {
+                    return [
+                        'appointment_id' => $slot->id,
+                        'start_time' => $slot->start_time,
+                        'end_time' => $slot->end_time
+                    ];
+                })->toArray();
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'available_days' => $availableDays->values()->toArray(),
+                    'selected_day_data' => [
+                        'date' => $selectedDate,
+                        'appointments' => $appointments
+                    ]
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve available appointments',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while retrieving appointments'
+            ], 500);
+        }
+    }
+
+    /**
+     * Submit an appointment request (either direct booking or request)
+     * 
+     * @param int $clinic_id
+     * @param int $doctor_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function submitAppointment($clinic_id, $doctor_id, Request $request)
+    {
+        $validated = $request->validate([
+            'appointment_method_id' => 'required|integer',
+            'patient_note' => 'nullable|string|max:500',
+            // For direct booking (method 1)
+            'selected_date' => 'required_if:appointment_method_id,1|date_format:Y-m-d|nullable',
+            'selected_appointment_id' => 'required_if:appointment_method_id,1|integer|nullable',
+            // For request booking (method 2)
+            'preferred_date' => 'required_if:appointment_method_id,2|date_format:Y-m-d|nullable',
+            'preferred_time' => 'required_if:appointment_method_id,2|date_format:H:i|nullable',
+        ]);
+
+        try {
+            // Check if user is authenticated and is a patient
+            $user = Auth::user();
+            if (!$user || !$user->patient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only patients can book appointments'
+                ], 403);
+            }
+
+            $patientId = $user->patient->id;
+
+            // Validate clinic-doctor relationship
+            $clinicDoctor = ClinicDoctor::where('clinic_id', $clinic_id)
+                                        ->where('doctor_id', $doctor_id)
+                                        ->first();
+
+            if (!$clinicDoctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with the specified clinic'
+                ], 404);
+            }
+
+            // Ensure requested method matches clinic settings
+            if ((int) $clinicDoctor->method_id !== (int) $validated['appointment_method_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Requested appointment method is not supported by this doctor in this clinic'
+                ], 400);
+            }
+
+            if ($validated['appointment_method_id'] == 1) {
+                // Direct booking - book slot atomically to avoid double booking
+                $appointment = DB::transaction(function () use ($validated, $doctor_id, $clinic_id, $patientId) {
+                    $slot = ScheduleSlot::where('id', $validated['selected_appointment_id'])
+                                      ->where('doctor_id', $doctor_id)
+                                      ->where('clinic_id', $clinic_id)
+                                      ->where('date', $validated['selected_date'])
+                                      ->lockForUpdate()
+                                      ->first();
+
+                    if (!$slot || !$slot->isAvailableForBooking()) {
+                        return null;
+                    }
+
+                    $appointment = Appointment::create([
+                        'patient_id' => $patientId,
+                        'doctor_id' => $doctor_id,
+                        'clinic_id' => $clinic_id,
+                        'schedule_slot_id' => $slot->id,
+                        'date' => $validated['selected_date'],
+                        'start_time' => $slot->start_time,
+                        'end_time' => $slot->end_time,
+                        'status' => Appointment::STATUS_BOOKED, // Initially booked
+                        'type' => 'consultation',
+                        'source' => 'patient_app',
+                        'payment_status' => 'unpaid',
+                        'patient_note' => $validated['patient_note'] ?? null
+                    ]);
+
+                    $slot->update([
+                        'status' => 'booked',
+                        'is_available' => false
+                    ]);
+
+                    return $appointment;
+                });
+
+                if (!$appointment) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected appointment slot is not available'
+                    ], 409);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Appointment booked successfully',
+                    'data' => [
+                        'appointment_id' => $appointment->id,
+                        'status' => $appointment->status,
+                        'date' => $appointment->date,
+                        'start_time' => $appointment->start_time,
+                        'end_time' => $appointment->end_time
+                    ]
+                ], 201);
+
+            } elseif ($validated['appointment_method_id'] == 2) {
+                $schedule = DoctorClinicSchedule::where('doctor_id', $doctor_id)
+                                               ->where('clinic_id', $clinic_id)
+                                               ->first();
+                $appointmentDuration = $schedule ? $schedule->appointment_duration : $clinicDoctor->appointment_period;
+                $appointmentDuration = $appointmentDuration ?: 30;
+
+                // Request booking - create appointment with pending status
+                $appointment = Appointment::create([
+                    'patient_id' => $patientId,
+                    'doctor_id' => $doctor_id,
+                    'clinic_id' => $clinic_id,
+                    'date' => $validated['preferred_date'],
+                    'start_time' => $validated['preferred_time'],
+                    'end_time' => Carbon::parse($validated['preferred_time'])->addMinutes($appointmentDuration)->format('H:i:s'),
+                    'status' => Appointment::STATUS_PENDING_APPROVAL, // Pending approval
+                    'type' => 'consultation',
+                    'source' => 'patient_app',
+                    'payment_status' => 'unpaid',
+                    'patient_note' => $validated['patient_note'] ?? null
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Appointment request submitted successfully',
+                    'data' => [
+                        'appointment_id' => $appointment->id,
+                        'status' => $appointment->status,
+                        'date' => $appointment->date,
+                        'start_time' => $appointment->start_time,
+                        'end_time' => $appointment->end_time
+                    ]
+                ], 201);
+
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid appointment method ID'
+                ], 400);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit appointment',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while submitting appointment'
+            ], 500);
+        }
+    }
+
+    /**
+     * Cancel an appointment
+     * 
+     * @param int $appointment_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancelAppointment($appointment_id, Request $request)
+    {
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+            'cancelled_by_comment' => 'nullable|string|max:500'
+        ]);
+
+        try {
+            $appointment = Appointment::findOrFail($appointment_id);
+
+            // Check authorization
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required'
+                ], 401);
+            }
+
+            // Determine if user is authorized to cancel
+            $isPatient = $user->patient && $user->patient->id == $appointment->patient_id;
+            $isDoctor = $user->doctor && $user->doctor->id == $appointment->doctor_id;
+            $isAdminOrClinicManager = $user->hasRole(['admin', 'clinic_manager']) || 
+                                     ($user->secretary && $user->secretary->clinic_id == $appointment->clinic_id);
+
+            if (!$isPatient && !$isDoctor && !$isAdminOrClinicManager) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to cancel this appointment'
+                ], 403);
+            }
+
+            // Check if appointment can be cancelled
+            if (!$appointment->canBeCancelled()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This appointment cannot be cancelled'
+                ], 400);
+            }
+
+            // Update appointment status
+            $appointment->update([
+                'status' => Appointment::STATUS_CANCELLED,
+                'cancellation_reason' => $validated['reason'] ?? null,
+                'cancelled_by' => $user->id,
+                'cancelled_by_comment' => $validated['cancelled_by_comment'] ?? null
+            ]);
+
+            // If the appointment had a schedule slot, make it available again
+            if ($appointment->scheduleSlot) {
+                $appointment->scheduleSlot->update([
+                    'status' => 'available',
+                    'is_available' => true
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment cancelled successfully',
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'status' => $appointment->status
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel appointment',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while cancelling appointment'
+            ], 500);
+        }
+    }
+
+    /**
+     * Mark appointment as attended/completed
+     * 
+     * @param int $clinic_id
+     * @param int $appointment_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function markAppointmentAsAttended($clinic_id, $appointment_id, Request $request)
+    {
+        try {
+            $appointment = Appointment::where('id', $appointment_id)
+                                    ->where('clinic_id', $clinic_id)
+                                    ->first();
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found'
+                ], 404);
+            }
+
+            // Check authorization
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required'
+                ], 401);
+            }
+
+            // Determine if user is authorized to mark as attended
+            $isDoctor = $user->doctor && $user->doctor->id == $appointment->doctor_id;
+            $isPatient = $user->patient && $user->patient->id == $appointment->patient_id;
+            $isAdminOrClinicManager = $user->hasRole(['admin', 'clinic_manager']) || 
+                                     ($user->secretary && $user->secretary->clinic_id == $appointment->clinic_id);
+
+            if (!$isDoctor && !$isPatient && !$isAdminOrClinicManager) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to mark this appointment as attended'
+                ], 403);
+            }
+
+            if ($appointment->isCancelled() || $appointment->isCompleted()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This appointment cannot be marked as attended'
+                ], 400);
+            }
+
+            // Update appointment status to completed
+            $appointment->update([
+                'status' => Appointment::STATUS_COMPLETED
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment marked as attended successfully',
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'status' => $appointment->status
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark appointment as attended',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while marking appointment as attended'
+            ], 500);
+        }
+    }
+
+    /**
+     * Confirm appointment initially (24 hours before)
+     * 
+     * @param int $clinic_id
+     * @param int $appointment_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function confirmAppointmentInitial($clinic_id, $appointment_id, Request $request)
+    {
+        try {
+            $appointment = Appointment::where('id', $appointment_id)
+                                    ->where('clinic_id', $clinic_id)
+                                    ->first();
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found'
+                ], 404);
+            }
+
+            $user = Auth::user();
+            if (!$user || !$user->patient || $user->patient->id != $appointment->patient_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to confirm this appointment'
+                ], 403);
+            }
+
+            // Check if appointment is in a state that can be confirmed
+            if (!$appointment->isBooked()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment cannot be confirmed at this stage'
+                ], 400);
+            }
+
+            // Update appointment status to confirmed
+            $appointment->update([
+                'status' => Appointment::STATUS_CONFIRMED
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Appointment confirmed successfully, we will remind you 2 hours before the appointment.',
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'status' => $appointment->status
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to confirm appointment',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while confirming appointment'
+            ], 500);
+        }
+    }
+
+    /**
+     * Confirm appointment finally (2 hours before)
+     * 
+     * @param int $clinic_id
+     * @param int $appointment_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function confirmAppointmentFinal($clinic_id, $appointment_id, Request $request)
+    {
+        try {
+            $appointment = Appointment::where('id', $appointment_id)
+                                    ->where('clinic_id', $clinic_id)
+                                    ->first();
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found'
+                ], 404);
+            }
+
+            $user = Auth::user();
+            if (!$user || !$user->patient || $user->patient->id != $appointment->patient_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to confirm this appointment'
+                ], 403);
+            }
+
+            // Check if appointment is in a state that can be confirmed
+            if (!$appointment->isConfirmed() && !$appointment->isBooked()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment cannot be confirmed at this stage'
+                ], 400);
+            }
+
+            // Update appointment status to final confirmation
+            $appointment->update([
+                'status' => Appointment::STATUS_FINAL_CONFIRMATION
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Final confirmation received. Thank you for confirming your attendance.',
+                'data' => [
+                    'appointment_id' => $appointment->id,
+                    'status' => $appointment->status
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to confirm appointment finally',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while confirming appointment finally'
+            ], 500);
+        }
+    }
+
+    /**
+     * Join waiting list for a specific doctor and date
+     * 
+     * @param int $clinic_id
+     * @param int $doctor_id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function joinWaitingList($clinic_id, $doctor_id, Request $request)
+    {
+        $validated = $request->validate([
+            'target_date' => 'required|date|after_or_equal:today',
+            'patient_note' => 'nullable|string|max:500'
+        ]);
+
+        try {
+            // Check if user is authenticated and is a patient
+            $user = Auth::user();
+            if (!$user || !$user->patient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only patients can join waiting lists'
+                ], 403);
+            }
+
+            $patientId = $user->patient->id;
+
+            // Validate clinic-doctor relationship
+            $clinicDoctor = ClinicDoctor::where('clinic_id', $clinic_id)
+                                        ->where('doctor_id', $doctor_id)
+                                        ->first();
+
+            if (!$clinicDoctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Doctor is not associated with the specified clinic'
+                ], 404);
+            }
+
+            // Check if the doctor supports waiting lists
+            if (!$clinicDoctor->queue) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This doctor does not support waiting lists'
+                ], 400);
+            }
+
+            if (!is_null($clinicDoctor->queue_number)) {
+                $currentCount = WaitingList::where('doctor_id', $doctor_id)
+                                         ->where('clinic_id', $clinic_id)
+                                         ->where('target_date', $validated['target_date'])
+                                         ->whereIn('status', ['active', 'notified'])
+                                         ->count();
+
+                if ($currentCount >= (int) $clinicDoctor->queue_number) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Waiting list is full for the selected date'
+                    ], 400);
+                }
+            }
+
+            // Check if patient is already in the waiting list for this date
+            $existingEntry = WaitingList::where('patient_id', $patientId)
+                                      ->where('doctor_id', $doctor_id)
+                                      ->where('clinic_id', $clinic_id)
+                                      ->where('target_date', $validated['target_date'])
+                                      ->whereIn('status', ['active', 'notified'])
+                                      ->first();
+
+            if ($existingEntry) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are already in the waiting list for this date'
+                ], 400);
+            }
+
+            // Calculate position in queue (based on current active entries for this date)
+            $positionInQueue = WaitingList::where('doctor_id', $doctor_id)
+                                        ->where('clinic_id', $clinic_id)
+                                        ->where('target_date', $validated['target_date'])
+                                        ->where('status', 'active')
+                                        ->count() + 1;
+
+            // Create waiting list entry
+            $waitingListEntry = WaitingList::create([
+                'patient_id' => $patientId,
+                'doctor_id' => $doctor_id,
+                'clinic_id' => $clinic_id,
+                'target_date' => $validated['target_date'],
+                'patient_note' => $validated['patient_note'] ?? null,
+                'position_in_queue' => $positionInQueue,
+                'status' => 'active'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "You have been registered in the waiting list for {$validated['target_date']} successfully. We will notify you if a spot becomes available.",
+                'data' => [
+                    'waiting_list_id' => $waitingListEntry->id,
+                    'doctor_name' => $clinicDoctor->doctor->name ?? 'Unknown Doctor',
+                    'clinic_name' => $clinicDoctor->clinic->name ?? 'Unknown Clinic',
+                    'position_in_queue' => $positionInQueue
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to join waiting list',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while joining waiting list'
             ], 500);
         }
     }

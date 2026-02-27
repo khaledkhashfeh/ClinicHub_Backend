@@ -71,6 +71,11 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
         return $this->belongsTo(District::class);
     }
 
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
     public function services(): HasMany
     {
         return $this->hasMany(ClinicService::class);

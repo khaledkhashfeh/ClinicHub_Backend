@@ -17,10 +17,10 @@ class AdminApi
                 mediaType: "application/json",
                 schema: new OA\Schema(
                     properties: [
-                        new OA\Property(property: "identifier", type: "string", example: "admin@example.com", description: "Email or phone number"),
-                        new OA\Property(property: "password", type: "string", example: "password123", format: "password", minLength: 8, maxLength: 18),
+                        new OA\Property(property: "email", type: "string", format: "email", example: "admin@clinichub.com", description: "Admin email"),
+                        new OA\Property(property: "password", type: "string", format: "password", example: "Admin@12345", minLength: 8, maxLength: 18),
                     ],
-                    required: ["identifier", "password"]
+                    required: ["email", "password"]
                 )
             )
         ),
@@ -41,7 +41,7 @@ class AdminApi
                                 new OA\Property(property: "id", type: "integer", example: 1),
                                 new OA\Property(property: "first_name", type: "string", example: "Admin"),
                                 new OA\Property(property: "last_name", type: "string", example: "User"),
-                                new OA\Property(property: "email", type: "string", example: "admin@example.com"),
+                                new OA\Property(property: "email", type: "string", example: "admin@clinichub.com"),
                                 new OA\Property(property: "phone", type: "string", example: "07771234567"),
                                 new OA\Property(property: "role", type: "string", example: "admin"),
                             ]

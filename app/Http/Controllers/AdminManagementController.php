@@ -119,7 +119,7 @@ class AdminManagementController extends Controller
 
         // Also update the associated user's status if needed
         if ($doctor->user) {
-            $doctor->user->update(['status' => 'rejected']);
+            $doctor->user->update(['status' => 'blocked']);
         }
 
         return response()->json([

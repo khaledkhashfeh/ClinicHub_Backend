@@ -1,0 +1,2939 @@
+{
+  "info": {
+    "_postman_id": "clinichub-api-collection-v2",
+    "name": "ClinicHub API",
+    "description": "Complete API collection for ClinicHub Backend - All endpoints verified from routes and controllers",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "clinic_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "center_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctor_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "clinic_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "center_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "plan_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "subscription_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00. Public - Governorates & Locations",
+      "item": [
+        {
+          "name": "Get All Governorates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/governorates",
+              "host": ["{{base_url}}"],
+              "path": ["api", "governorates"]
+            }
+          }
+        },
+        {
+          "name": "Get Districts by Governorate",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/governorates/{{governorate_id}}/districts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "governorates", "{{governorate_id}}", "districts"],
+              "variable": [
+                {
+                  "key": "governorate_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "01. Public - Medical Specializations",
+      "item": [
+        {
+          "name": "Get All Specializations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/medical-specializations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-specializations"]
+            }
+          }
+        },
+        {
+          "name": "Create Specialization (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "طب أسنان",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "is_active",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/medical-specializations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-specializations"]
+            }
+          }
+        },
+        {
+          "name": "Update Specialization (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "طب أسنان (محدث)",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "is_active",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/medical-specializations/{{specialization_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-specializations", "{{specialization_id}}"],
+              "variable": [
+                {
+                  "key": "specialization_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Specialization (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/medical-specializations/{{specialization_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-specializations", "{{specialization_id}}"],
+              "variable": [
+                {
+                  "key": "specialization_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Public - Subscription Plans",
+      "item": [
+        {
+          "name": "Get All Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/subscription-plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subscription-plans"]
+            }
+          }
+        },
+        {
+          "name": "Filter Plans by Target Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/subscription-plans?target_type=clinic",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subscription-plans"],
+              "query": [
+                {
+                  "key": "target_type",
+                  "value": "clinic"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Specific Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/subscription-plans/{{plan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "subscription-plans", "{{plan_id}}"],
+              "variable": [
+                {
+                  "key": "plan_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03. Admin - Authentication",
+      "item": [
+        {
+          "name": "Admin Login (Email)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@clinichub.com\",\n  \"password\": \"Admin@12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('admin_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin Login (Phone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"0999999999\",\n  \"password\": \"Admin@12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('admin_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Admin - Doctor Management",
+      "item": [
+        {
+          "name": "Get Pending Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors/pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Approve Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors/{{doctor_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors", "{{doctor_id}}", "approve"],
+              "variable": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/doctors/{{doctor_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "doctors", "{{doctor_id}}", "reject"],
+              "variable": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Admin - Clinic Management",
+      "item": [
+        {
+          "name": "Get Pending Clinics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/clinics/pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "clinics", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Approve Clinic",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/clinics/{{clinic_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "clinics", "{{clinic_id}}", "approve"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Clinic",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/clinics/{{clinic_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "clinics", "{{clinic_id}}", "reject"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List All Clinics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics"]
+            }
+          }
+        },
+        {
+          "name": "Get Clinic by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/{{clinic_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "{{clinic_id}}"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Activate Clinic",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/{{clinic_id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "{{clinic_id}}", "activate"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Deactivate Clinic",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/{{clinic_id}}/deactivate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "{{clinic_id}}", "deactivate"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Admin - Secretary Management",
+      "item": [
+        {
+          "name": "Get Pending Secretaries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/secretaries/pending",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "secretaries", "pending"]
+            }
+          }
+        },
+        {
+          "name": "Approve Secretary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/secretaries/{{secretary_id}}/approve",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "secretaries", "{{secretary_id}}", "approve"],
+              "variable": [
+                {
+                  "key": "secretary_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Secretary",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/secretaries/{{secretary_id}}/reject",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "secretaries", "{{secretary_id}}", "reject"],
+              "variable": [
+                {
+                  "key": "secretary_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "07. Admin - Subscription Plans Management",
+      "item": [
+        {
+          "name": "Create Plan - Silver (Clinic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"الخطة الفضية\",\n  \"target_type\": \"clinic\",\n  \"price\": 5000,\n  \"duration_days\": 30,\n  \"description\": \"وصف الخطة الفضية\",\n  \"features\": [\n    \"50 مريض شهرياً\",\n    \"دعم فني\"\n  ],\n  \"entitlements\": [\n    {\n      \"key\": \"max_patients_per_month\",\n      \"value\": \"50\",\n      \"type\": \"integer\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscription-plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscription-plans"]
+            }
+          }
+        },
+        {
+          "name": "Create Plan - Gold (Clinic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"الخطة الذهبية\",\n  \"target_type\": \"clinic\",\n  \"price\": 10000,\n  \"duration_days\": 30,\n  \"features\": [\n    \"200 مريض شهرياً\",\n    \"سكرتيرة\",\n    \"إشعارات\"\n  ],\n  \"entitlements\": [\n    {\n      \"key\": \"enable_secretary\",\n      \"value\": \"true\",\n      \"type\": \"boolean\"\n    },\n    {\n      \"key\": \"max_patients_per_month\",\n      \"value\": \"200\",\n      \"type\": \"integer\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscription-plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscription-plans"]
+            }
+          }
+        },
+        {
+          "name": "Create Plan - Medical Center",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"باقة المراكز\",\n  \"target_type\": \"medical_center\",\n  \"price\": 40000,\n  \"duration_days\": 90,\n  \"features\": [\n    \"15 عيادة\",\n    \"50 طبيب\",\n    \"نظام محاسبي\"\n  ],\n  \"entitlements\": [\n    {\n      \"key\": \"max_clinics\",\n      \"value\": \"15\",\n      \"type\": \"integer\"\n    },\n    {\n      \"key\": \"max_doctors\",\n      \"value\": \"50\",\n      \"type\": \"integer\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscription-plans",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscription-plans"]
+            }
+          }
+        },
+        {
+          "name": "Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"الخطة الذهبية (محدثة)\",\n  \"price\": 12000,\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscription-plans/{{plan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscription-plans", "{{plan_id}}"],
+              "variable": [
+                {
+                  "key": "plan_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscription-plans/{{plan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscription-plans", "{{plan_id}}"],
+              "variable": [
+                {
+                  "key": "plan_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Admin - Subscriptions Management",
+      "item": [
+        {
+          "name": "Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Filter Subscriptions by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscriptions?status=active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscriptions"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription - Clinic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscribable_type\": \"clinic\",\n  \"subscribable_id\": 2,\n  \"plan_id\": 1,\n  \"starts_at\": \"2026-01-08\",\n  \"status\": \"trial\",\n  \"notes\": \"ملاحظات اختيارية\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Create Subscription - Medical Center",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscribable_type\": \"medical_center\",\n  \"subscribable_id\": 1,\n  \"plan_id\": 3,\n  \"starts_at\": \"2026-01-08\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscriptions"]
+            }
+          }
+        },
+        {
+          "name": "Update Subscription Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\",\n  \"notes\": \"ملاحظات محدثة\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/subscriptions/{{subscription_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "subscriptions", "{{subscription_id}}"],
+              "variable": [
+                {
+                  "key": "subscription_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Clinic - Authentication",
+      "item": [
+        {
+          "name": "Clinic Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifyer\": \"clinic_shifa\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinic/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinic", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('clinic_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Clinic Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinic/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinic", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinic/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinic", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinic/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinic", "verify-otp"]
+            }
+          }
+        },
+        {
+          "name": "Register Clinic",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "clinic_name",
+                  "value": "عيادة الشفاء",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "clinic@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "specialization_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "city_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "شارع رئيسي",
+                  "type": "text"
+                },
+                {
+                  "key": "detailed_address",
+                  "value": "مبنى رقم 5",
+                  "type": "text"
+                },
+                {
+                  "key": "floor",
+                  "value": "3",
+                  "type": "text"
+                },
+                {
+                  "key": "room_number",
+                  "value": "301",
+                  "type": "text"
+                },
+                {
+                  "key": "consultation_fee",
+                  "value": "50000",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "وصف العيادة",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "clinic_shifa",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "latitude",
+                  "value": "33.3152",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "44.3661",
+                  "type": "text"
+                },
+                {
+                  "key": "main_image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "gallery_images[]",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "working_hours",
+                  "value": "{\"sunday\": [{\"start\": \"09:00\", \"end\": \"17:00\"}]}",
+                  "type": "text"
+                },
+                {
+                  "key": "services",
+                  "value": "[{\"name\": \"كشف\", \"price\": 50000}]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Clinic - Profile Management",
+      "item": [
+        {
+          "name": "Get Clinic Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Clinic Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "clinic_name",
+                  "value": "عيادة الشفاء (محدثة)",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "specialization_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "city_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "detailed_address",
+                  "value": "مبنى رقم 5 - طابق 3",
+                  "type": "text"
+                },
+                {
+                  "key": "consultation_fee",
+                  "value": "60000",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "وصف محدث",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "clinic_shifa",
+                  "type": "text"
+                },
+                {
+                  "key": "latitude",
+                  "value": "33.3152",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "44.3661",
+                  "type": "text"
+                },
+                {
+                  "key": "main_image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "gallery_images[]",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "working_hours",
+                  "value": "{\"sunday\": [{\"start\": \"09:00\", \"end\": \"17:00\"}]}",
+                  "type": "text"
+                },
+                {
+                  "key": "services",
+                  "value": "[{\"name\": \"كشف\", \"price\": 60000}]",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinics/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Delete Clinic",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Clinic - Doctor Management",
+      "item": [
+        {
+          "name": "Get Clinic Doctors",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "doctors"]
+            }
+          }
+        },
+        {
+          "name": "Add Doctor to Clinic",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinics/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "doctors"]
+            }
+          }
+        },
+        {
+          "name": "Remove Doctor from Clinic",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/doctors/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "doctors", "{{doctor_id}}"],
+              "variable": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Set Primary Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/doctors/{{doctor_id}}/primary",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "doctors", "{{doctor_id}}", "primary"],
+              "variable": [
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Clinic - Invitations",
+      "item": [
+        {
+          "name": "Get Clinic Invitations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/invitations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "invitations"]
+            }
+          }
+        },
+        {
+          "name": "Send Invitation to Doctor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctor_id\": 1,\n  \"clinic_id\": 1,\n  \"message\": \"ندعوك للانضمام إلى فريقنا الطبي\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/clinics/invitations/send",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "invitations", "send"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Invitation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{clinic_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/clinics/invitations/{{invitation_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "clinics", "invitations", "{{invitation_id}}", "cancel"],
+              "variable": [
+                {
+                  "key": "invitation_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Doctor - Authentication",
+      "item": [
+        {
+          "name": "Doctor Login (Email)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"doctor@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('user_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Doctor Login (Username)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"dr_ahmed\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('user_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Doctor Register Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "أحمد",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "محمد",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "doctor@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "password_confirmation",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "dr_ahmed",
+                  "type": "text"
+                },
+                {
+                  "key": "license_number",
+                  "value": "12345",
+                  "type": "text"
+                },
+                {
+                  "key": "practicing_profession_date",
+                  "value": "2015-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "طبيب اختصاصي",
+                  "type": "text"
+                },
+                {
+                  "key": "distinguished_specialties",
+                  "value": "جراحة، قلب",
+                  "type": "text"
+                },
+                {
+                  "key": "facebook_link",
+                  "value": "https://facebook.com/dr",
+                  "type": "text"
+                },
+                {
+                  "key": "instagram_link",
+                  "value": "https://instagram.com/dr",
+                  "type": "text"
+                },
+                {
+                  "key": "specializations_ids[]",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "specializations_ids[]",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "certifications[]",
+                  "value": "{\"name\": \"شهادة 1\"}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/register-request",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "register-request"]
+            }
+          }
+        },
+        {
+          "name": "Verify Phone",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/verify-phone",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "verify-phone"]
+            }
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/resend-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "resend-otp"]
+            }
+          }
+        },
+        {
+          "name": "Doctor Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctor/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Doctor - Profile Management",
+      "item": [
+        {
+          "name": "Get Doctor Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Doctor Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "أحمد",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "محمد",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "doctor@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "dr_ahmed",
+                  "type": "text"
+                },
+                {
+                  "key": "license_number",
+                  "value": "12345",
+                  "type": "text"
+                },
+                {
+                  "key": "practicing_profession_date",
+                  "value": "2015-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "وصف محدث",
+                  "type": "text"
+                },
+                {
+                  "key": "distinguished_specialties",
+                  "value": "جراحة",
+                  "type": "text"
+                },
+                {
+                  "key": "facebook_link",
+                  "value": "https://facebook.com/dr",
+                  "type": "text"
+                },
+                {
+                  "key": "instagram_link",
+                  "value": "https://instagram.com/dr",
+                  "type": "text"
+                },
+                {
+                  "key": "consultation_price",
+                  "value": "50000",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "specializations_ids[]",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "specializations_ids[]",
+                  "value": "2",
+                  "type": "text"
+                },
+                {
+                  "key": "certifications[]",
+                  "value": "{\"name\": \"شهادة جديدة\"}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "15. Doctor - Invitations",
+      "item": [
+        {
+          "name": "Respond to Invitation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctor/invitations/{{invitation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctor", "invitations", "{{invitation_id}}"],
+              "variable": [
+                {
+                  "key": "invitation_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "16. Medical Center - Authentication",
+      "item": [
+        {
+          "name": "Medical Center Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"center_damascus\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/center/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "center", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('center_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medical Center Register Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "center_name",
+                  "value": "مركز دمشق الطبي",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "city_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "clinic_count",
+                  "value": "10",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "center_damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "password_confirmation",
+                  "value": "password123",
+                  "type": "text"
+                },
+                {
+                  "key": "detailed_address",
+                  "value": "شارع رئيسي",
+                  "type": "text"
+                },
+                {
+                  "key": "latitude",
+                  "value": "33.5138",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "36.2765",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "gallery_images[]",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "working_hours",
+                  "value": "{\"sunday\": [{\"start\": \"08:00\", \"end\": \"20:00\"}]}",
+                  "type": "text"
+                },
+                {
+                  "key": "services",
+                  "value": "[{\"name\": \"استشارة\", \"price\": 50000}]",
+                  "type": "text"
+                },
+                {
+                  "key": "facebook_link",
+                  "value": "https://facebook.com/center",
+                  "type": "text"
+                },
+                {
+                  "key": "instagram_link",
+                  "value": "https://instagram.com/center",
+                  "type": "text"
+                },
+                {
+                  "key": "website_link",
+                  "value": "https://center.com",
+                  "type": "text"
+                },
+                {
+                  "key": "plan_id",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/center/register-request",
+              "host": ["{{base_url}}"],
+              "path": ["api", "center", "register-request"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "17. Medical Center - Management",
+      "item": [
+        {
+          "name": "Update Medical Center",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "center_name",
+                  "value": "مركز دمشق الطبي (محدث)",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "center_damascus",
+                  "type": "text"
+                },
+                {
+                  "key": "clinic_count",
+                  "value": "15",
+                  "type": "text"
+                },
+                {
+                  "key": "latitude",
+                  "value": "33.5138",
+                  "type": "text"
+                },
+                {
+                  "key": "longitude",
+                  "value": "36.2765",
+                  "type": "text"
+                },
+                {
+                  "key": "detailed_address",
+                  "value": "عنوان محدث",
+                  "type": "text"
+                },
+                {
+                  "key": "facebook_link",
+                  "value": "https://facebook.com/center",
+                  "type": "text"
+                },
+                {
+                  "key": "instagram_link",
+                  "value": "https://instagram.com/center",
+                  "type": "text"
+                },
+                {
+                  "key": "website_link",
+                  "value": "https://center.com",
+                  "type": "text"
+                },
+                {
+                  "key": "working_hours",
+                  "value": "{\"sunday\": [{\"start\": \"08:00\", \"end\": \"20:00\"}]}",
+                  "type": "text"
+                },
+                {
+                  "key": "services",
+                  "value": "[{\"name\": \"استشارة\", \"price\": 60000}]",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "gallery_images[]",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/centers/{{center_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "centers", "{{center_id}}"],
+              "variable": [
+                {
+                  "key": "center_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Medical Center",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{center_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/centers/{{center_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "centers", "{{center_id}}"],
+              "variable": [
+                {
+                  "key": "center_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "18. Medical Team - Authentication",
+      "item": [
+        {
+          "name": "Medical Team Login (Doctor/Secretary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"dr_ahmed\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/medical-team/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-team", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('user_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medical Team Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/medical-team/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "medical-team", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "19. Secretary - Management",
+      "item": [
+        {
+          "name": "Create Secretary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"فاطمة\",\n  \"last_name\": \"أحمد\",\n  \"phone\": \"07779876543\",\n  \"email\": \"fatima@example.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"date_of_birth\": \"1995-01-01\",\n  \"gender\": \"female\",\n  \"username\": \"fatima_sec\",\n  \"entity_id\": 1,\n  \"entity_type\": \"clinic\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/secretaries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "secretaries"]
+            }
+          }
+        },
+        {
+          "name": "Update Secretary Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"فاطمة\",\n  \"last_name\": \"أحمد\",\n  \"phone\": \"07779876543\",\n  \"email\": \"fatima@example.com\",\n  \"username\": \"fatima_sec\",\n  \"entity_id\": 1,\n  \"entity_type\": \"medical_center\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/secretaries/updateAccounte",
+              "host": ["{{base_url}}"],
+              "path": ["api", "secretaries", "updateAccounte"]
+            }
+          }
+        },
+        {
+          "name": "Get Secretary Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/secretaries/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "secretaries", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Secretary Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "فاطمة",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "أحمد",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07779876543",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "fatima@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "username",
+                  "value": "fatima_sec",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1995-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "female",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_image",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "entity_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "entity_type",
+                  "value": "clinic",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/secretaries/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "secretaries", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "20. Patient - Authentication",
+      "item": [
+        {
+          "name": "Patient Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('patient_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "send-otp"]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "verify-otp"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.token) {",
+                  "        pm.environment.set('patient_token', jsonData.token);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"07771234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/resend-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "resend-otp"]
+            }
+          }
+        },
+        {
+          "name": "Patient Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "محمد",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "علي",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "07771234567",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "21. Patient - Management",
+      "item": [
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "محمد",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "علي",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "mohamed@example.com",
+                  "type": "text"
+                },
+                {
+                  "key": "governorate_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "district_id",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1990-01-01",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patients/{{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patients", "{{patient_id}}"],
+              "variable": [
+                {
+                  "key": "patient_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "22. Appointments - Setup",
+      "item": [
+        {
+          "name": "Set Doctor Work Settings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinic_id\": 1,\n  \"doctor_id\": 1,\n  \"method_id\": 1,\n  \"appointment_period\": 30,\n  \"queue\": true,\n  \"queue_number\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/set-doctor-work-settings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "set-doctor-work-settings"]
+            }
+          }
+        },
+        {
+          "name": "Set Weekly Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinic_id\": 1,\n  \"doctor_id\": 1,\n  \"effective_from\": \"2026-01-01\",\n  \"effective_to\": \"2026-12-31\",\n  \"appointment_duration\": 30,\n  \"weekly_schedule\": [\n    {\n      \"day_of_week\": 0,\n      \"start_time\": \"09:00\",\n      \"end_time\": \"17:00\",\n      \"breaks\": [\n        {\n          \"start\": \"13:00\",\n          \"end\": \"14:00\"\n        }\n      ]\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/set-weekly-schedule",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "set-weekly-schedule"]
+            }
+          }
+        },
+        {
+          "name": "Generate Slots",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinic_id\": 1,\n  \"doctor_id\": 1,\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-01-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/generate-slots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "generate-slots"]
+            }
+          }
+        },
+        {
+          "name": "Create Manual Slots",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinic_id\": 1,\n  \"doctor_id\": 1,\n  \"date\": \"2026-01-15\",\n  \"slots\": [\n    {\n      \"start\": \"10:00\",\n      \"end\": \"10:30\"\n    },\n    {\n      \"start\": \"11:00\",\n      \"end\": \"11:30\"\n    }\n  ],\n  \"replace_existing\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/create-manual-slots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "create-manual-slots"]
+            }
+          }
+        },
+        {
+          "name": "Add Override",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clinic_id\": 1,\n  \"doctor_id\": 1,\n  \"date\": \"2026-01-15\",\n  \"start_time\": \"08:00\",\n  \"end_time\": \"12:00\",\n  \"type\": \"working\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/add-override",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "add-override"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Appointments - Booking",
+      "item": [
+        {
+          "name": "Get Booking Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appointments/{{clinic_id}}/patients/doctors/{{doctor_id}}/booking-info",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "{{clinic_id}}", "patients", "doctors", "{{doctor_id}}", "booking-info"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Available Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/appointments/{{clinic_id}}/patients/doctors/{{doctor_id}}/available-appointments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "{{clinic_id}}", "patients", "doctors", "{{doctor_id}}", "available-appointments"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"slot_id\": 1,\n  \"notes\": \"ملاحظات\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/{{clinic_id}}/patients/doctors/{{doctor_id}}/submit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "{{clinic_id}}", "patients", "doctors", "{{doctor_id}}", "submit"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Join Waiting List",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"preferred_date\": \"2026-01-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/appointments/{{clinic_id}}/patients/doctors/{{doctor_id}}/waiting-list",
+              "host": ["{{base_url}}"],
+              "path": ["api", "appointments", "{{clinic_id}}", "patients", "doctors", "{{doctor_id}}", "waiting-list"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "doctor_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "24. Appointments - Management",
+      "item": [
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/appointments/{{appointment_id}}/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "appointments", "{{appointment_id}}", "cancel"],
+              "variable": [
+                {
+                  "key": "appointment_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Appointment as Attended",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clinics/{{clinic_id}}/appointments/{{appointment_id}}/mark-attended",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clinics", "{{clinic_id}}", "appointments", "{{appointment_id}}", "mark-attended"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "appointment_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirm Appointment Initial",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clinics/{{clinic_id}}/appointments/{{appointment_id}}/confirm-initial",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clinics", "{{clinic_id}}", "appointments", "{{appointment_id}}", "confirm-initial"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "appointment_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Confirm Appointment Final",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clinics/{{clinic_id}}/appointments/{{appointment_id}}/confirm-final",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clinics", "{{clinic_id}}", "appointments", "{{appointment_id}}", "confirm-final"],
+              "variable": [
+                {
+                  "key": "clinic_id",
+                  "value": "1"
+                },
+                {
+                  "key": "appointment_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "25. My Subscription",
+      "item": [
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/my-subscription",
+              "host": ["{{base_url}}"],
+              "path": ["api", "my-subscription"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "26. Public - Available Doctors",
+      "item": [
+        {
+          "name": "Search Available Doctors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/available-doctors?query=أحمد",
+              "host": ["{{base_url}}"],
+              "path": ["api", "available-doctors"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "أحمد"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "27. Notifications",
+      "item": [
+        {
+          "name": "Send Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"title\": \"عنوان الإشعار\",\n  \"body\": \"محتوى الإشعار\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/notification/send-notification",
+              "host": ["{{base_url}}"],
+              "path": ["api", "notification", "send-notification"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

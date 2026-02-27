@@ -204,6 +204,9 @@ class ClinicApi
                         new OA\Property(property: "working_hours", type: "string", example: "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}", description: "ساعات العمل بصيغة JSON"),
                         new OA\Property(property: "latitude", type: "number", example: 33.5138, description: "خط العرض (اختياري)"),
                         new OA\Property(property: "longitude", type: "number", example: 36.2765, description: "خط الطول (اختياري)"),
+                        new OA\Property(property: "facebook_link", type: "string", format: "url", example: "https://facebook.com/clinic", description: "رابط فيسبوك (اختياري)", nullable: true),
+                        new OA\Property(property: "instagram_link", type: "string", format: "url", example: "https://instagram.com/clinic", description: "رابط إنستغرام (اختياري)", nullable: true),
+                        new OA\Property(property: "website_link", type: "string", format: "url", example: "https://clinic-website.com", description: "رابط الموقع الإلكتروني (اختياري)", nullable: true),
                         new OA\Property(
                             property: "services[0][name]",
                             type: "string",
@@ -639,6 +642,9 @@ class ClinicApi
                         new OA\Property(property: "working_hours", type: "string", example: "{\"saturday\":{\"open\":\"09:00\",\"close\":\"18:00\"}}", description: "ساعات العمل بصيغة JSON"),
                         new OA\Property(property: "latitude", type: "number", example: 33.5138, description: "خط العرض (اختياري)"),
                         new OA\Property(property: "longitude", type: "number", example: 36.2765, description: "خط الطول (اختياري)"),
+                        new OA\Property(property: "facebook_link", type: "string", format: "url", example: "https://facebook.com/clinic", description: "رابط فيسبوك (اختياري)", nullable: true),
+                        new OA\Property(property: "instagram_link", type: "string", format: "url", example: "https://instagram.com/clinic", description: "رابط إنستغرام (اختياري)", nullable: true),
+                        new OA\Property(property: "website_link", type: "string", format: "url", example: "https://clinic-website.com", description: "رابط الموقع الإلكتروني (اختياري)", nullable: true),
                         new OA\Property(
                             property: "services[0][name]",
                             type: "string",

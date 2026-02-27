@@ -391,4 +391,460 @@ class AppointmentsApi
     public function addOverride()
     {
     }
+
+    #[OA\Get(
+        path: "/api/appointments/{clinic_id}/patients/doctors/{doctor_id}/booking-info",
+        summary: "Get doctor booking info",
+        description: "Returns booking information for a specific doctor at a clinic",
+        tags: ["Appointments"],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "doctor_id",
+                description: "Doctor ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Booking info retrieved successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "doctor_id", type: "integer", example: 1),
+                                new OA\Property(property: "clinic_id", type: "integer", example: 1),
+                                new OA\Property(property: "appointment_period", type: "integer", example: 30),
+                                new OA\Property(property: "queue_enabled", type: "boolean", example: true),
+                                new OA\Property(property: "consultation_fee", type: "number", example: 50000),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor or clinic not found"
+            )
+        ]
+    )]
+    public function bookingInfo()
+    {
+    }
+
+    #[OA\Get(
+        path: "/api/appointments/{clinic_id}/patients/doctors/{doctor_id}/available-appointments",
+        summary: "Get available appointments",
+        description: "Returns available appointment slots for a specific doctor at a clinic",
+        tags: ["Appointments"],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "doctor_id",
+                description: "Doctor ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "date",
+                description: "Filter by date (optional)",
+                in: "query",
+                required: false,
+                schema: new OA\Schema(type: "string", format: "date", example: "2026-01-15")
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Available appointments retrieved successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(
+                            property: "data",
+                            type: "array",
+                            items: new OA\Items(
+                                properties: [
+                                    new OA\Property(property: "id", type: "integer", example: 1),
+                                    new OA\Property(property: "date", type: "string", format: "date", example: "2026-01-15"),
+                                    new OA\Property(property: "start_time", type: "string", example: "09:00:00"),
+                                    new OA\Property(property: "end_time", type: "string", example: "09:30:00"),
+                                    new OA\Property(property: "status", type: "string", example: "available"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor or clinic not found"
+            )
+        ]
+    )]
+    public function availableAppointments()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/appointments/{clinic_id}/patients/doctors/{doctor_id}/submit",
+        summary: "Submit appointment booking",
+        description: "Books an appointment for a patient with a specific doctor at a clinic",
+        tags: ["Appointments"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "doctor_id",
+                description: "Doctor ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "application/json",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "patient_id", type: "integer", example: 1, description: "ID of the patient"),
+                        new OA\Property(property: "slot_id", type: "integer", example: 1, description: "ID of the selected slot"),
+                        new OA\Property(property: "notes", type: "string", example: "ملاحظات", description: "Optional notes for the appointment"),
+                    ],
+                    required: ["patient_id", "slot_id"]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Appointment booked successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم حجز الموعد بنجاح"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "pending"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Invalid slot or patient data"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor, clinic, or slot not found"
+            )
+        ]
+    )]
+    public function submitAppointment()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/appointments/{clinic_id}/patients/doctors/{doctor_id}/waiting-list",
+        summary: "Join waiting list",
+        description: "Adds a patient to the waiting list for a doctor at a clinic",
+        tags: ["Appointments"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "doctor_id",
+                description: "Doctor ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "application/json",
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(property: "patient_id", type: "integer", example: 1, description: "ID of the patient"),
+                        new OA\Property(property: "preferred_date", type: "string", format: "date", example: "2026-01-15", description: "Preferred appointment date"),
+                    ],
+                    required: ["patient_id", "preferred_date"]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "Added to waiting list successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تمت الإضافة إلى قائمة الانتظار بنجاح"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "waiting_list_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "pending"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Invalid patient data"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Doctor or clinic not found"
+            )
+        ]
+    )]
+    public function waitingList()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/v1/appointments/{appointment_id}/cancel",
+        summary: "Cancel appointment",
+        description: "Cancels an existing appointment",
+        tags: ["Appointments"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "appointment_id",
+                description: "Appointment ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Appointment cancelled successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم إلغاء الموعد بنجاح"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "cancelled"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Cannot cancel this appointment"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Appointment not found"
+            )
+        ]
+    )]
+    public function cancelAppointment()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/v1/clinics/{clinic_id}/appointments/{appointment_id}/mark-attended",
+        summary: "Mark appointment as attended",
+        description: "Marks an appointment as attended (clinic only)",
+        tags: ["Appointments"],
+        security: [["jwt" => ["clinic"]]],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "appointment_id",
+                description: "Appointment ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Appointment marked as attended",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم تعليم الموعد كحضور"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "attended"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Cannot mark this appointment"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Appointment not found"
+            )
+        ]
+    )]
+    public function markAttended()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/v1/clinics/{clinic_id}/appointments/{appointment_id}/confirm-initial",
+        summary: "Confirm appointment initial",
+        description: "Confirms the initial stage of an appointment (clinic only)",
+        tags: ["Appointments"],
+        security: [["jwt" => ["clinic"]]],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "appointment_id",
+                description: "Appointment ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Appointment initial confirmed",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم تأكيد الموعد مبدئياً"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "initial_confirmed"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Cannot confirm this appointment"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Appointment not found"
+            )
+        ]
+    )]
+    public function confirmInitial()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/v1/clinics/{clinic_id}/appointments/{appointment_id}/confirm-final",
+        summary: "Confirm appointment final",
+        description: "Confirms the final stage of an appointment (clinic only)",
+        tags: ["Appointments"],
+        security: [["jwt" => ["clinic"]]],
+        parameters: [
+            new OA\Parameter(
+                name: "clinic_id",
+                description: "Clinic ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            ),
+            new OA\Parameter(
+                name: "appointment_id",
+                description: "Appointment ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 1)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Appointment final confirmed",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم تأكيد الموعد نهائياً"),
+                        new OA\Property(
+                            property: "data",
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 1),
+                                new OA\Property(property: "status", type: "string", example: "confirmed"),
+                            ]
+                        ),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Cannot confirm this appointment"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Appointment not found"
+            )
+        ]
+    )]
+    public function confirmFinal()
+    {
+    }
 }

@@ -27,14 +27,14 @@ class PatientController extends Controller
     }
     /**
      * تسجيل الدخول التقليدي للمريض
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]/'],
             'password' => ['required', 'string'],
         ], [
             'phone.required' => 'رقم الهاتف مطلوب.',
@@ -72,7 +72,7 @@ class PatientController extends Controller
                     'password_starts_with' => substr($user->password, 0, 7)
                 ]);
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'عذراً، رقم الهاتف أو كلمة المرور غير صحيحة.',
@@ -90,7 +90,7 @@ class PatientController extends Controller
                     'needs_registration' => true,
                 ], 404);
             }
-            
+
             // إذا كان المستخدم لديه بيانات لكن لا يوجد patient، إنشاء patient تلقائياً
             $patient = Patient::create([
                 'user_id' => $user->id,
@@ -123,7 +123,7 @@ class PatientController extends Controller
 
     /**
      * إرسال رمز التحقق (OTP)
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -170,7 +170,7 @@ class PatientController extends Controller
         $user->otp_expires_at = now()->addMinutes(10); // صلاحية 10 دقائق
         $user->otp_attempts = 0;
         $user->otp_last_sent_at = now();
-        
+
         if (!$user->exists) {
             $user->first_name = '';
             $user->last_name = '';
@@ -178,12 +178,12 @@ class PatientController extends Controller
             $user->gender = 'male'; // قيمة افتراضية (سيتم تحديثها عند التسجيل)
             $user->status = 'pending';
         }
-        
+
         $user->save();
 
         // إرسال OTP عبر Evolution API (نمرر OTP المولد لضمان التطابق)
         $otpResponse = $this->otpService->sendOtp($phone, $otpCode);
-        
+
         if (!$otpResponse['success']) {
             // في حالة فشل الإرسال، نرجع رسالة خطأ
             \Log::error('Failed to send OTP to patient: ' . $phone . ', Error: ' . ($otpResponse['message'] ?? 'Unknown error'));
@@ -202,7 +202,7 @@ class PatientController extends Controller
 
     /**
      * التحقق من رمز OTP وتسجيل الدخول/التسجيل
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -256,14 +256,14 @@ class PatientController extends Controller
 
         // التحقق من OTP باستخدام OtpService (التحقق من Cache أولاً)
         $otpVerified = $this->otpService->verifyOtp($phone, $otp);
-        
+
         // التحقق أيضاً من قاعدة البيانات (للتوافق مع النظام الحالي)
         // نتحقق من قاعدة البيانات إذا فشل التحقق من Cache
         $dbOtpMatch = false;
         if (!$otpVerified) {
             $dbOtpMatch = $user->otp_code === $otp;
         }
-        
+
         // إذا لم ينجح التحقق من أي من المصدرين
         if (!$otpVerified && !$dbOtpMatch) {
             $user->otp_attempts += 1;
@@ -324,7 +324,7 @@ class PatientController extends Controller
 
     /**
      * إعادة إرسال رمز التحقق (OTP)
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -400,7 +400,7 @@ class PatientController extends Controller
 
     /**
      * إنشاء حساب مريض جديد
-     * 
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -479,7 +479,7 @@ class PatientController extends Controller
         $user->birth_date = $request->input('date_of_birth');
         // لا نغير password - تم إنشاؤه عند send-otp
         $user->status = 'approved';
-        
+
         $user->save();
 
         // رفع صورة الملف الشخصي إن وجدت
@@ -504,7 +504,7 @@ class PatientController extends Controller
         $role = Role::firstOrCreate(
             ['name' => 'patient', 'guard_name' => 'api']
         );
-        
+
         // تعيين الـ role للمستخدم
         if (!$user->hasRole('patient', 'api')) {
             $user->assignRole($role);
@@ -529,7 +529,7 @@ class PatientController extends Controller
 
     /**
      * تحديث بيانات المريض
-     * 
+     *
      * @param Request $request
      * @param int $id
      * @return JsonResponse
@@ -621,7 +621,7 @@ class PatientController extends Controller
                 if ($user->profile_photo_file_id) {
                     $this->imageKitService->delete($user->profile_photo_file_id);
                 }
-                
+
                 $uploadResult = $this->imageKitService->upload($request->file('image'), 'patients/profiles');
                 $userData['profile_photo_url'] = $uploadResult['url'];
                 $userData['profile_photo_file_id'] = $uploadResult['fileId'];
@@ -653,7 +653,7 @@ class PatientController extends Controller
 
             // تحديث الملف الطبي
             $medicalFile = $patient->medicalFile;
-            
+
             if (!$medicalFile) {
                 $medicalFile = new MedicalFile();
                 $medicalFile->patient_id = $patient->id;
@@ -723,7 +723,7 @@ class PatientController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'حدث خطأ أثناء تحديث البيانات.',

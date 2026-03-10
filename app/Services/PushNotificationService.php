@@ -32,9 +32,17 @@ class PushNotificationService
     }
 
     /**
+     * Send push notification to patient.
+     */
+    public function sendToPatient($patientId, $title, $body, array $data = [])
+    {
+        return $this->sendNotification($patientId, 'patient', $title, $body, $data);
+    }
+
+    /**
      * Generic method to send push notification
      */
-    private function sendNotification($entityId, $entityType, $title, $body)
+    private function sendNotification($entityId, $entityType, $title, $body, array $data = [])
     {
         try {
             // Get FCM tokens for the entity
@@ -53,11 +61,11 @@ class PushNotificationService
                     'body' => $body,
                     'sound' => 'default'
                 ],
-                'data' => [
+                'data' => array_merge([
                     'title' => $title,
                     'body' => $body,
                     'click_action' => 'FLUTTER_NOTIFICATION_CLICK'
-                ],
+                ], $data),
                 'priority' => 'high'
             ];
 
@@ -100,6 +108,10 @@ class PushNotificationService
             } elseif ($entityType === 'clinic') {
                 $q->whereHas('clinic', function ($clinicQuery) use ($entityId) {
                     $clinicQuery->where('id', $entityId);
+                });
+            } elseif ($entityType === 'patient') {
+                $q->whereHas('patient', function ($patientQuery) use ($entityId) {
+                    $patientQuery->where('id', $entityId);
                 });
             }
         });

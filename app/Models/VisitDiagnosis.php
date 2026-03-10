@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class LabResult extends Model
+class VisitDiagnosis extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'visit_record_id',
-        'test_type',
-        'result_data',
-        'attachment_url',
-        'file_name',
-        'file_url',
-        'file_type',
-        'doctor_comment',
+        'condition_id',
+        'condition_name',
+        'classification',
+        'notes',
     ];
 
     public function visitRecord()

@@ -10,9 +10,17 @@ use App\Http\Requests\Appointment\CreateManualSlotsRequest;
 use App\Models\Appointment;
 use App\Models\ClinicDoctor;
 use App\Models\DoctorClinicSchedule;
+use App\Models\LabRequest;
+use App\Models\LabResult;
+use App\Models\MedicationTracker;
+use App\Models\MedicalFile;
+use App\Models\Prescription;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleSlot;
+use App\Models\VisitDiagnosis;
+use App\Models\VisitRecord;
 use App\Models\WaitingList;
+use App\Services\ImageKitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +28,13 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentsController extends Controller
 {
+    private ImageKitService $imageKitService;
+
+    public function __construct(ImageKitService $imageKitService)
+    {
+        $this->imageKitService = $imageKitService;
+    }
+
     /**
      * Set doctor's work settings within a specific clinic
      * 
@@ -1138,6 +1153,114 @@ class AppointmentsController extends Controller
     }
 
     /**
+     * Return aggregated consultation details for an appointment.
+     *
+     * @param int $appointment_id
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function getConsultationDetails($appointment_id)
+    {
+        try {
+            $appointment = Appointment::with([
+                'doctor.user',
+                'patient.user',
+                'clinic',
+            ])->find($appointment_id);
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found',
+                ], 404);
+            }
+
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Authentication required',
+                ], 401);
+            }
+
+            $isDoctor = $user->doctor && (int) $user->doctor->id === (int) $appointment->doctor_id;
+            $isPatient = $user->patient && (int) $user->patient->id === (int) $appointment->patient_id;
+
+            if (!$isDoctor && !$isPatient) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to access this consultation',
+                ], 403);
+            }
+
+            $visitRecord = VisitRecord::with([
+                'diagnoses',
+                'labRequests',
+                'labResults',
+                'prescriptions',
+            ])->where('appointment_id', $appointment->id)->first();
+
+            if (!$visitRecord) {
+                return response()->noContent();
+            }
+
+            $payload = [
+                'appointment_info' => [
+                    'id' => $appointment->id,
+                    'date' => $appointment->date ? Carbon::parse($appointment->date)->toDateString() : null,
+                    'doctor_name' => $appointment->doctor?->full_name,
+                    'patient_name' => $appointment->patient?->user?->full_name,
+                    'clinic_name' => $appointment->clinic?->clinic_name,
+                ],
+                'general_notes' => $visitRecord->notes,
+                'diagnoses' => $visitRecord->diagnoses->map(function ($diagnosis) {
+                    return [
+                        'condition_id' => $diagnosis->condition_id,
+                        'condition_name' => $diagnosis->condition_name,
+                        'classification' => $diagnosis->classification,
+                        'notes' => $diagnosis->notes,
+                    ];
+                })->values(),
+                'investigations' => [
+                    'requests' => $visitRecord->labRequests->map(function ($request) {
+                        return [
+                            'test_id' => $request->test_id,
+                            'test_name' => $request->test_name,
+                            'status' => $request->status ?? 'pending',
+                        ];
+                    })->values(),
+                    'uploads' => $visitRecord->labResults->map(function ($upload) {
+                        return [
+                            'file_url' => $upload->file_url ?: $upload->attachment_url,
+                            'doctor_comment' => $upload->doctor_comment,
+                        ];
+                    })->values(),
+                ],
+                'prescriptions' => $visitRecord->prescriptions->map(function ($prescription) {
+                    return [
+                        'medicine_name' => $prescription->medication_name,
+                        'dose' => $prescription->dose_description ?: $prescription->dosage,
+                        'duration' => $prescription->duration,
+                        'instructions' => $prescription->food_relation
+                            ?: $prescription->special_instructions
+                            ?: $prescription->instructions,
+                    ];
+                })->values(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $payload,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch consultation details',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while fetching consultation details',
+            ], 500);
+        }
+    }
+
+    /**
      * Mark appointment as attended/completed
      * 
      * @param int $clinic_id
@@ -1334,6 +1457,275 @@ class AppointmentsController extends Controller
     }
 
     /**
+     * Finalize a doctor consultation and mark appointment as completed.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function finalizeConsultation(Request $request)
+    {
+        $validated = $request->validate([
+            'metadata' => 'required|array',
+            'metadata.appointment_id' => 'required|integer|exists:appointments,id',
+            'metadata.patient_id' => 'required|integer|exists:patients,id',
+            'metadata.doctor_id' => 'required|integer|exists:doctors,id',
+            'metadata.clinic_id' => 'required|integer|exists:clinics,id',
+            'metadata.session_start_time' => 'nullable|date',
+
+            'general_notes' => 'nullable|string',
+
+            'diagnoses' => 'nullable|array',
+            'diagnoses.*.condition_id' => 'nullable|string|max:100',
+            'diagnoses.*.condition_name' => 'required_with:diagnoses|string|max:255',
+            'diagnoses.*.classification' => 'nullable|in:acute,chronic,suspected',
+            'diagnoses.*.notes' => 'nullable|string',
+
+            'investigations' => 'nullable|array',
+            'investigations.requests' => 'nullable|array',
+            'investigations.requests.*.test_id' => 'nullable|string|max:100',
+            'investigations.requests.*.test_name' => 'required_with:investigations.requests|string|max:255',
+            'investigations.requests.*.priority' => 'nullable|in:normal,urgent,stat',
+            'investigations.requests.*.instructions' => 'nullable|string',
+
+            'investigations.uploads' => 'nullable|array',
+            'investigations.uploads.*.file_name' => 'nullable|string|max:255',
+            'investigations.uploads.*.file_url' => 'nullable|url|max:2048',
+            'investigations.uploads.*.file_type' => 'nullable|in:pdf,image',
+            'investigations.uploads.*.file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:10240',
+            'investigations.uploads.*.doctor_comment' => 'nullable|string',
+
+            'prescriptions' => 'nullable|array',
+            'prescriptions.*.medicine_name' => 'required_with:prescriptions|string|max:255',
+            'prescriptions.*.total_quantity' => 'nullable|integer|min:1',
+            'prescriptions.*.dose_description' => 'nullable|string|max:255',
+            'prescriptions.*.daily_frequency' => 'nullable|integer|min:1',
+            'prescriptions.*.hourly_interval' => 'nullable|integer|min:1',
+            'prescriptions.*.food_relation' => 'nullable|string|max:100',
+            'prescriptions.*.duration' => 'nullable|string|max:255',
+            'prescriptions.*.special_instructions' => 'nullable|string',
+        ]);
+
+        try {
+            $user = Auth::user();
+            if (!$user || !$user->doctor) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only doctors can finalize consultations',
+                ], 403);
+            }
+
+            $metadata = $validated['metadata'];
+            $authenticatedDoctorId = (int) $user->doctor->id;
+
+            if ($authenticatedDoctorId !== (int) $metadata['doctor_id']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to finalize consultation for this doctor ID',
+                ], 403);
+            }
+
+            $appointment = Appointment::with(['patient.user'])
+                ->find($metadata['appointment_id']);
+
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found',
+                ], 404);
+            }
+
+            if ($appointment->isCancelled()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cancelled appointments cannot be finalized',
+                ], 400);
+            }
+
+            $metadataMatchesAppointment =
+                (int) $appointment->doctor_id === (int) $metadata['doctor_id']
+                && (int) $appointment->patient_id === (int) $metadata['patient_id']
+                && (int) $appointment->clinic_id === (int) $metadata['clinic_id'];
+
+            if (!$metadataMatchesAppointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Metadata does not match appointment ownership',
+                ], 403);
+            }
+
+            DB::transaction(function () use ($validated, $metadata, $appointment, $request) {
+                $lockedAppointment = Appointment::where('id', $appointment->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$lockedAppointment || $lockedAppointment->isCancelled()) {
+                    throw new \RuntimeException('Appointment cannot be finalized');
+                }
+
+                $medicalFile = MedicalFile::firstOrCreate([
+                    'patient_id' => $metadata['patient_id'],
+                ]);
+
+                $visitRecord = VisitRecord::where('appointment_id', $lockedAppointment->id)->first();
+
+                if (!$visitRecord) {
+                    $visitRecord = new VisitRecord();
+                    $visitRecord->appointment_id = $lockedAppointment->id;
+                }
+
+                $legacyDiagnosis = collect($validated['diagnoses'] ?? [])
+                    ->pluck('condition_name')
+                    ->filter()
+                    ->implode(', ');
+
+                $visitRecord->fill([
+                    'medical_file_id' => $medicalFile->id,
+                    'patient_id' => $metadata['patient_id'],
+                    'doctor_id' => $metadata['doctor_id'],
+                    'clinic_id' => $metadata['clinic_id'],
+                    'visit_date' => $lockedAppointment->date ?? now()->toDateString(),
+                    'session_start_time' => $metadata['session_start_time'] ?? null,
+                    'diagnosis' => $legacyDiagnosis !== '' ? $legacyDiagnosis : null,
+                    'notes' => $validated['general_notes'] ?? null,
+                ]);
+
+                $visitRecord->save();
+
+                // Replace children for deterministic resubmission behavior.
+                $visitRecord->diagnoses()->delete();
+                $visitRecord->labRequests()->delete();
+                $visitRecord->labResults()->delete();
+                $visitRecord->prescriptions()->delete();
+
+                foreach (($validated['diagnoses'] ?? []) as $diagnosis) {
+                    VisitDiagnosis::create([
+                        'visit_record_id' => $visitRecord->id,
+                        'condition_id' => $diagnosis['condition_id'] ?? null,
+                        'condition_name' => $diagnosis['condition_name'],
+                        'classification' => $diagnosis['classification'] ?? null,
+                        'notes' => $diagnosis['notes'] ?? null,
+                    ]);
+                }
+
+                foreach (($validated['investigations']['requests'] ?? []) as $labRequest) {
+                    LabRequest::create([
+                        'visit_record_id' => $visitRecord->id,
+                        'test_id' => $labRequest['test_id'] ?? null,
+                        'test_name' => $labRequest['test_name'],
+                        'priority' => $labRequest['priority'] ?? null,
+                        'instructions' => $labRequest['instructions'] ?? null,
+                        'status' => 'pending',
+                    ]);
+                }
+
+                $uploadFiles = $request->file('investigations.uploads', []);
+                foreach (($validated['investigations']['uploads'] ?? []) as $index => $upload) {
+                    $file = null;
+                    if (isset($uploadFiles[$index]['file'])) {
+                        $file = $uploadFiles[$index]['file'];
+                    } elseif (isset($uploadFiles[$index]) && $uploadFiles[$index] instanceof \Illuminate\Http\UploadedFile) {
+                        $file = $uploadFiles[$index];
+                    }
+
+                    $fileUrl = $upload['file_url'] ?? null;
+                    $fileType = $upload['file_type'] ?? null;
+                    $fileName = $upload['file_name'] ?? null;
+
+                    if ($file) {
+                        $uploadResult = $this->imageKitService->upload(
+                            $file,
+                            "patients/{$metadata['patient_id']}/lab-results"
+                        );
+                        $fileUrl = $uploadResult['url'];
+                        $fileType = $this->resolveFileType($file->getClientOriginalExtension());
+                        $fileName = $fileName ?: $file->getClientOriginalName();
+                    }
+
+                    if (!$fileUrl) {
+                        throw new \RuntimeException('Either file or file_url is required for investigation upload.');
+                    }
+
+                    if (!$fileType) {
+                        $fileType = $this->resolveFileTypeFromUrl($fileUrl);
+                    }
+
+                    if (!$fileType) {
+                        throw new \RuntimeException('file_type is required for investigation upload.');
+                    }
+
+                    LabResult::create([
+                        'visit_record_id' => $visitRecord->id,
+                        'test_type' => $fileType,
+                        'result_data' => null,
+                        'attachment_url' => $fileUrl,
+                        'file_name' => $fileName,
+                        'file_url' => $fileUrl,
+                        'file_type' => $fileType,
+                        'doctor_comment' => $upload['doctor_comment'] ?? null,
+                    ]);
+                }
+
+                foreach (($validated['prescriptions'] ?? []) as $prescription) {
+                    $newPrescription = Prescription::create([
+                        'visit_record_id' => $visitRecord->id,
+                        'medication_name' => $prescription['medicine_name'],
+                        'dosage' => $prescription['dose_description'] ?? null,
+                        'instructions' => $prescription['special_instructions'] ?? null,
+                        'issued_at' => now(),
+                        'total_quantity' => $prescription['total_quantity'] ?? null,
+                        'dose_description' => $prescription['dose_description'] ?? null,
+                        'daily_frequency' => $prescription['daily_frequency'] ?? null,
+                        'hourly_interval' => $prescription['hourly_interval'] ?? null,
+                        'food_relation' => $prescription['food_relation'] ?? null,
+                        'duration' => $prescription['duration'] ?? null,
+                        'special_instructions' => $prescription['special_instructions'] ?? null,
+                    ]);
+
+                    MedicationTracker::updateOrCreate(
+                        ['prescription_id' => $newPrescription->id],
+                        [
+                            'patient_id' => $visitRecord->patient_id,
+                            'doctor_id' => $visitRecord->doctor_id,
+                            'status' => 'waiting_purchase',
+                            'total_doses' => 0,
+                            'taken_doses' => 0,
+                            'start_at' => null,
+                            'next_dose_at' => null,
+                            'consecutive_missed_doses' => 0,
+                            'non_compliant_at' => null,
+                        ]
+                    );
+                }
+
+                $lockedAppointment->update([
+                    'status' => Appointment::STATUS_COMPLETED,
+                ]);
+            });
+
+            $patientName = $appointment->patient?->user?->full_name;
+            $message = $patientName
+                ? "تم اصدار المعاينة للمريض {$patientName} بنجاح"
+                : 'تم اصدار المعاينة بنجاح';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ], 200);
+        } catch (\RuntimeException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage() ?: 'Appointment cannot be finalized',
+            ], 400);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to finalize consultation',
+                'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while finalizing consultation',
+            ], 500);
+        }
+    }
+
+    /**
      * Join waiting list for a specific doctor and date
      * 
      * @param int $clinic_id
@@ -1446,5 +1838,29 @@ class AppointmentsController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : 'An error occurred while joining waiting list'
             ], 500);
         }
+    }
+
+    private function resolveFileType(string $extension): ?string
+    {
+        $extension = strtolower($extension);
+        if ($extension === 'pdf') {
+            return 'pdf';
+        }
+
+        if (in_array($extension, ['jpg', 'jpeg', 'png'], true)) {
+            return 'image';
+        }
+
+        return null;
+    }
+
+    private function resolveFileTypeFromUrl(string $url): ?string
+    {
+        $extension = pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION);
+        if ($extension === '') {
+            return null;
+        }
+
+        return $this->resolveFileType($extension);
     }
 }

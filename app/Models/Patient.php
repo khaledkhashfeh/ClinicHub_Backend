@@ -54,4 +54,14 @@ class Patient extends Model
     {
         return $this->hasMany(LoyaltyTransaction::class);
     }
+
+    public function medicationTrackers()
+    {
+        return $this->hasMany(MedicationTracker::class);
+    }
+
+    public function complianceAlerts()
+    {
+        return $this->hasMany(PatientComplianceAlert::class);
+    }
 }

@@ -319,7 +319,7 @@ class CompleteDataSeeder extends Seeder
 
         // Create Patient Users
         $patientUsers = [
-            ['first_name' => 'محمد', 'last_name' => 'الأحمد', 'email' => 'patient1@test.com', 'phone' => '+963911111111', 'gender' => 'male', 'birth_date' => '1990-05-15'],
+            ['first_name' => 'محمد', 'last_name' => 'الأحمد', 'email' => 'patient1@test.com', 'phone' => '963911111111', 'gender' => 'male', 'birth_date' => '1990-05-15'],
             ['first_name' => 'فاطمة', 'last_name' => 'الحسين', 'email' => 'patient2@test.com', 'phone' => '+963911111112', 'gender' => 'female', 'birth_date' => '1985-08-20'],
             ['first_name' => 'أحمد', 'last_name' => 'العلي', 'email' => 'patient3@test.com', 'phone' => '+963911111113', 'gender' => 'male', 'birth_date' => '1992-03-10'],
             ['first_name' => 'نور', 'last_name' => 'الدين', 'email' => 'patient4@test.com', 'phone' => '+963911111114', 'gender' => 'female', 'birth_date' => '1988-12-05'],

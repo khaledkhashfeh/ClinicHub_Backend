@@ -88,4 +88,14 @@ class Doctor extends Model
     {
         return $this->hasMany(Appointment::class);
     }
+
+    public function medicationTrackers(): HasMany
+    {
+        return $this->hasMany(MedicationTracker::class);
+    }
+
+    public function complianceAlerts(): HasMany
+    {
+        return $this->hasMany(PatientComplianceAlert::class);
+    }
 }

@@ -62,6 +62,10 @@ use OpenApi\Attributes as OA;
     description: "Endpoints for managing patient profile"
 )]
 #[OA\Tag(
+    name: "Patient Journey",
+    description: "Endpoints for patient lab tests, medications, and adherence tracking"
+)]
+#[OA\Tag(
     name: "Governorates",
     description: "Endpoints for managing governorates and districts"
 )]

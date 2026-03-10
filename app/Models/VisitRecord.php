@@ -11,9 +11,12 @@ class VisitRecord extends Model
 
     protected $fillable = [
         'medical_file_id',
+        'appointment_id',
+        'patient_id',
         'doctor_id',
         'clinic_id',
         'visit_date',
+        'session_start_time',
         'diagnosis',
         'notes',
         'next_visit_date',
@@ -21,6 +24,7 @@ class VisitRecord extends Model
 
     protected $casts = [
         'visit_date'      => 'date',
+        'session_start_time' => 'datetime',
         'next_visit_date' => 'date',
     ];
 
@@ -34,9 +38,29 @@ class VisitRecord extends Model
         return $this->belongsTo(Doctor::class);
     }
 
+    public function patient()
+    {
+        return $this->belongsTo(Patient::class);
+    }
+
     public function clinic()
     {
         return $this->belongsTo(Clinic::class);
+    }
+
+    public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
+    }
+
+    public function diagnoses()
+    {
+        return $this->hasMany(VisitDiagnosis::class);
+    }
+
+    public function labRequests()
+    {
+        return $this->hasMany(LabRequest::class);
     }
 
     public function prescriptions()

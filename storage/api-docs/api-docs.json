@@ -2418,6 +2418,283 @@
                 ]
             }
         },
+        "/api/v1/appointments/{appointment_id}/consultation": {
+            "get": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Get consultation details",
+                "description": "Returns aggregated consultation details for an appointment if consultation has been issued",
+                "operationId": "27293adc2ed45a3f39f8c858cbb303fb",
+                "parameters": [
+                    {
+                        "name": "appointment_id",
+                        "in": "path",
+                        "description": "Appointment ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12345
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Consultation details retrieved successfully"
+                    },
+                    "204": {
+                        "description": "Consultation is not issued yet"
+                    },
+                    "403": {
+                        "description": "Unauthorized to access this consultation"
+                    },
+                    "404": {
+                        "description": "Appointment not found"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/doctor/consultations/submit": {
+            "post": {
+                "tags": [
+                    "Appointments"
+                ],
+                "summary": "Finalize consultation",
+                "description": "Finalize a medical consultation by saving diagnoses, prescriptions, and investigations, then mark the appointment as completed",
+                "operationId": "43ea0e58946c906c13f1d224339a290e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "metadata"
+                                ],
+                                "properties": {
+                                    "metadata": {
+                                        "required": [
+                                            "appointment_id",
+                                            "patient_id",
+                                            "doctor_id",
+                                            "clinic_id"
+                                        ],
+                                        "properties": {
+                                            "appointment_id": {
+                                                "type": "integer",
+                                                "example": 12345
+                                            },
+                                            "patient_id": {
+                                                "type": "integer",
+                                                "example": 6789
+                                            },
+                                            "doctor_id": {
+                                                "type": "integer",
+                                                "example": 101
+                                            },
+                                            "clinic_id": {
+                                                "type": "integer",
+                                                "example": 50
+                                            },
+                                            "session_start_time": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2026-02-01T21:00:00Z",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "general_notes": {
+                                        "type": "string",
+                                        "example": "Patient is stable and currently does not need medication.",
+                                        "nullable": true
+                                    },
+                                    "diagnoses": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "condition_id": {
+                                                    "type": "string",
+                                                    "example": "ICD10-I10",
+                                                    "nullable": true
+                                                },
+                                                "condition_name": {
+                                                    "type": "string",
+                                                    "example": "Essential (primary) hypertension"
+                                                },
+                                                "classification": {
+                                                    "type": "string",
+                                                    "example": "chronic",
+                                                    "nullable": true
+                                                },
+                                                "notes": {
+                                                    "type": "string",
+                                                    "example": "Slightly elevated blood pressure",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "investigations": {
+                                        "properties": {
+                                            "requests": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "test_id": {
+                                                            "type": "string",
+                                                            "example": "LAB-101",
+                                                            "nullable": true
+                                                        },
+                                                        "test_name": {
+                                                            "type": "string",
+                                                            "example": "Complete Blood Count (CBC)"
+                                                        },
+                                                        "priority": {
+                                                            "type": "string",
+                                                            "example": "normal",
+                                                            "nullable": true
+                                                        },
+                                                        "instructions": {
+                                                            "type": "string",
+                                                            "example": "Fasting required",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "nullable": true
+                                            },
+                                            "uploads": {
+                                                "type": "array",
+                                                "items": {
+                                                    "properties": {
+                                                        "file_name": {
+                                                            "type": "string",
+                                                            "example": "kidney_function_test.pdf"
+                                                        },
+                                                        "file_url": {
+                                                            "type": "string",
+                                                            "format": "uri",
+                                                            "example": "https://storage.clinic.com/uploads/2026/file_778.pdf"
+                                                        },
+                                                        "file_type": {
+                                                            "type": "string",
+                                                            "example": "pdf"
+                                                        },
+                                                        "doctor_comment": {
+                                                            "type": "string",
+                                                            "example": "Kidney function is within normal range",
+                                                            "nullable": true
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object",
+                                        "nullable": true
+                                    },
+                                    "prescriptions": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "medicine_name": {
+                                                    "type": "string",
+                                                    "example": "Panadol 500mg"
+                                                },
+                                                "total_quantity": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                },
+                                                "dose_description": {
+                                                    "type": "string",
+                                                    "example": "One tablet",
+                                                    "nullable": true
+                                                },
+                                                "daily_frequency": {
+                                                    "type": "integer",
+                                                    "example": 3,
+                                                    "nullable": true
+                                                },
+                                                "hourly_interval": {
+                                                    "type": "integer",
+                                                    "example": 8,
+                                                    "nullable": true
+                                                },
+                                                "food_relation": {
+                                                    "type": "string",
+                                                    "example": "after_meal",
+                                                    "nullable": true
+                                                },
+                                                "duration": {
+                                                    "type": "string",
+                                                    "example": "7 days",
+                                                    "nullable": true
+                                                },
+                                                "special_instructions": {
+                                                    "type": "string",
+                                                    "example": "When needed",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Consultation finalized successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "تم اصدار المعاينة للمريض احمد بنجاح"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Appointment cannot be finalized"
+                    },
+                    "403": {
+                        "description": "Unauthorized (doctor or metadata mismatch)"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
         "/api/clinic/login": {
             "post": {
                 "tags": [
@@ -7579,6 +7856,300 @@
                 ]
             }
         },
+        "/api/v1/patient/lab-tests": {
+            "get": {
+                "tags": [
+                    "Patient Journey"
+                ],
+                "summary": "Get patient lab tests",
+                "description": "Returns actionable lab tests requested for the authenticated patient",
+                "operationId": "2a3691f3e31cc24f6334b7e2e05c7866",
+                "responses": {
+                    "200": {
+                        "description": "Lab tests retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "test_id": {
+                                                "type": "string",
+                                                "example": "LAB-772"
+                                            },
+                                            "test_name": {
+                                                "type": "string",
+                                                "example": "Vitamin D Test"
+                                            },
+                                            "status": {
+                                                "type": "string",
+                                                "example": "pending"
+                                            },
+                                            "instructions": {
+                                                "type": "string",
+                                                "example": "Fast for 12 hours",
+                                                "nullable": true
+                                            },
+                                            "is_urgent": {
+                                                "type": "boolean",
+                                                "example": false
+                                            },
+                                            "request_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2026-02-01"
+                                            },
+                                            "reminders_sent": {
+                                                "type": "integer",
+                                                "example": 1
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Only patients can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/patient/lab-tests/{id}/upload": {
+            "post": {
+                "tags": [
+                    "Patient Journey"
+                ],
+                "summary": "Upload lab test result",
+                "description": "Uploads a lab result and marks the test request as completed",
+                "operationId": "762e5f85e2fc2613ec78cf3bc94715ff",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lab request ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "file_url",
+                                    "file_type",
+                                    "completion_date"
+                                ],
+                                "properties": {
+                                    "file_url": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://storage.clinic.com/results/user1_lab_abc.jpg"
+                                    },
+                                    "file_type": {
+                                        "type": "string",
+                                        "example": "image"
+                                    },
+                                    "completion_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-02-01T22:00:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Upload accepted"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Lab request not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/patient/medications": {
+            "get": {
+                "tags": [
+                    "Patient Journey"
+                ],
+                "summary": "Get medication tracker list",
+                "description": "Returns actionable medication trackers for the authenticated patient",
+                "operationId": "e71f60ddd1b484af4b4c03086ae16204",
+                "responses": {
+                    "200": {
+                        "description": "Medication trackers retrieved successfully"
+                    },
+                    "403": {
+                        "description": "Only patients can access this endpoint"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/patient/medications/{id}/activate": {
+            "patch": {
+                "tags": [
+                    "Patient Journey"
+                ],
+                "summary": "Activate medication tracking",
+                "description": "Marks medication as purchased and generates dose schedule from start date",
+                "operationId": "2180a36709462c3fbecd9f736bf1d303",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medication tracker ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "start_date"
+                                ],
+                                "properties": {
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-02-01T23:00:00Z"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Medication activated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Medication tracker not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/patient/medications/{id}/track-dose": {
+            "post": {
+                "tags": [
+                    "Patient Journey"
+                ],
+                "summary": "Track taken medication dose",
+                "description": "Marks one pending dose as taken and recalculates adherence progress",
+                "operationId": "4569a717d4f1d390f6125d3cbce9bea9",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Medication tracker ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dose tracked successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "new_progress_percentage": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 15.5
+                                        },
+                                        "doses_remaining": {
+                                            "type": "integer",
+                                            "example": 12
+                                        },
+                                        "next_dose_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-02-02T11:00:00Z",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Medication tracker not found"
+                    },
+                    "400": {
+                        "description": "No pending doses or medication not active"
+                    }
+                },
+                "security": [
+                    {
+                        "jwt": []
+                    }
+                ]
+            }
+        },
         "/api/secretaries": {
             "post": {
                 "tags": [
@@ -9640,6 +10211,10 @@
         {
             "name": "Patient Profile",
             "description": "Endpoints for managing patient profile"
+        },
+        {
+            "name": "Patient Journey",
+            "description": "Endpoints for patient lab tests, medications, and adherence tracking"
         },
         {
             "name": "Governorates",

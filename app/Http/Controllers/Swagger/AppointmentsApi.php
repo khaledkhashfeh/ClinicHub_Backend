@@ -847,4 +847,168 @@ class AppointmentsApi
     public function confirmFinal()
     {
     }
+
+    #[OA\Get(
+        path: "/api/v1/appointments/{appointment_id}/consultation",
+        summary: "Get consultation details",
+        description: "Returns aggregated consultation details for an appointment if consultation has been issued",
+        tags: ["Appointments"],
+        security: [["jwt" => []]],
+        parameters: [
+            new OA\Parameter(
+                name: "appointment_id",
+                description: "Appointment ID",
+                in: "path",
+                required: true,
+                schema: new OA\Schema(type: "integer", example: 12345)
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Consultation details retrieved successfully"
+            ),
+            new OA\Response(
+                response: 204,
+                description: "Consultation is not issued yet"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized to access this consultation"
+            ),
+            new OA\Response(
+                response: 404,
+                description: "Appointment not found"
+            )
+        ]
+    )]
+    public function getConsultationDetails()
+    {
+    }
+
+    #[OA\Post(
+        path: "/api/v1/doctor/consultations/submit",
+        summary: "Finalize consultation",
+        description: "Finalize a medical consultation by saving diagnoses, prescriptions, and investigations, then mark the appointment as completed",
+        tags: ["Appointments"],
+        security: [["jwt" => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: "application/json",
+                schema: new OA\Schema(
+                    required: ["metadata"],
+                    properties: [
+                        new OA\Property(
+                            property: "metadata",
+                            required: ["appointment_id", "patient_id", "doctor_id", "clinic_id"],
+                            properties: [
+                                new OA\Property(property: "appointment_id", type: "integer", example: 12345),
+                                new OA\Property(property: "patient_id", type: "integer", example: 6789),
+                                new OA\Property(property: "doctor_id", type: "integer", example: 101),
+                                new OA\Property(property: "clinic_id", type: "integer", example: 50),
+                                new OA\Property(property: "session_start_time", type: "string", format: "date-time", nullable: true, example: "2026-02-01T21:00:00Z"),
+                            ],
+                            type: "object"
+                        ),
+                        new OA\Property(property: "general_notes", type: "string", nullable: true, example: "Patient is stable and currently does not need medication."),
+                        new OA\Property(
+                            property: "diagnoses",
+                            type: "array",
+                            nullable: true,
+                            items: new OA\Items(
+                                type: "object",
+                                properties: [
+                                    new OA\Property(property: "condition_id", type: "string", nullable: true, example: "ICD10-I10"),
+                                    new OA\Property(property: "condition_name", type: "string", example: "Essential (primary) hypertension"),
+                                    new OA\Property(property: "classification", type: "string", nullable: true, example: "chronic"),
+                                    new OA\Property(property: "notes", type: "string", nullable: true, example: "Slightly elevated blood pressure"),
+                                ]
+                            )
+                        ),
+                        new OA\Property(
+                            property: "investigations",
+                            type: "object",
+                            nullable: true,
+                            properties: [
+                                new OA\Property(
+                                    property: "requests",
+                                    type: "array",
+                                    nullable: true,
+                                    items: new OA\Items(
+                                        type: "object",
+                                        properties: [
+                                            new OA\Property(property: "test_id", type: "string", nullable: true, example: "LAB-101"),
+                                            new OA\Property(property: "test_name", type: "string", example: "Complete Blood Count (CBC)"),
+                                            new OA\Property(property: "priority", type: "string", nullable: true, example: "normal"),
+                                            new OA\Property(property: "instructions", type: "string", nullable: true, example: "Fasting required"),
+                                        ]
+                                    )
+                                ),
+                                new OA\Property(
+                                    property: "uploads",
+                                    type: "array",
+                                    nullable: true,
+                                    items: new OA\Items(
+                                        type: "object",
+                                        properties: [
+                                            new OA\Property(property: "file_name", type: "string", example: "kidney_function_test.pdf"),
+                                            new OA\Property(property: "file_url", type: "string", format: "uri", example: "https://storage.clinic.com/uploads/2026/file_778.pdf"),
+                                            new OA\Property(property: "file_type", type: "string", example: "pdf"),
+                                            new OA\Property(property: "doctor_comment", type: "string", nullable: true, example: "Kidney function is within normal range"),
+                                        ]
+                                    )
+                                ),
+                            ]
+                        ),
+                        new OA\Property(
+                            property: "prescriptions",
+                            type: "array",
+                            nullable: true,
+                            items: new OA\Items(
+                                type: "object",
+                                properties: [
+                                    new OA\Property(property: "medicine_name", type: "string", example: "Panadol 500mg"),
+                                    new OA\Property(property: "total_quantity", type: "integer", nullable: true, example: 1),
+                                    new OA\Property(property: "dose_description", type: "string", nullable: true, example: "One tablet"),
+                                    new OA\Property(property: "daily_frequency", type: "integer", nullable: true, example: 3),
+                                    new OA\Property(property: "hourly_interval", type: "integer", nullable: true, example: 8),
+                                    new OA\Property(property: "food_relation", type: "string", nullable: true, example: "after_meal"),
+                                    new OA\Property(property: "duration", type: "string", nullable: true, example: "7 days"),
+                                    new OA\Property(property: "special_instructions", type: "string", nullable: true, example: "When needed"),
+                                ]
+                            )
+                        ),
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Consultation finalized successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "success", type: "boolean", example: true),
+                        new OA\Property(property: "message", type: "string", example: "تم اصدار المعاينة للمريض احمد بنجاح"),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: "Appointment cannot be finalized"
+            ),
+            new OA\Response(
+                response: 403,
+                description: "Unauthorized (doctor or metadata mismatch)"
+            ),
+            new OA\Response(
+                response: 422,
+                description: "Validation failed"
+            )
+        ]
+    )]
+    public function finalizeConsultation()
+    {
+    }
 }

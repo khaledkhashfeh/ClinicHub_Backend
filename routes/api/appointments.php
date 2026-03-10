@@ -20,6 +20,14 @@ Route::prefix('appointments/{clinic_id}/patients/doctors/{doctor_id}')->group(fu
 
 // Appointment management routes
 Route::post('/v1/appointments/{appointment_id}/cancel', [AppointmentsController::class, 'cancelAppointment']);
+Route::get('/v1/appointments/{appointment_id}/consultation', [AppointmentsController::class, 'getConsultationDetails'])->middleware('auth:api');
 Route::post('/v1/clinics/{clinic_id}/appointments/{appointment_id}/mark-attended', [AppointmentsController::class, 'markAppointmentAsAttended']);
 Route::post('/v1/clinics/{clinic_id}/appointments/{appointment_id}/confirm-initial', [AppointmentsController::class, 'confirmAppointmentInitial']);
 Route::post('/v1/clinics/{clinic_id}/appointments/{appointment_id}/confirm-final', [AppointmentsController::class, 'confirmAppointmentFinal']);
+
+
+
+
+// Doctor consultation finalization route
+Route::post('/v1/doctor/consultations/submit', [AppointmentsController::class, 'finalizeConsultation'])
+    ->middleware('auth:api');

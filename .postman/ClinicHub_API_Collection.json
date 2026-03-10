@@ -2555,7 +2555,131 @@
       ]
     },
     {
-      "name": "22. Appointments - Setup",
+      "name": "22. Patient - Journey",
+      "item": [
+        {
+          "name": "Get Lab Tests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/patient/lab-tests",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "patient", "lab-tests"]
+            }
+          }
+        },
+        {
+          "name": "Upload Lab Test Result",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_url\": \"https://storage.clinic.com/results/user1_lab_abc.jpg\",\n  \"file_type\": \"image\",\n  \"completion_date\": \"2026-02-01T22:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/patient/lab-tests/{{id}}/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "patient", "lab-tests", "{{id}}", "upload"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Medications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/patient/medications",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "patient", "medications"]
+            }
+          }
+        },
+        {
+          "name": "Activate Medication",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_date\": \"2026-02-01T23:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/patient/medications/{{id}}/activate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "patient", "medications", "{{id}}", "activate"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Medication Dose",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/patient/medications/{{id}}/track-dose",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "patient", "medications", "{{id}}", "track-dose"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "23. Appointments - Setup",
       "item": [
         {
           "name": "Set Doctor Work Settings",
@@ -2665,7 +2789,7 @@
       ]
     },
     {
-      "name": "23. Appointments - Booking",
+      "name": "24. Appointments - Booking",
       "item": [
         {
           "name": "Get Booking Info",
@@ -2776,7 +2900,7 @@
       ]
     },
     {
-      "name": "24. Appointments - Management",
+      "name": "25. Appointments - Management",
       "item": [
         {
           "name": "Cancel Appointment",
@@ -2861,11 +2985,59 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get Consultation Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/appointments/{{appointment_id}}/consultation",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "appointments", "{{appointment_id}}", "consultation"],
+              "variable": [
+                {
+                  "key": "appointment_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Finalize Consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metadata\": {\n    \"appointment_id\": 1,\n    \"patient_id\": 1,\n    \"doctor_id\": 1,\n    \"clinic_id\": 1,\n    \"session_start_time\": \"2026-02-01T21:00:00Z\"\n  },\n  \"general_notes\": \"Patient is stable.\",\n  \"diagnoses\": [\n    {\n      \"condition_id\": \"ICD10-I10\",\n      \"condition_name\": \"Essential hypertension\",\n      \"classification\": \"chronic\",\n      \"notes\": \"Mild elevation\"\n    }\n  ],\n  \"investigations\": {\n    \"requests\": [\n      {\n        \"test_id\": \"LAB-101\",\n        \"test_name\": \"Complete Blood Count (CBC)\",\n        \"priority\": \"normal\",\n        \"instructions\": \"Fasting required\"\n      }\n    ],\n    \"uploads\": [\n      {\n        \"file_name\": \"kidney_function_test.pdf\",\n        \"file_url\": \"https://storage.clinic.com/uploads/2026/file_778.pdf\",\n        \"file_type\": \"pdf\",\n        \"doctor_comment\": \"Normal findings\"\n      }\n    ]\n  },\n  \"prescriptions\": [\n    {\n      \"medicine_name\": \"Panadol 500mg\",\n      \"total_quantity\": 14,\n      \"dose_description\": \"1 tablet\",\n      \"daily_frequency\": 2,\n      \"hourly_interval\": 12,\n      \"food_relation\": \"after_meal\",\n      \"duration\": \"7 days\",\n      \"special_instructions\": \"As needed\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/doctor/consultations/submit",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "doctor", "consultations", "submit"]
+            }
+          }
         }
       ]
     },
     {
-      "name": "25. My Subscription",
+      "name": "26. My Subscription",
       "item": [
         {
           "name": "Get My Subscription",
@@ -2887,7 +3059,7 @@
       ]
     },
     {
-      "name": "26. Public - Available Doctors",
+      "name": "27. Public - Available Doctors",
       "item": [
         {
           "name": "Search Available Doctors",
@@ -2910,7 +3082,7 @@
       ]
     },
     {
-      "name": "27. Notifications",
+      "name": "28. Notifications",
       "item": [
         {
           "name": "Send Notification",

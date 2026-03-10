@@ -81,6 +81,11 @@ class Appointment extends Model
         return $this->hasMany(LoyaltyTransaction::class);
     }
 
+    public function visitRecord()
+    {
+        return $this->hasOne(VisitRecord::class);
+    }
+
     // Scopes
     public function scopePendingApproval($query)
     {

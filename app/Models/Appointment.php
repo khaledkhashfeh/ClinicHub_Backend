@@ -45,6 +45,12 @@ class Appointment extends Model
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_COMPLETED = 'completed';
 
+    // Constants for payment statuses
+    const PAYMENT_STATUS_UNPAID = 'unpaid';
+    const PAYMENT_STATUS_PARTIAL_PAID = 'partial_paid';
+    const PAYMENT_STATUS_FULL_PAID = 'full_paid';
+    const PAYMENT_STATUS_REFUNDED = 'refunded';
+
     // Relations
     public function patient()
     {

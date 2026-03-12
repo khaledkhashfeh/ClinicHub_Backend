@@ -13,6 +13,7 @@ class Review extends Model
         'patient_id',
         'doctor_id',
         'clinic_id',
+        'medical_center_id',
         'rating',
         'comment',
     ];
@@ -34,5 +35,10 @@ class Review extends Model
     public function clinic()
     {
         return $this->belongsTo(Clinic::class);
+    }
+
+    public function medicalCenter()
+    {
+        return $this->belongsTo(MedicalCenter::class);
     }
 }

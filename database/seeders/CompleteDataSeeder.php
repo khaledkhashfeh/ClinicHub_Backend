@@ -26,6 +26,8 @@ use App\Models\Offer;
 use App\Models\Patient;
 use App\Models\Prescription;
 use App\Models\Review;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\ScheduleOverride;
 use App\Models\ScheduleSlot;
 use App\Models\Secretary;
@@ -80,62 +82,70 @@ class CompleteDataSeeder extends Seeder
         // Step 9: Create Medical Centers
         $this->createMedicalCenters();
 
-        // Step 10: Create Clinic-Doctor Relationships
+        // Step 10: Attach Clinics to Medical Centers
+        $this->attachClinicsToMedicalCenters();
+
+        // Step 11: Create Clinic-Doctor Relationships
         $this->createClinicDoctorRelationships();
 
-        // Step 11: Create Secretaries
+        // Step 12: Create Secretaries
         $this->createSecretaries();
 
-        // Step 12: Create Clinic Services
+        // Step 13: Create Clinic Services
         $this->createClinicServices();
 
-        // Step 13: Create Clinic Gallery Images
+        // Step 14: Create Clinic Gallery Images
         $this->createClinicGalleryImages();
 
-        // Step 14: Create Medical Center Services
+        // Step 15: Create Medical Center Services
         $this->createMedicalCenterServices();
 
-        // Step 15: Create Medical Center Gallery Images
+        // Step 16: Create Medical Center Gallery Images
         $this->createMedicalCenterGalleryImages();
 
-        // Step 16: Create Doctor Clinic Schedules
+        // Step 17: Create Doctor Clinic Schedules
         $this->createDoctorClinicSchedules();
 
-        // Step 17: Create Schedule Slots
+        // Step 18: Create Schedule Slots
         $this->createScheduleSlots();
 
-        // Step 18: Create Appointments
+        // Step 19: Create Appointments
         $this->createAppointments();
 
-        // Step 19: Create Medical Files
+        // Step 20: Create Medical Files
         $this->createMedicalFiles();
 
-        // Step 20: Create Visit Records
+        // Step 21: Create Visit Records
         $this->createVisitRecords();
 
-        // Step 21: Create Prescriptions
+        // Step 22: Create Prescriptions
         $this->createPrescriptions();
 
-        // Step 22: Create Lab Results
+        // Step 23: Create Lab Results
         $this->createLabResults();
 
-        // Step 23: Create Reviews
+        // Step 24: Create Reviews
         $this->createReviews();
 
-        // Step 24: Create Offers
+        // Step 25: Create Offers
         $this->createOffers();
 
-        // Step 25: Create Loyalty Transactions
+        // Step 26: Create Loyalty Transactions
         $this->createLoyaltyTransactions();
 
-        // Step 26: Create Subscriptions
+        // Step 27: Ensure subscription plans exist, then create Subscriptions
+        $this->call(SubscriptionPlanSeeder::class);
         $this->createSubscriptions();
 
-        // Step 27: Create Waiting Lists
+        // Step 28: Create Waiting Lists
         $this->createWaitingLists();
 
-        // Step 28: Create Invitations
+        // Step 29: Create Invitations
         $this->createInvitations();
+
+        // Step 30: Create Finance Categories and Expenses
+        $this->createExpenseCategories();
+        $this->createExpenses();
 
         // Step 29: Create FCM Tokens
         $this->createFcmTokens();
@@ -540,6 +550,34 @@ class CompleteDataSeeder extends Seeder
         $this->command->info("   Total clinics created: " . Clinic::count() . "\n");
     }
 
+    /**
+     * Attach each clinic to a medical center (for center reviews & finance flows).
+     */
+    private function attachClinicsToMedicalCenters(): void
+    {
+        echo "🏥🔗 Attaching Clinics to Medical Centers...\n";
+
+        $clinics = Clinic::all();
+        $centers = MedicalCenter::all();
+
+        if ($clinics->isEmpty() || $centers->isEmpty()) {
+            $this->command->warn("   Skipped attaching clinics to centers (no data).");
+            return;
+        }
+
+        $centerIds = $centers->pluck('id')->all();
+
+        foreach ($clinics as $index => $clinic) {
+            $centerId = $centerIds[$index % count($centerIds)];
+            $clinic->medical_center_id = $centerId;
+            $clinic->save();
+
+            echo "  ✓ Attached Clinic ID: {$clinic->id} to Center ID: {$centerId}\n";
+        }
+
+        $this->command->info("   Attached " . $clinics->count() . " clinics to medical centers.\n");
+    }
+
     private function createMedicalCenters(): void
     {
         echo "🏨 Creating Medical Centers...\n";
@@ -899,7 +937,7 @@ class CompleteDataSeeder extends Seeder
         $slots = ScheduleSlot::where('status', 'available')->get();
 
         $appointmentStatuses = ['booked', 'confirmed', 'completed', 'pending_approval', 'cancelled'];
-        $paymentStatuses = ['unpaid', 'paid', 'refunded'];
+        $paymentStatuses = ['unpaid', 'partial_paid', 'full_paid', 'refunded'];
         $sources = ['patient_app', 'doctor_app', 'secretary_panel', 'website'];
 
         foreach ($patients->take(8) as $patient) {
@@ -909,7 +947,13 @@ class CompleteDataSeeder extends Seeder
             $clinic = Clinic::find($slot->schedule->clinic_id);
 
             $status = $appointmentStatuses[array_rand($appointmentStatuses)];
-            $paymentStatus = $status === 'completed' ? 'paid' : ($status === 'cancelled' ? 'refunded' : 'unpaid');
+            // Simple mapping for seeding:
+            // - completed -> full_paid
+            // - cancelled -> refunded
+            // - others -> unpaid
+            $paymentStatus = $status === 'completed'
+                ? 'full_paid'
+                : ($status === 'cancelled' ? 'refunded' : 'unpaid');
 
             $appointment = Appointment::firstOrCreate(
                 [
@@ -1064,6 +1108,115 @@ class CompleteDataSeeder extends Seeder
         $this->command->info("   Total reviews created: " . Review::count() . "\n");
     }
 
+    /**
+     * Create default expense categories for each clinic.
+     */
+    private function createExpenseCategories(): void
+    {
+        echo "📂 Creating Expense Categories...\n";
+
+        $clinics = Clinic::all();
+
+        if ($clinics->isEmpty()) {
+            $this->command->warn("   Skipped creating expense categories (no clinics).");
+            return;
+        }
+
+        $defaultCategories = [
+            ['name' => 'مستلزمات طبية', 'icon_type' => 'box'],
+            ['name' => 'إيجار وفواتير', 'icon_type' => 'home'],
+            ['name' => 'صيانة', 'icon_type' => 'tool'],
+            ['name' => 'رواتب الموظفين', 'icon_type' => 'users'],
+        ];
+
+        foreach ($clinics as $clinic) {
+            foreach ($defaultCategories as $categoryData) {
+                ExpenseCategory::firstOrCreate(
+                    [
+                        'clinic_id' => $clinic->id,
+                        'name' => $categoryData['name'],
+                    ],
+                    [
+                        'icon_type' => $categoryData['icon_type'],
+                    ]
+                );
+            }
+
+            echo "  ✓ Created expense categories for Clinic ID: {$clinic->id}\n";
+        }
+
+        $this->command->info("   Total expense categories created: " . ExpenseCategory::count() . "\n");
+    }
+
+    /**
+     * Create sample expenses for each clinic across multiple months
+     * to easily test finance summary and list APIs.
+     */
+    private function createExpenses(): void
+    {
+        echo "💰 Creating Expenses...\n";
+
+        $clinics = Clinic::all();
+
+        if ($clinics->isEmpty()) {
+            $this->command->warn("   Skipped creating expenses (no clinics).");
+            return;
+        }
+
+        $currentYear = (int) now()->year;
+        $months = [1, 2, 3, 4, 5, 6]; // First half of the year for easier testing
+
+        foreach ($clinics as $clinic) {
+            $categories = ExpenseCategory::where('clinic_id', $clinic->id)->get();
+
+            if ($categories->isEmpty()) {
+                continue;
+            }
+
+            foreach ($months as $month) {
+                // Create 3 expenses per month
+                for ($i = 0; $i < 3; $i++) {
+                    $category = $categories->random();
+
+                    $date = \Carbon\Carbon::create($currentYear, $month, rand(1, 25))->toDateString();
+
+                    $title = match ($category->name) {
+                        'مستلزمات طبية' => 'شراء مستلزمات طبية أساسية',
+                        'إيجار وفواتير' => 'دفع إيجار العيادة والفواتير',
+                        'صيانة' => 'صيانة الأجهزة الطبية',
+                        'رواتب الموظفين' => 'دفع رواتب الطاقم الطبي والإداري',
+                        default => 'مصروف عام للعيادة',
+                    };
+
+                    $amount = match ($category->name) {
+                        'مستلزمات طبية' => rand(30000, 150000),
+                        'إيجار وفواتير' => rand(200000, 500000),
+                        'صيانة' => rand(50000, 200000),
+                        'رواتب الموظفين' => rand(300000, 800000),
+                        default => rand(20000, 100000),
+                    };
+
+                    Expense::firstOrCreate(
+                        [
+                            'clinic_id' => $clinic->id,
+                            'category_id' => $category->id,
+                            'title' => $title,
+                            'date' => $date,
+                        ],
+                        [
+                            'amount' => $amount,
+                            'notes' => 'Seeded demo expense for finance API tests.',
+                        ]
+                    );
+                }
+            }
+
+            echo "  ✓ Created expenses for Clinic ID: {$clinic->id}\n";
+        }
+
+        $this->command->info("   Total expenses created: " . Expense::count() . "\n");
+    }
+
     private function createOffers(): void
     {
         echo "🎁 Creating Offers...\n";
@@ -1127,46 +1280,55 @@ class CompleteDataSeeder extends Seeder
         $clinics = Clinic::all();
         $centers = MedicalCenter::all();
 
-        // Subscribe clinics to plans
-        foreach ($clinics as $clinic) {
-            $plan = $plans->where('target_type', 'clinic')->random();
+        $clinicPlans = $plans->where('target_type', 'clinic');
+        $centerPlans = $plans->where('target_type', 'medical_center');
 
-            Subscription::firstOrCreate(
-                [
-                    'subscribable_type' => Clinic::class,
-                    'subscribable_id' => $clinic->id,
-                    'subscription_plan_id' => $plan->id,
-                ],
-                [
-                    'status' => 'active',
-                    'starts_at' => now(),
-                    'ends_at' => now()->addDays($plan->duration_days),
-                    'notes' => null,
-                ]
-            );
+        if ($clinicPlans->isEmpty()) {
+            $this->command->warn("   No clinic subscription plans found. Skipping clinic subscriptions.");
+        } else {
+            foreach ($clinics as $clinic) {
+                $plan = $clinicPlans->random();
 
-            echo "  ✓ Subscribed {$clinic->clinic_name} to {$plan->name}\n";
+                Subscription::firstOrCreate(
+                    [
+                        'subscribable_type' => Clinic::class,
+                        'subscribable_id' => $clinic->id,
+                        'subscription_plan_id' => $plan->id,
+                    ],
+                    [
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'ends_at' => now()->addDays($plan->duration_days),
+                        'notes' => null,
+                    ]
+                );
+
+                echo "  ✓ Subscribed {$clinic->clinic_name} to {$plan->name}\n";
+            }
         }
 
-        // Subscribe medical centers to plans
-        foreach ($centers as $center) {
-            $plan = $plans->where('target_type', 'medical_center')->random();
+        if ($centerPlans->isEmpty()) {
+            $this->command->warn("   No medical center subscription plans found. Skipping center subscriptions.");
+        } else {
+            foreach ($centers as $center) {
+                $plan = $centerPlans->random();
 
-            Subscription::firstOrCreate(
-                [
-                    'subscribable_type' => MedicalCenter::class,
-                    'subscribable_id' => $center->id,
-                    'subscription_plan_id' => $plan->id,
-                ],
-                [
-                    'status' => 'active',
-                    'starts_at' => now(),
-                    'ends_at' => now()->addDays($plan->duration_days),
-                    'notes' => null,
-                ]
-            );
+                Subscription::firstOrCreate(
+                    [
+                        'subscribable_type' => MedicalCenter::class,
+                        'subscribable_id' => $center->id,
+                        'subscription_plan_id' => $plan->id,
+                    ],
+                    [
+                        'status' => 'active',
+                        'starts_at' => now(),
+                        'ends_at' => now()->addDays($plan->duration_days),
+                        'notes' => null,
+                    ]
+                );
 
-            echo "  ✓ Subscribed {$center->name} to {$plan->name}\n";
+                echo "  ✓ Subscribed {$center->name} to {$plan->name}\n";
+            }
         }
 
         $this->command->info("   Total subscriptions created: " . Subscription::count() . "\n");

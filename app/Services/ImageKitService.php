@@ -21,23 +21,57 @@ class ImageKitService
 
     public function upload(UploadedFile $file, string $folder): array
     {
-        $response = $this->imageKit->upload([
-            'file' => fopen($file->getRealPath(), 'r'),
-            'fileName' => uniqid() . '.' . $file->getClientOriginalExtension(),
-            'folder' => $folder,
-        ]);
+        $fileHandle = fopen($file->getRealPath(), 'r');
 
-        if (!isset($response->result)) {
+        try {
+            $response = $this->imageKit->upload([
+                'file' => $fileHandle,
+                'fileName' => uniqid() . '.' . $file->getClientOriginalExtension(),
+                'folder' => $folder,
+            ]);
+        } finally {
+            if (is_resource($fileHandle)) {
+                fclose($fileHandle);
+            }
+        }
+
+        if (isset($response->error)) {
+            throw new \Exception($this->resolveUploadErrorMessage($response->error));
+        }
+
+        if (!isset($response->result) || !is_object($response->result)) {
             throw new \Exception('ImageKit upload failed');
         }
 
+        $result = $response->result;
+
         return [
-            'url' => $response->result->url,
-            'fileId' => $response->result->fileId,
-            'name' => $response->result->name,
-            'size' => $response->result->size,
-            'mime' => $response->result->mime,
+            'url' => $result->url,
+            'fileId' => $result->fileId,
+            'name' => $result->name,
+            'size' => $result->size,
+            'mime' => $result->mime ?? $result->mimeType ?? $file->getMimeType(),
+            'fileType' => $result->fileType ?? null,
         ];
+    }
+
+    private function resolveUploadErrorMessage(mixed $error): string
+    {
+        if (is_string($error) && $error !== '') {
+            return $error;
+        }
+
+        if (is_object($error)) {
+            if (isset($error->message) && is_string($error->message) && $error->message !== '') {
+                return $error->message;
+            }
+
+            if (isset($error->help) && is_string($error->help) && $error->help !== '') {
+                return $error->help;
+            }
+        }
+
+        return 'ImageKit upload failed';
     }
 
     /**
@@ -89,4 +123,3 @@ class ImageKitService
         }
     }
 }
-

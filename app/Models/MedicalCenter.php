@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -16,6 +18,7 @@ class MedicalCenter extends Model implements JWTSubject, AuthenticatableContract
         'user_id',
         'governorate_id',
         'city_id',
+        'district_id',
         'center_name',
         'address',
         'phone',
@@ -86,6 +89,11 @@ class MedicalCenter extends Model implements JWTSubject, AuthenticatableContract
         return $this->belongsTo(City::class);
     }
 
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class);
+    }
+
     public function clinics()
     {
         return $this->hasMany(Clinic::class);
@@ -144,5 +152,10 @@ class MedicalCenter extends Model implements JWTSubject, AuthenticatableContract
     public function galleryImages()
     {
         return $this->hasMany(MedicalCenterGalleryImage::class);
+    }
+
+    public function favoredByPatients(): BelongsToMany
+    {
+        return $this->belongsToMany(Patient::class, 'patient_medical_center_favorites')->withTimestamps();
     }
 }

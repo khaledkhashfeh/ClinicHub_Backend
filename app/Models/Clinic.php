@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -161,5 +162,17 @@ class Clinic extends Model implements JWTSubject, AuthenticatableContract
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    public function favoredByPatients()
+    {
+        return $this->belongsToMany(Patient::class, 'patient_clinic_favorites')->withTimestamps();
+    }
+
+    public function doctors(): BelongsToMany
+    {
+        return $this->belongsToMany(Doctor::class, 'clinic_doctor')
+            ->withTimestamps()
+            ->withPivot(['is_primary', 'method_id', 'appointment_period', 'queue', 'queue_number']);
     }
 }

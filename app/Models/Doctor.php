@@ -98,4 +98,21 @@ class Doctor extends Model
     {
         return $this->hasMany(PatientComplianceAlert::class);
     }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function favoredByPatients(): BelongsToMany
+    {
+        return $this->belongsToMany(Patient::class, 'patient_doctor_favorites')->withTimestamps();
+    }
+
+    public function clinics(): BelongsToMany
+    {
+        return $this->belongsToMany(Clinic::class, 'clinic_doctor')
+            ->withTimestamps()
+            ->withPivot(['is_primary', 'method_id', 'appointment_period', 'queue', 'queue_number']);
+    }
 }

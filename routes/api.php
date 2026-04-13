@@ -15,3 +15,6 @@ require __DIR__ . '/api/subscriptions.php';
 require __DIR__ . '/api/admin-management.php';
 require __DIR__ . '/api/notification.php';
 require __DIR__ . '/api/invitations.php';
+require __DIR__ . '/api/v1-clinics.php';
+require __DIR__ . '/api/v1-doctors.php';
+require __DIR__ . '/api/v1-medical-centers.php';

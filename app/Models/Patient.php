@@ -64,4 +64,19 @@ class Patient extends Model
     {
         return $this->hasMany(PatientComplianceAlert::class);
     }
+
+    public function favoriteClinics()
+    {
+        return $this->belongsToMany(Clinic::class, 'patient_clinic_favorites')->withTimestamps();
+    }
+
+    public function favoriteDoctors()
+    {
+        return $this->belongsToMany(Doctor::class, 'patient_doctor_favorites')->withTimestamps();
+    }
+
+    public function favoriteMedicalCenters()
+    {
+        return $this->belongsToMany(MedicalCenter::class, 'patient_medical_center_favorites')->withTimestamps();
+    }
 }
